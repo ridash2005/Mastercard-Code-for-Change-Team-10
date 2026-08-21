@@ -64,6 +64,48 @@ export async function coachReply(prompt: string, ctx: CoachContext): Promise<str
   return `Hello ${ctx.name}. ${ctx.completedCount} activities are done, ${ctx.pendingTitles.length} still open. Next move: ${next}. Ask me about gaps, scoring, or a weekly plan — I will not replace the general chatbot for navigation.`;
 }
 
+export type LiveCoachReply = {
+  reply: string;
+  source: "live" | "guardrail_blocked" | "offline_fallback";
+};
+
+/**
+ * Calls the REAL AI Coach: this fetches the frontend's own /api/coach route
+ * handler, which proxies to backend-1's guarded /api/ai/coach/message
+ * (JWT auth, rate limiting, input/output guardrails, Gemini) — see
+ * lib/services/backend1Client.ts. Falls back to the local mock `coachReply`
+ * only when the backend itself is unreachable (offline dev, no server
+ * running), never when the backend deliberately blocked the message —
+ * a guardrail block is surfaced to the user as-is, not silently hidden.
+ */
+export async function coachReplyLive(
+  prompt: string,
+  ctx: CoachContext,
+  user: { email: string; role: "student" | "admin" },
+): Promise<LiveCoachReply> {
+  try {
+    const res = await fetch("/api/coach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: prompt, email: user.email, name: ctx.name, role: user.role }),
+    });
+    const body = await res.json().catch(() => null);
+
+    if (res.status === 503 && body?.offline) {
+      return { reply: await coachReply(prompt, ctx), source: "offline_fallback" };
+    }
+    if (!body?.success) {
+      return {
+        reply: body?.message ?? "Your message was blocked by AI safety guardrails.",
+        source: "guardrail_blocked",
+      };
+    }
+    return { reply: body.reply as string, source: "live" };
+  } catch {
+    return { reply: await coachReply(prompt, ctx), source: "offline_fallback" };
+  }
+}
+
 export const coachPrompts = [
   "What should I do next?",
   "Where are my learning gaps?",

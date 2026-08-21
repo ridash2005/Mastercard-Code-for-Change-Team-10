@@ -31,11 +31,19 @@ class AiCoachError extends Error {
 async function getCoachReply(guardedUserMessage) {
   const client = await getLlmClient();
 
+  // generateJson() sets responseMimeType: "application/json" but does not
+  // pin a response schema on the provider side (ai/ai-client's GeminiClient
+  // has no responseSchema support) - so the exact JSON shape has to be
+  // spelled out in-prompt, or the model returns arbitrary JSON that fails
+  // coachReplySchema every time. This was caught by an end-to-end test that
+  // actually called the live model rather than trusting the fixture path.
+  const userPrompt = `${guardedUserMessage}\n\nRespond with ONLY a JSON object of the exact shape {"reply": "<your reply text>"} - no other keys, no markdown fences, no prose outside the JSON.`;
+
   let result;
   try {
     result = await client.generateJson({
       systemPrompt: AI_COACH_SYSTEM_PROMPT,
-      userPrompt: guardedUserMessage,
+      userPrompt,
       schema: coachReplySchema,
       temperature: 0.4
     });
