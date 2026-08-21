@@ -22,7 +22,7 @@ export const users: User[] = [
   {
     id: "u-ananya",
     name: "Ananya Munshi",
-    email: "ananya@catalyst.edu",
+    email: "ananya@katalyst.edu",
     role: "student",
     college: "St. Xavier's College, Mumbai",
     programme: "Katalyst Fellows 2026",
@@ -32,7 +32,7 @@ export const users: User[] = [
   {
     id: "u-isha",
     name: "Isha Verma",
-    email: "isha@catalyst.edu",
+    email: "isha@katalyst.edu",
     role: "student",
     college: "Fergusson College, Pune",
     programme: "Katalyst Fellows 2026",
@@ -42,7 +42,7 @@ export const users: User[] = [
   {
     id: "u-riya",
     name: "Riya Kapoor",
-    email: "riya@catalyst.edu",
+    email: "riya@katalyst.edu",
     role: "student",
     college: "Miranda House, Delhi",
     programme: "Katalyst Fellows 2026",
@@ -52,7 +52,7 @@ export const users: User[] = [
   {
     id: "u-meera-s",
     name: "Meera Joshi",
-    email: "meera.s@catalyst.edu",
+    email: "meera.s@katalyst.edu",
     role: "student",
     college: "Christ University, Bengaluru",
     programme: "Katalyst Fellows 2026",
@@ -62,7 +62,7 @@ export const users: User[] = [
   {
     id: "u-sara",
     name: "Sara Khan",
-    email: "sara@catalyst.edu",
+    email: "sara@katalyst.edu",
     role: "student",
     college: "Jadavpur University, Kolkata",
     programme: "Katalyst Fellows 2026",
@@ -72,7 +72,7 @@ export const users: User[] = [
   {
     id: "u-nisha",
     name: "Nisha Patel",
-    email: "nisha@catalyst.edu",
+    email: "nisha@katalyst.edu",
     role: "student",
     college: "NIT Trichy",
     programme: "Katalyst Fellows 2026",
@@ -82,7 +82,7 @@ export const users: User[] = [
   {
     id: "u-kavya",
     name: "Kavya Nair",
-    email: "kavya@catalyst.edu",
+    email: "kavya@katalyst.edu",
     role: "student",
     college: "IIT Madras",
     programme: "Katalyst Fellows 2026",
@@ -92,7 +92,7 @@ export const users: User[] = [
   {
     id: "u-aditi",
     name: "Aditi Rao",
-    email: "aditi@catalyst.edu",
+    email: "aditi@katalyst.edu",
     role: "student",
     college: "BITS Pilani",
     programme: "Katalyst Fellows 2026",
@@ -102,9 +102,9 @@ export const users: User[] = [
   {
     id: "u-priya",
     name: "Priya Sharma",
-    email: "priya.admin@catalyst.edu",
+    email: "priya.admin@katalyst.edu",
     role: "admin",
-    college: "Catalyst HQ",
+    college: "Katalyst HQ",
     programme: "Programme Operations",
     avatar: "PS",
     createdAt: "2025-11-01T08:00:00.000Z",
@@ -112,9 +112,9 @@ export const users: User[] = [
   {
     id: "u-arjun",
     name: "Arjun Desai",
-    email: "arjun.admin@catalyst.edu",
+    email: "arjun.admin@katalyst.edu",
     role: "admin",
-    college: "Catalyst HQ",
+    college: "Katalyst HQ",
     programme: "Learning Design",
     avatar: "AD",
     createdAt: "2025-11-01T08:00:00.000Z",
@@ -609,7 +609,7 @@ export const achievements: Achievement[] = [
   { id: "ach-course", key: "course_master", title: "Course Master", description: "Finish a certificate course." },
   { id: "ach-project", key: "project_champion", title: "Project Champion", description: "Ship an approved project." },
   { id: "ach-mentor", key: "mentor_mindset", title: "Mentor Mindset", description: "Attend a mentoring session." },
-  { id: "ach-leader", key: "catalyst_leader", title: "Catalyst Leader", description: "Reach the top five on the global board." },
+  { id: "ach-leader", key: "katalyst_leader", title: "Katalyst Leader", description: "Reach the top five on the global board." },
 ];
 
 export const studentAchievements: StudentAchievement[] = [

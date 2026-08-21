@@ -16,7 +16,7 @@ export default function LandingPage() {
           <Logo />
           <h1 className="mt-6 font-serif text-4xl leading-tight md:text-5xl">{t.tagline}</h1>
           <p className="mt-4 max-w-md text-stone-600">
-            Catalyst turns Katalyst programme work — courses, training, mentoring, projects — into a path you can
+            Katalyst turns programme work — courses, training, mentoring, projects — into a path you can
             actually finish. XP, missions and a coach that knows your deadlines. Not a toy.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">

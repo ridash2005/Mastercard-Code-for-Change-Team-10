@@ -1,5 +1,5 @@
 export const en = {
-  brand: "Catalyst",
+  brand: "Katalyst",
   tagline: "Turn your learning journey into progress you can see.",
   signIn: "Sign in",
   getStarted: "Get started",
@@ -35,7 +35,7 @@ export const en = {
 };
 
 export const hi: typeof en = {
-  brand: "कैटेलिस्ट",
+  brand: "कैटालिस्ट",
   tagline: "अपनी सीखने की यात्रा को दिखने वाली प्रगति में बदलें।",
   signIn: "साइन इन",
   getStarted: "शुरू करें",

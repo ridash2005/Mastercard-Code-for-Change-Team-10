@@ -1,4 +1,4 @@
-# Catalyst / Katalyst — Gamified Learning & Student Engagement
+# Katalyst — Gamified Learning & Student Engagement
 
 Hackathon-ready Next.js app for **Mastercard Code for Change**, alongside `backend/` and `ai/` packages.
 
@@ -13,8 +13,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Demo accounts (no passwords):
 
-- Student: `ananya@catalyst.edu`
-- Admin: `priya.admin@catalyst.edu`
+- Student: `ananya@katalyst.edu`
+- Admin: `priya.admin@katalyst.edu`
 
 ## Monorepo
 
@@ -37,8 +37,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Demo accounts (no passwords):
 
-- Student: `ananya@catalyst.edu`
-- Admin: `priya.admin@catalyst.edu`
+- Student: `ananya@katalyst.edu`
+- Admin: `priya.admin@katalyst.edu`
 
 ## Stack
 

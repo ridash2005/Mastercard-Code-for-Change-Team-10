@@ -16,7 +16,7 @@ export function VoiceAssist({ textToRead, onTranscript }: { textToRead?: string;
             setMsg("Text-to-speech is not supported here.");
             return;
           }
-          speak(textToRead || document.querySelector("main")?.innerText.slice(0, 400) || "Catalyst");
+          speak(textToRead || document.querySelector("main")?.innerText.slice(0, 400) || "Katalyst");
         }}
       >
         Listen

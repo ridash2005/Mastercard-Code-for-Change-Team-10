@@ -20,7 +20,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <header className="border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link href="/" aria-label="Catalyst home">
+          <Link href="/" aria-label="Katalyst home">
             <Logo />
           </Link>
           <nav className="hidden items-center gap-4 text-sm md:flex">
@@ -43,7 +43,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       </header>
       {children}
       <footer className="border-t border-stone-200 px-4 py-8 text-center text-xs text-stone-500">
-        Catalyst is a programme engagement demo for Mastercard Code for Change. Mock data only.
+        Katalyst is a programme engagement demo for Mastercard Code for Change. Mock data only.
       </footer>
     </div>
   );
