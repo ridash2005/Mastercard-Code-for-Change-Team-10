@@ -1,140 +1,159 @@
-# Katalyst Backend (backend-1)
+# Katalyst Standalone Backend (`backend-1`)
 
-A clean, modular Node.js and Express backend built with JWT authentication, RBAC, Mongoose models, and standard RESTful API conventions.
-
----
-
-## 📁 Directory Structure
-
-```
-backend-1/
-├── config/
-│   ├── db.js                 # MongoDB connection & connection status
-│   └── index.js              # Centralized configuration & environment loader
-├── controllers/
-│   ├── authController.js     # User registration, login, profile resolution
-│   ├── userController.js     # User profiles, updates & admin user listings
-│   └── healthController.js   # Server & DB health status
-├── middleware/
-│   ├── authMiddleware.js     # JWT verification & role authorization (student/admin)
-│   ├── errorMiddleware.js    # 404 handler & global error responses
-│   └── loggerMiddleware.js   # Custom request logging
-├── models/
-│   ├── User.js               # User schema & password hashing
-│   ├── StudentProfile.js     # Student profile & interests schema
-│   └── Meeting.js            # Meeting & schedule schema
-├── routes/
-│   ├── authRoutes.js         # /api/auth endpoints
-│   ├── userRoutes.js         # /api/users endpoints
-│   ├── healthRoutes.js       # /api/health endpoints
-│   └── index.js              # Root router aggregator
-├── .env                      # Local environment configuration
-├── .env.example              # Template environment variables
-├── .gitignore                # Git ignore rules
-├── package.json              # Project dependencies & scripts
-├── README.md                 # Documentation
-└── server.js                 # Express server entry point
-```
+A robust, production-grade Express.js & MongoDB backend providing complete non-AI functionality for the Katalyst student and administrator portals.
 
 ---
 
-## 🚀 Getting Started
+## 🏗️ Architecture
 
-### 1. Navigate to the folder
-```bash
-cd backend-1
+Clean 4-tier layered architecture:
+
+```
+routes → controllers → services → models/database
 ```
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+- **`models/`**: Mongoose schemas defining all data entities, validation rules, and JSON serialization.
+- **`services/`**: Pure business logic (gamification formulas, review approvals, XP ledgers, badge unlocking, audit trails).
+- **`controllers/`**: HTTP request parsing, status codes, and standardized API response formats (`{ success, message, data }`).
+- **`routes/`**: Express routers with role-based JWT middleware (`authenticate`, `authorize`, `optionalAuth`).
+- **`middleware/`**: JWT validation, centralized error handling, and structured logging.
+- **`config/`**: Environment variable parsing and database connection management.
+- **`scripts/`**: Standalone database seeding and automated API test suites.
 
-### 3. Configure Environment Variables
-A default `.env` file is already created. You can customize variables if needed:
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| **Node.js** | Runtime Environment |
+| **Express.js (v4.21)** | RESTful API Web Framework |
+| **MongoDB & Mongoose (v8.10)** | Document Database & ODM |
+| **JSON Web Tokens (`jsonwebtoken`)** | Stateless Authentication & RBAC |
+| **Bcrypt.js** | Password Hashing |
+| **CORS & Morgan** | Cross-Origin Resource Sharing & Request Logging |
+
+---
+
+## 📋 Environment Variables
+
+Create a `.env` file in the `backend-1` directory:
+
 ```env
+# Server
 PORT=5000
 NODE_ENV=development
+
+# Database
 MONGO_URI=mongodb://127.0.0.1:27017/katalyst
+
+# Security & JWT
 JWT_SECRET=supersecretjwtkey_katalyst_2026_change_in_production
 JWT_EXPIRES_IN=7d
+
+# Frontend Connection
 CLIENT_URL=http://localhost:3000
 ```
 
-### 4. Run the Server
+---
 
-- **Development mode (with auto-reload via nodemon):**
-  ```bash
-  npm run dev
-  ```
+## 🚀 Quickstart & How to Run
 
-- **Production / standard mode:**
-  ```bash
-  npm start
-  ```
+### 1. Install Dependencies
+```bash
+cd backend-1
+npm install
+```
 
-The server will start at: `http://localhost:5000`
+### 2. Start MongoDB
+Ensure a local MongoDB daemon is running on port `27017`, or configure a MongoDB Atlas URI in `.env`.
+
+### 3. Seed Database
+Populate MongoDB with demo student and admin accounts, sample courses, squads, achievements, and meetings:
+```bash
+npm run seed
+```
+
+### 4. Run Development Server
+```bash
+npm run dev
+```
+The API server will listen on `http://localhost:5000`.
+
+### 5. Run Verification Tests
+Execute the end-to-end API test suite:
+```bash
+npm run test:api
+```
 
 ---
 
-## 📡 API Endpoints
+## 🔐 Authentication & Roles
 
-### 🩺 Health & Root
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/` | Public | API root information |
-| `GET` | `/api/health` | Public | Health status & database connection status |
+The platform enforces two roles:
+1. **`student`**: Fellows who can view personalised dashboards, browse catalog, enroll, submit work, reschedule sessions, and track XP/ranks.
+2. **`admin`**: Programme operations managers who create activities, schedule meetings, review submissions, award XP, and access analytics.
 
-### 🔐 Authentication (`/api/auth`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | Register new user (`name`, `email`, `password`, `role: "student" \| "admin"`) |
-| `POST` | `/api/auth/login` | Public | Login with email and password, receives JWT token |
-| `GET` | `/api/auth/me` | Protected | Get authenticated user info & linked profile |
+### Demo Credentials (Pre-seeded)
 
-### 👤 Users & Profiles (`/api/users`)
-| Method | Endpoint | Access | Description |
+| Name | Email | Password | Role |
 |---|---|---|---|
-| `GET` | `/api/users/profile` | Protected | Get current user's profile |
-| `PUT` | `/api/users/profile` | Protected | Update profile (name, bio, interests, preferences) |
-| `GET` | `/api/users` | Admin only | List all users (supports pagination & role/cohort filtering) |
-| `GET` | `/api/users/:id` | Admin only | Get details of a specific user |
+| Ananya Munshi | `ananya@katalyst.edu` | `password123` | `student` |
+| Isha Verma | `isha@katalyst.edu` | `password123` | `student` |
+| Priya Sharma | `priya.admin@katalyst.edu` | `password123` | `admin` |
+| Arjun Desai | `arjun.admin@katalyst.edu` | `password123` | `admin` |
 
 ---
 
-## 🧪 Quick Test Examples (cURL)
+## 📚 API Endpoints Overview
 
-### 1. Health Check
-```bash
-curl http://localhost:5000/api/health
-```
+| Module | Route | Method | Access | Description |
+|---|---|---|---|---|
+| **Health** | `/api/health` | `GET` | Public | System & DB connection status |
+| **Auth** | `/api/auth/register` | `POST` | Public | Register new student or admin |
+| | `/api/auth/login` | `POST` | Public | Authenticate user & receive JWT |
+| | `/api/auth/me` | `GET` | Private | Current user & profile |
+| | `/api/auth/onboarding` | `POST` | Private | Complete onboarding profile |
+| **Users** | `/api/users/profile` | `GET / PUT` | Private | View/update current profile |
+| | `/api/users` | `GET` | Admin | List all users (paginated) |
+| | `/api/users/students/at-risk`| `GET` | Admin | List at-risk & inactive students |
+| **Activities** | `/api/activities` | `GET` | Public/Auth | List & filter activities |
+| | `/api/activities/:id` | `GET` | Public/Auth | Get activity details |
+| | `/api/activities` | `POST` | Admin | Create course/training/project |
+| | `/api/activities/:id` | `PUT / DELETE`| Admin | Update or delete activity |
+| **Enrollments**| `/api/enrollments` | `GET` | Private | List student enrollments |
+| | `/api/enrollments` | `POST` | Private | Enroll in an activity |
+| | `/api/enrollments/:id/start`| `PATCH` | Private | Transition status to `in_progress` |
+| **Submissions**| `/api/submissions` | `GET / POST` | Private | Submit work / view attempts |
+| | `/api/submissions/:id/review`| `POST` | Admin | Approve/reject & award XP |
+| **Meetings** | `/api/meetings` | `GET` | Private | List sessions |
+| | `/api/meetings` | `POST / PUT` | Admin | Schedule/edit meeting |
+| | `/api/meetings/:id/reschedule`| `POST` | Private | Student reschedule slot |
+| **Gamification**| `/api/gamification/dashboard`| `GET` | Private | Level, XP, streak, rank metrics |
+| | `/api/gamification/leaderboard`| `GET` | Public/Auth | Global student leaderboard |
+| | `/api/gamification/achievements`| `GET` | Private | Unlocked & available badges |
+| | `/api/gamification/xp-transactions`| `GET` | Private | Append-only XP ledger |
+| **Teams** | `/api/teams` | `GET` | Public | List squads and rankings |
+| | `/api/teams/:id/members` | `POST` | Admin | Add/update team member |
+| **Complaints** | `/api/complaints` | `GET / POST` | Private | Student grievance redressal |
+| | `/api/complaints/:id/status`| `PATCH` | Admin | Update grievance status |
+| **Feedback** | `/api/feedback` | `GET / POST` | Private | Submit star rating & review |
+| **Certificates**| `/api/certificates` | `GET` | Private | View issued certificates |
+| **Analytics** | `/api/admin/analytics/overview`| `GET`| Admin | Programme KPI metrics |
+| | `/api/admin/analytics/reports`| `GET` | Admin | Fellow performance reports |
 
-### 2. Register a Student
-```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "password": "password123",
-    "role": "student",
-    "cohort": "Alpha",
-    "batchYear": 2
-  }'
-```
+For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTING.md`](./API_TESTING.md).
 
-### 3. Login
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "jane@example.com",
-    "password": "password123"
-  }'
-```
+---
 
-### 4. Access Protected Route
-```bash
-curl -X GET http://localhost:5000/api/auth/me \
-  -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
-```
+## 🔗 Frontend-Backend Integration
+
+The backend is fully compatible with the existing frontend data structures:
+
+1. **Base URL**: Point the frontend HTTP client to `http://localhost:5000/api`.
+2. **CORS**: Configured out of the box to accept requests from `http://localhost:3000` with credentials.
+3. **Authentication**: Transmit JWT in header:
+   ```http
+   Authorization: Bearer <token>
+   ```
+4. **Data Shapes**: All models implement standard `id` virtual mapping and camelCase fields matching `frontend/lib/types.ts`.
