@@ -1,7 +1,7 @@
 export type ChatMessage = { role: "bot" | "user"; text: string };
 
 /**
- * General-purpose Catalyst assistant. Not a performance coach.
+ * General-purpose Katalyst assistant. Not a performance coach.
  * Replace `chatbotReply` with an LLM later.
  */
 export async function chatbotReply(prompt: string): Promise<string> {
@@ -34,7 +34,7 @@ export async function chatbotReply(prompt: string): Promise<string> {
   if (p.includes("where") || p.includes("navigate") || p.includes("how do i")) {
     return "Student portal: Dashboard, My Learning, Explore, Gamification, Teams, AI Coach, Chatbot, Notifications, Profile. Admin portal is a separate login. Use the sidebar or the language/voice controls in the top bar.";
   }
-  return "I can help with Catalyst navigation: courses, training, assignments, deadlines, mentoring, milestones, XP, achievements, teams, complaints, feedback, rescheduling, and programme basics. For personalised scoring and next-activity advice, use AI Coach.";
+  return "I can help with Katalyst navigation: courses, training, assignments, deadlines, mentoring, milestones, XP, achievements, teams, complaints, feedback, rescheduling, and programme basics. For personalised scoring and next-activity advice, use AI Coach.";
 }
 
 export const suggestedPrompts = [

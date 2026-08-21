@@ -14,7 +14,7 @@ const serif = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Catalyst — Gamified learning for Katalyst fellows",
+  title: "Katalyst — Gamified learning for fellows",
   description: "Track activities, earn XP, and stay engaged across courses, training, mentoring, and projects.",
 };
 

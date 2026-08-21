@@ -12,7 +12,7 @@ export function ChatbotPanel() {
   const [messages, setMessages] = useState<{ role: "bot" | "user"; text: string }[]>([
     {
       role: "bot",
-      text: "General Catalyst help — courses, XP, navigation, complaints, rescheduling. For personalised coaching, use AI Coach.",
+      text: "General Katalyst help — courses, XP, navigation, complaints, rescheduling. For personalised coaching, use AI Coach.",
     },
   ]);
   const [busy, setBusy] = useState(false);
@@ -54,7 +54,7 @@ export function ChatbotPanel() {
           void send(input);
         }}
       >
-        <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about Catalyst…" />
+        <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about Katalyst…" />
         <Button type="submit">Send</Button>
       </form>
       <div className="px-2 pb-2">

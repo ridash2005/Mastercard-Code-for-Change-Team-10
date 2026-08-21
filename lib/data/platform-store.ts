@@ -114,16 +114,16 @@ export const usePlatform = create<PlatformState>()(
         if (!user) return { ok: false, error: "No account for that email in this demo." };
         set({ sessionUserId: user.id });
         if (typeof document !== "undefined") {
-          document.cookie = `catalyst-role=${user.role}; path=/; SameSite=Lax`;
-          document.cookie = `catalyst-user=${user.id}; path=/; SameSite=Lax`;
+          document.cookie = `katalyst-role=${user.role}; path=/; SameSite=Lax`;
+          document.cookie = `katalyst-user=${user.id}; path=/; SameSite=Lax`;
         }
         return { ok: true, role: user.role };
       },
       logout: () => {
         set({ sessionUserId: null });
         if (typeof document !== "undefined") {
-          document.cookie = "catalyst-role=; path=/; max-age=0";
-          document.cookie = "catalyst-user=; path=/; max-age=0";
+          document.cookie = "katalyst-role=; path=/; max-age=0";
+          document.cookie = "katalyst-user=; path=/; max-age=0";
         }
       },
       register: (input) => {
@@ -171,8 +171,8 @@ export const usePlatform = create<PlatformState>()(
           sessionUserId: id,
         }));
         if (typeof document !== "undefined") {
-          document.cookie = `catalyst-role=${input.role}; path=/; SameSite=Lax`;
-          document.cookie = `catalyst-user=${id}; path=/; SameSite=Lax`;
+          document.cookie = `katalyst-role=${input.role}; path=/; SameSite=Lax`;
+          document.cookie = `katalyst-user=${id}; path=/; SameSite=Lax`;
         }
         return { ok: true };
       },
@@ -491,7 +491,7 @@ export const usePlatform = create<PlatformState>()(
       },
     }),
     {
-      name: "catalyst-platform",
+      name: "katalyst-platform",
       skipHydration: true,
       partialize: (s) => ({
         sessionUserId: s.sessionUserId,

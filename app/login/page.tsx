@@ -14,7 +14,7 @@ import Link from "next/link";
 export default function LoginPage() {
   const login = usePlatform((s) => s.login);
   const router = useRouter();
-  const [email, setEmail] = useState("ananya@catalyst.edu");
+  const [email, setEmail] = useState("ananya@katalyst.edu");
   const [error, setError] = useState<string | null>(null);
 
   return (

@@ -84,7 +84,7 @@ export default function RegisterPage() {
             Create account
           </Button>
           {error ? <ErrorState title={error} /> : null}
-          {ok ? <SuccessState title="Welcome to Catalyst." /> : null}
+          {ok ? <SuccessState title="Welcome to Katalyst." /> : null}
         </div>
       </div>
     </PublicShell>
