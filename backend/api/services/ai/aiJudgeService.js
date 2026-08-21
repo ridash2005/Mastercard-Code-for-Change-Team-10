@@ -4,7 +4,7 @@
 // level-based `criteria_levels` + XP-ready output, KATALYST_AI_SPEC.md §2.2)
 // as an internal, admin+service-key-gated endpoint. It does not yet read
 // from a `submissions`/`enrollments`/`rubrics` Mongo pipeline (Phase 4 of
-// KATALYST_BACKEND_SPEC.md §16, not built in backend-1 yet) - callers pass
+// KATALYST_BACKEND_SPEC.md §16, not built in backend/api yet) - callers pass
 // the submission text and rubric criteria directly. Deterministic XP from
 // the returned levels must still be computed by a pure service-layer
 // function (ai/ai-judge/src/xp.ts's formula) before anything is persisted -

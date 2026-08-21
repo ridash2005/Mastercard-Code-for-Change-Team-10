@@ -1,7 +1,7 @@
 // Minimal, dependency-free schema validators shaped to match `@katalyst/ai-client`'s
 // `GenerateJsonOptions.schema` contract (an object with `.safeParse(value)` ->
 // `{ success: true, data }` | `{ success: false, error: { message } }`).
-// Kept hand-rolled (no zod) so backend-1 stays a plain CommonJS service with
+// Kept hand-rolled (no zod) so backend/api stays a plain CommonJS service with
 // guardrail logic that's easy to audit line-by-line.
 
 const PERFORMANCE_LEVEL_KEYS = ['not_demonstrated', 'developing', 'proficient', 'excellent'];
