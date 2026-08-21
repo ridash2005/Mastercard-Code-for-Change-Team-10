@@ -87,6 +87,43 @@ function stripCodeFence(text: string): string {
   return (fenced ? fenced[1] : text).trim();
 }
 
+// Transient provider/network failures (overload, rate limit, momentary
+// connection drops) are a normal fact of calling a live LLM API and are
+// unrelated to whether the prompt/schema was valid — retrying the *content*
+// loop below won't help with these, so they get their own short backoff
+// retry instead of immediately surfacing as a hard failure to the caller.
+const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+const MAX_TRANSIENT_RETRIES = 3;
+const TRANSIENT_RETRY_BASE_DELAY_MS = 500;
+
+function isRetryableProviderError(err: unknown): boolean {
+  const status =
+    (err as { status?: number })?.status ?? (err as { statusCode?: number })?.statusCode;
+  if (typeof status === "number" && RETRYABLE_STATUS_CODES.has(status)) return true;
+
+  const message = err instanceof Error ? err.message : String(err);
+  return /\b(429|500|502|503|504)\b/.test(message) || /high demand|overloaded|rate.?limit|ECONNRESET|ETIMEDOUT|fetch failed/i.test(message);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Retries `fn` with exponential backoff on transient provider/network errors only. */
+async function withTransientRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < MAX_TRANSIENT_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (!isRetryableProviderError(err) || attempt === MAX_TRANSIENT_RETRIES - 1) throw err;
+      await sleep(TRANSIENT_RETRY_BASE_DELAY_MS * 2 ** attempt);
+    }
+  }
+  throw lastErr;
+}
+
 /**
  * Google Gemini implementation. Requires GEMINI_API_KEY in the environment.
  * Uses responseMimeType: "application/json" for generateJson (Gemini's JSON
@@ -132,7 +169,7 @@ export class GeminiClient implements LlmClient {
           ? opts.userPrompt
           : `${opts.userPrompt}\n\nYour previous response was not valid JSON matching the required schema. Return ONLY valid JSON, no prose, no markdown fences.`;
 
-      const result = await model.generateContent(prompt);
+      const result = await withTransientRetry(() => model.generateContent(prompt));
       const raw = result.response.text();
       lastRaw = raw;
 
@@ -175,7 +212,7 @@ export class GeminiClient implements LlmClient {
     const last = conversation[conversation.length - 1];
 
     const chat = model.startChat({ history });
-    const result = await chat.sendMessage(last.content);
+    const result = await withTransientRetry(() => chat.sendMessage(last.content));
     const response = result.response;
 
     const calls = response.functionCalls() ?? [];
