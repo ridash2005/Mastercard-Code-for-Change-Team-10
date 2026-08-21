@@ -9,8 +9,11 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace @katalyst/backend-api",
     "build": "npm run build --workspace frontend",
+    "build:ai": "tsc -b tsconfig.workspace.json",
     "start": "npm run start --workspace frontend",
+    "start:backend": "npm run start --workspace @katalyst/backend-api",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b tsconfig.workspace.json && npm run typecheck --workspace frontend"

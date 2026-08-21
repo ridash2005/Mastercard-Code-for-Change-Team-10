@@ -14,7 +14,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.33.0",
-    "mongoose": "^9.9.3",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -27,7 +26,6 @@
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
     "postcss": "8.5.6",
-    "@types/mongoose": "^5.11.96",
     "@types/node": "^22.9.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",

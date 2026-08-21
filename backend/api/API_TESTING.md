@@ -1,6 +1,6 @@
 # Katalyst Backend API Testing Guide (Postman-Ready)
 
-This document contains complete, Postman-ready testing specifications for all non-AI backend APIs in `backend-1`.
+This document contains complete, Postman-ready testing specifications for all non-AI backend APIs in `backend/api`.
 
 ---
 

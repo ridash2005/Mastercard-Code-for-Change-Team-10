@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { coachPrompts, coachReply } from "@/lib/ai/coach";
+import { coachPrompts, coachReplyLive } from "@/lib/ai/coach";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VoiceAssist } from "@/components/voice/voice-assist";
@@ -25,19 +25,24 @@ export default function CoachPage() {
     if (!profile || !user) return;
     const mine = store.enrollments.filter((e) => e.studentId === sid);
     const completed = mine.filter((e) => e.status === "completed" || e.status === "approved").length;
-    const reply = await coachReply(q, {
-      name: user.name,
-      xp: profile.xp,
-      streak: profile.streak,
-      rank,
-      completion: mine.length ? Math.round((completed / mine.length) * 100) : 0,
-      pendingTitles: pending,
-      overdueTitles: [],
-      completedCount: completed,
-      interests: profile.interests,
-      atRisk: profile.atRisk || profile.inactive,
-    });
-    setLog((l) => [...l, `You: ${q}`, `Coach: ${reply}`]);
+    const { reply, source } = await coachReplyLive(
+      q,
+      {
+        name: user.name,
+        xp: profile.xp,
+        streak: profile.streak,
+        rank,
+        completion: mine.length ? Math.round((completed / mine.length) * 100) : 0,
+        pendingTitles: pending,
+        overdueTitles: [],
+        completedCount: completed,
+        interests: profile.interests,
+        atRisk: profile.atRisk || profile.inactive,
+      },
+      { email: user.email, role: "student" },
+    );
+    const tag = source === "live" ? "" : source === "guardrail_blocked" ? " (blocked)" : " (offline)";
+    setLog((l) => [...l, `You: ${q}`, `Coach${tag}: ${reply}`]);
   }
 
   return (

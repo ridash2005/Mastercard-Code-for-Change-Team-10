@@ -1,6 +1,6 @@
-# Katalyst Standalone Backend (`backend-1`)
+# Katalyst Standalone Backend (`backend/api`)
 
-A robust, production-grade Express.js & MongoDB backend providing complete non-AI functionality for the Katalyst student and administrator portals.
+A robust, production-grade Express.js & MongoDB backend for the Katalyst student and administrator portals — plus the guarded gateway into `/ai` (see `services/ai/` and `routes/aiRoutes.js`; `POST /api/ai/coach/message` and `POST /api/ai/judge/score-submission`). This is the only backend the frontend talks to, and the only thing that talks to `/ai`.
 
 ---
 
@@ -37,7 +37,7 @@ routes → controllers → services → models/database
 
 ## 📋 Environment Variables
 
-Create a `.env` file in the `backend-1` directory:
+Create a `.env` file in the `backend/api` directory:
 
 ```env
 # Server
@@ -61,7 +61,7 @@ CLIENT_URL=http://localhost:3000
 
 ### 1. Install Dependencies
 ```bash
-cd backend-1
+cd backend/api
 npm install
 ```
 

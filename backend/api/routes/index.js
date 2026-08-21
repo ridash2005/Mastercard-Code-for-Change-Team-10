@@ -17,6 +17,7 @@ const extracurricularRoutes = require('./extracurricularRoutes');
 const contactRoutes = require('./contactRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const healthRoutes = require('./healthRoutes');
+const aiRoutes = require('./aiRoutes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -34,5 +35,6 @@ router.use('/extracurricular', extracurricularRoutes);
 router.use('/contact', contactRoutes);
 router.use('/admin/analytics', analyticsRoutes);
 router.use('/health', healthRoutes);
+router.use('/ai', aiRoutes);
 
 module.exports = router;
