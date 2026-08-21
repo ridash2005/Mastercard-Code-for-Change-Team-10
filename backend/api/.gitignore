@@ -1,0 +1,6 @@
+.vercel
+
+# Vendored @katalyst/ai-client, built by scripts/vercel-build.js for
+# standalone (non-monorepo) Vercel deploys of this directory — see
+# services/ai/aiClientBridge.js. Build artifact, not source.
+vendor/

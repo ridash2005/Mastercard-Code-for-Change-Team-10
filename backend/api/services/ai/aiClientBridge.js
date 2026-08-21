@@ -8,12 +8,21 @@
 // is an ESM package ("type": "module") while backend/api is CommonJS; Node
 // supports import() from a CJS module natively, no build step needed here.
 
+const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 
 // backend/api/services/ai/ -> repo root is 4 levels up (services -> api ->
-// backend -> root), then into ai/ai-client/dist.
-const AI_CLIENT_DIST_ENTRY = path.resolve(__dirname, '../../../../ai/ai-client/dist/index.js');
+// backend -> root), then into ai/ai-client/dist. This is a static import()
+// target computed at runtime, so Vercel's build-time dependency tracer
+// can't see it — on Vercel, `npm run vercel-build` (see package.json) vendors
+// the compiled package into backend/api/vendor/ai-client instead, which
+// lives inside this function's own rootDirectory and therefore always gets
+// bundled. Local/monorepo dev never creates that vendor folder, so it falls
+// through to the normal workspace path unchanged.
+const VENDORED_ENTRY = path.resolve(__dirname, '../../vendor/ai-client/dist/index.js');
+const WORKSPACE_ENTRY = path.resolve(__dirname, '../../../../ai/ai-client/dist/index.js');
+const AI_CLIENT_DIST_ENTRY = fs.existsSync(VENDORED_ENTRY) ? VENDORED_ENTRY : WORKSPACE_ENTRY;
 
 let clientPromise = null;
 let clientKind = null; // 'gemini' | 'fixture' — surfaced for logging/health checks only
