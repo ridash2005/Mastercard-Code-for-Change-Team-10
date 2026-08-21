@@ -1,10 +1,11 @@
 # Katalyst — Gamified Learning & Student Engagement
 
 Hackathon build for **Mastercard Code for Change**. Two portals (student and admin), real product
-flow from activity creation through XP — currently running on **mock services**, not yet wired to
-the `ai/`/`backend/` packages in this repo (see Monorepo status below).
+flow from activity creation through XP. Most of the platform runs on **mock services** (an
+in-memory Zustand store) — the one path wired to a real backend and a real AI provider is the
+**AI Coach chat**, described below.
 
-## Run the product UI
+## Run the product UI only (mock services, no backend needed)
 
 ```bash
 npm install
@@ -18,39 +19,63 @@ Demo accounts (no passwords):
 - Student: `ananya@katalyst.edu`
 - Admin: `priya.admin@katalyst.edu`
 
+## Run with the real AI Coach
+
+The AI Coach page (`/student/ai-coach`) calls a real backend and a real LLM instead of a canned
+reply. To enable it, also run the backend:
+
+```bash
+npm run dev:backend   # starts backend/api on :5000 (needs MONGO_URI, or runs DB-less for auth+AI)
+npm run dev           # starts the frontend on :3000, in another terminal
+```
+
+Without `backend/api` running (or without a `GEMINI_API_KEY` set there), the Coach page falls back
+to a local mock reply automatically — nothing breaks, it just isn't live. See
+`backend/api/.env.example` for the backend's own env vars, and root `.env.example` for the
+frontend's bridge config (`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD`).
+
 ## Monorepo layout
 
 - `frontend/` — the Next.js app (student + admin portals, App Router, TypeScript, Tailwind,
   shadcn-style UI). Run it via the root scripts above, or `cd frontend && npm run dev` directly.
-- `backend/shared-types` — TS types meant to be shared between frontend and `/ai`.
-- `ai/` — AI client (Gemini), AI Judge, AI Coach, and the Python matching/eval packages. Fully
-  unit-tested in isolation (`npm test` at the root, `pytest` in `ai/python`).
-- `backend-1/` — a standalone Express + MongoDB skeleton (auth, users, meetings). Early-stage,
-  not yet wired to anything else in the repo.
+- `backend/api` — the real backend: Express + MongoDB (auth, users, activities, submissions,
+  meetings, gamification, teams, notifications, etc.), and the **only** path into `/ai` — see
+  `backend/api/services/ai/` for the guardrail + auth layer in front of the AI gateway
+  (`POST /api/ai/coach/message`, `POST /api/ai/judge/score-submission`).
+- `backend/shared-types` — TS types shared between the `/ai` packages.
+- `ai/` — AI client (Gemini), AI Judge, AI Coach prompt/schema, and the Python matching/eval
+  packages. Fully unit-tested in isolation (`npm test` at the root, `pytest` in `ai/python`).
+  `backend/api` imports the compiled `ai/ai-client` package directly (not over HTTP) — run
+  `npm run build:ai` after changing anything under `ai/*/src` so `backend/api` picks it up.
 - `KATALYST_FRONTEND_SPEC.md` / `KATALYST_BACKEND_SPEC.md` / `KATALYST_AI_SPEC.md` — the
-  authoritative specs for each layer.
+  authoritative specs for each layer (aspirational in places — e.g. the backend spec describes
+  Next.js Route Handlers, while `backend/api` is a standalone Express service; the specs still
+  define the data model/contracts this build is working toward).
 
-**Current status: these pieces are not yet connected.** `frontend/lib/ai/*.ts` and
-`frontend/lib/data/*.ts` are self-contained mocks (a rule-based coach reply, an in-memory Zustand
-store) — the running app does not call into `ai/ai-client`/`ai-judge`/`ai-coach`, and
-`frontend/lib/db/mongodb.ts` is defined but never invoked. `backend-1`'s Express server is not
-called by the frontend either. Wiring the real `/ai` packages and a real persistence layer into
-the frontend (per `KATALYST_BACKEND_SPEC.md` §5 and `KATALYST_AI_SPEC.md`) is the next milestone,
-not something this demo build currently does.
+**Current status.** `frontend/lib/data/*.ts` (the Zustand store) still backs everything except the
+AI Coach: activities, enrollments, submissions, gamification, meetings, notifications, etc. are all
+mock/in-memory. The AI Coach (`frontend/lib/ai/coach.ts`'s `coachReplyLive`, via
+`frontend/app/api/coach/route.ts` and `frontend/lib/services/backendClient.ts`) is the one real,
+end-to-end path: browser → Next.js route → `backend/api` (JWT auth + guardrails) → `ai/ai-client` →
+Gemini. `lib/ai/chatbot.ts` and `lib/ai/review.ts` are still mocked. Wiring the rest of the
+platform to `backend/api` (per `KATALYST_BACKEND_SPEC.md` §16's phases) is the next milestone.
 
-`npm test` and `npm run typecheck` cover the `ai/`/`backend/` workspace packages plus the frontend
-build; `MONGODB_URI`/`GEMINI_API_KEY` are optional for the demo UI — see `.env.example`.
+`npm test` and `npm run typecheck` cover the `ai/`/`backend/shared-types` workspace packages plus
+the frontend build. `backend/api` has its own test script (`npm run test:api --workspace
+@katalyst/backend-api`, see `backend/api/API_TESTING.md`).
 
 ## Stack
 
 Next.js App Router, TypeScript, Tailwind CSS, shadcn-style UI, Lucide-ready layout, React Hook
-Form + Zod, Zustand mock store, Mongoose models isolated in `frontend/lib/models` (unused by the
-running app for now — see status above).
+Form + Zod, Zustand mock store for the non-AI parts of the product. `backend/api`: Express,
+Mongoose, JWT auth. `ai/`: Gemini via `@katalyst/ai-client`, Zod-validated schemas.
 
 ## Notes
 
-- Database is **not required** for the demo UI. `MONGODB_URI` is in `.env.example` for a later
-  swap to real persistence.
-- OCR, AI Coach, chatbot, and AI review under `frontend/lib/` are mock services, separate from the
-  real `ai/ai-judge`/`ai/ai-coach` packages.
-- Auth never stores passwords; `frontend/lib/auth` is shaped for Auth.js later.
+- Database is **not required** for the demo UI, and `backend/api` runs (auth + AI gateway only,
+  degrading gracefully) even without a reachable MongoDB — see `backend/api/config/db.js`.
+- Auth never stores passwords in the frontend mock; `frontend/lib/auth` is shaped for Auth.js
+  later. `backend/api` uses real bcrypt + JWT.
+- The AI gateway is guardrailed: input/output validation, regex-based prompt-injection and PII
+  detection, rate limiting, and an internal-service-key gate on the (non-client-facing) AI Judge
+  scoring route — see `backend/api/services/ai/` and `KATALYST_AI_SPEC.md`.

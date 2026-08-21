@@ -71,9 +71,9 @@ export type LiveCoachReply = {
 
 /**
  * Calls the REAL AI Coach: this fetches the frontend's own /api/coach route
- * handler, which proxies to backend-1's guarded /api/ai/coach/message
+ * handler, which proxies to backend/api's guarded /api/ai/coach/message
  * (JWT auth, rate limiting, input/output guardrails, Gemini) — see
- * lib/services/backend1Client.ts. Falls back to the local mock `coachReply`
+ * lib/services/backendClient.ts. Falls back to the local mock `coachReply`
  * only when the backend itself is unreachable (offline dev, no server
  * running), never when the backend deliberately blocked the message —
  * a guardrail block is surfaced to the user as-is, not silently hidden.

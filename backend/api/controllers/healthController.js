@@ -11,7 +11,7 @@ const checkHealth = (req, res) => {
     success: true,
     status: 'ok',
     timestamp: new Date().toISOString(),
-    service: 'katalyst-backend-1',
+    service: 'katalyst-backend-api',
     uptimeSeconds: Math.floor(process.uptime()),
     environment: config.nodeEnv,
     database: {

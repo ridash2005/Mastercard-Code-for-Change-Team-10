@@ -1,7 +1,7 @@
 {
-  "name": "katalyst-backend-1",
+  "name": "@katalyst/backend-api",
   "version": "1.0.0",
-  "description": "Standalone Express backend for Katalyst",
+  "description": "Katalyst's Express + MongoDB backend - the only path into /ai (see services/ai/).",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

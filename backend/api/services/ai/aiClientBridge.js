@@ -1,17 +1,19 @@
 // The ONLY file in this backend that touches `/ai`. Every other AI-related
-// route/service in backend-1 goes through this bridge, which in turn is the
-// only thing that dynamically imports the compiled `@katalyst/ai-client`
+// route/service in backend/api goes through this bridge, which in turn is
+// the only thing that dynamically imports the compiled `@katalyst/ai-client`
 // package - `/ai` has no HTTP server of its own and is never reachable from
 // the frontend directly, only in-process from this backend.
 //
 // Loaded via dynamic import() (not require()) because `@katalyst/ai-client`
-// is an ESM package ("type": "module") while backend-1 is CommonJS; Node
+// is an ESM package ("type": "module") while backend/api is CommonJS; Node
 // supports import() from a CJS module natively, no build step needed here.
 
 const path = require('path');
 const { pathToFileURL } = require('url');
 
-const AI_CLIENT_DIST_ENTRY = path.resolve(__dirname, '../../../ai/ai-client/dist/index.js');
+// backend/api/services/ai/ -> repo root is 4 levels up (services -> api ->
+// backend -> root), then into ai/ai-client/dist.
+const AI_CLIENT_DIST_ENTRY = path.resolve(__dirname, '../../../../ai/ai-client/dist/index.js');
 
 let clientPromise = null;
 let clientKind = null; // 'gemini' | 'fixture' — surfaced for logging/health checks only

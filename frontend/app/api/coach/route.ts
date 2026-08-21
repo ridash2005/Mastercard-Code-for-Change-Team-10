@@ -1,8 +1,8 @@
 // The frontend's only path to the AI Coach: browser -> this route (Next.js
-// server) -> backend-1 (/api/ai/coach/message, JWT-gated + guardrailed) ->
-// ai/ai-client -> Gemini. The browser never talks to backend-1 or /ai
+// server) -> backend/api (/api/ai/coach/message, JWT-gated + guardrailed) ->
+// ai/ai-client -> Gemini. The browser never talks to backend/api or /ai
 // directly, and this route holds no LLM/provider secrets of its own — it
-// only forwards to backend-1, which owns auth and guardrails.
+// only forwards to backend/api, which owns auth and guardrails.
 
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -10,7 +10,7 @@ import {
   callCoachMessage,
   getBackendToken,
   invalidateBackendToken,
-} from "@/lib/services/backend1Client";
+} from "@/lib/services/backendClient";
 
 type CoachRequestBody = {
   message?: unknown;
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const token = await getBackendToken(email, safeName, safeRole);
     let result = await callCoachMessage(token, message);
 
-    // A cached token can go stale (backend-1 restarted, JWT expired) - retry
+    // A cached token can go stale (backend/api restarted, JWT expired) - retry
     // once with a freshly issued token rather than surfacing a confusing
     // 401 for something the caller never did wrong.
     if (!result.ok && result.status === 401) {
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!result.ok) {
-      // Mirror backend-1's own status codes (422 guardrail block, 429 rate
+      // Mirror backend/api's own status codes (422 guardrail block, 429 rate
       // limit, etc.) rather than collapsing everything to a generic error.
       return NextResponse.json(
         { success: false, message: result.message, reason: result.reason },

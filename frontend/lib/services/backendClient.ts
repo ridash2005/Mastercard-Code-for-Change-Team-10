@@ -1,14 +1,14 @@
-// Server-only bridge to backend-1 (the real backend). Never import this from
+// Server-only bridge to backend/api (the real backend). Never import this from
 // a "use client" component — it holds no secrets a browser should see, but
 // the JWTs it manages are meant to stay server-side, proxied through this
 // app's own /api/* route handlers rather than exposed to the browser.
 //
 // This is intentionally scoped to the AI Coach path only (KATALYST_AI_SPEC.md
 // §3), matching the demo's mock-account model: the frontend has no real
-// registration/login UI wired to backend-1 yet (see README's "Monorepo
-// status"), so this transparently provisions/logs in a shadow backend-1
+// registration/login UI wired to backend/api yet (see README's "Monorepo
+// status"), so this transparently provisions/logs in a shadow backend/api
 // account per demo user email, using a fixed demo password. That's fine for
-// a hackathon demo bridge — swap for backend-1's real login flow once the
+// a hackathon demo bridge — swap for backend/api's real login flow once the
 // frontend has one.
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:5000/api";
@@ -24,7 +24,7 @@ async function backendFetch<T = unknown>(path: string, init: RequestInit): Promi
       headers: { "Content-Type": "application/json", ...(init.headers ?? {}) }
     });
   } catch (err) {
-    throw new BackendUnavailableError(`backend-1 is unreachable at ${BACKEND_API_URL}`, err);
+    throw new BackendUnavailableError(`backend/api is unreachable at ${BACKEND_API_URL}`, err);
   }
 
   let body: T | null = null;
@@ -69,9 +69,9 @@ async function registerAndLogin(email: string, name: string, role: "student" | "
 // a multi-instance deployment would want Redis (per KATALYST_BACKEND_SPEC.md
 // §1's cache layer) instead.
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
-const TOKEN_TTL_MS = 6 * 24 * 60 * 60 * 1000; // under backend-1's 7d JWT_EXPIRES_IN
+const TOKEN_TTL_MS = 6 * 24 * 60 * 60 * 1000; // under backend/api's 7d JWT_EXPIRES_IN
 
-/** Drops a cached token — call this when backend-1 rejects it (401), e.g.
+/** Drops a cached token — call this when backend/api rejects it (401), e.g.
  * after a backend restart invalidates the user id a cached JWT points at. */
 export function invalidateBackendToken(email: string): void {
   tokenCache.delete(email);
@@ -88,7 +88,7 @@ export async function getBackendToken(
 
   let token = await login(email);
   if (!token) token = await registerAndLogin(email, name, role);
-  if (!token) throw new BackendUnavailableError("Could not authenticate the demo bridge account with backend-1");
+  if (!token) throw new BackendUnavailableError("Could not authenticate the demo bridge account with backend/api");
 
   tokenCache.set(email, { token, expiresAt: Date.now() + TOKEN_TTL_MS });
   return token;
@@ -99,10 +99,10 @@ export type CoachMessageResult =
   | { ok: false; status: number; reason?: string; message: string };
 
 /**
- * Calls backend-1's guarded AI Coach endpoint (POST /api/ai/coach/message).
+ * Calls backend/api's guarded AI Coach endpoint (POST /api/ai/coach/message).
  * This is the ONLY function in the frontend that talks to the AI gateway —
  * everything else (guardrails, rate limiting, the actual LLM call) lives in
- * backend-1 per the auth/routing rules in KATALYST_AI_SPEC.md.
+ * backend/api per the auth/routing rules in KATALYST_AI_SPEC.md.
  */
 export async function callCoachMessage(token: string, message: string): Promise<CoachMessageResult> {
   const { status, body } = await backendFetch<{
