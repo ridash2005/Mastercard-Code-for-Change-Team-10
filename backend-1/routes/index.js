@@ -3,10 +3,36 @@ const router = express.Router();
 
 const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
+const activityRoutes = require('./activityRoutes');
+const enrollmentRoutes = require('./enrollmentRoutes');
+const submissionRoutes = require('./submissionRoutes');
+const meetingRoutes = require('./meetingRoutes');
+const gamificationRoutes = require('./gamificationRoutes');
+const teamRoutes = require('./teamRoutes');
+const notificationRoutes = require('./notificationRoutes');
+const feedbackRoutes = require('./feedbackRoutes');
+const complaintRoutes = require('./complaintRoutes');
+const certificateRoutes = require('./certificateRoutes');
+const extracurricularRoutes = require('./extracurricularRoutes');
+const contactRoutes = require('./contactRoutes');
+const analyticsRoutes = require('./analyticsRoutes');
 const healthRoutes = require('./healthRoutes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/activities', activityRoutes);
+router.use('/enrollments', enrollmentRoutes);
+router.use('/submissions', submissionRoutes);
+router.use('/meetings', meetingRoutes);
+router.use('/gamification', gamificationRoutes);
+router.use('/teams', teamRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/feedback', feedbackRoutes);
+router.use('/complaints', complaintRoutes);
+router.use('/certificates', certificateRoutes);
+router.use('/extracurricular', extracurricularRoutes);
+router.use('/contact', contactRoutes);
+router.use('/admin/analytics', analyticsRoutes);
 router.use('/health', healthRoutes);
 
 module.exports = router;

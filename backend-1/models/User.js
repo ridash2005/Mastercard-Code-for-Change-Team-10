@@ -31,6 +31,20 @@ const userSchema = new mongoose.Schema(
       enum: ['student', 'admin'],
       default: 'student'
     },
+    college: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    programme: {
+      type: String,
+      default: 'Katalyst Fellows 2026',
+      trim: true
+    },
+    avatar: {
+      type: String,
+      default: ''
+    },
     cohort: {
       type: String,
       default: null
@@ -47,7 +61,15 @@ const userSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id ? ret._id.toString() : ret.id;
+        delete ret.passwordHash;
+        return ret;
+      }
+    }
   }
 );
 
@@ -68,13 +90,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
-// Omit passwordHash in serialized JSON
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.passwordHash;
-  return obj;
-};
-
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = User;
