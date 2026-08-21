@@ -71,8 +71,19 @@ async function registerAndLogin(email: string, name: string, role: "student" | "
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 const TOKEN_TTL_MS = 6 * 24 * 60 * 60 * 1000; // under backend-1's 7d JWT_EXPIRES_IN
 
-export async function getBackendToken(email: string, name: string, role: "student" | "admin"): Promise<string> {
-  const cached = tokenCache.get(email);
+/** Drops a cached token — call this when backend-1 rejects it (401), e.g.
+ * after a backend restart invalidates the user id a cached JWT points at. */
+export function invalidateBackendToken(email: string): void {
+  tokenCache.delete(email);
+}
+
+export async function getBackendToken(
+  email: string,
+  name: string,
+  role: "student" | "admin",
+  forceRefresh = false
+): Promise<string> {
+  const cached = !forceRefresh && tokenCache.get(email);
   if (cached && cached.expiresAt > Date.now()) return cached.token;
 
   let token = await login(email);

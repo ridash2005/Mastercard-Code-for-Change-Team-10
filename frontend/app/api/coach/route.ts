@@ -5,7 +5,12 @@
 // only forwards to backend-1, which owns auth and guardrails.
 
 import { NextRequest, NextResponse } from "next/server";
-import { BackendUnavailableError, callCoachMessage, getBackendToken } from "@/lib/services/backend1Client";
+import {
+  BackendUnavailableError,
+  callCoachMessage,
+  getBackendToken,
+  invalidateBackendToken,
+} from "@/lib/services/backend1Client";
 
 type CoachRequestBody = {
   message?: unknown;
@@ -35,7 +40,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const token = await getBackendToken(email, safeName, safeRole);
-    const result = await callCoachMessage(token, message);
+    let result = await callCoachMessage(token, message);
+
+    // A cached token can go stale (backend-1 restarted, JWT expired) - retry
+    // once with a freshly issued token rather than surfacing a confusing
+    // 401 for something the caller never did wrong.
+    if (!result.ok && result.status === 401) {
+      invalidateBackendToken(email);
+      const freshToken = await getBackendToken(email, safeName, safeRole, true);
+      result = await callCoachMessage(freshToken, message);
+    }
 
     if (!result.ok) {
       // Mirror backend-1's own status codes (422 guardrail block, 429 rate
