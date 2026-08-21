@@ -17,7 +17,7 @@ const meetingSchema = new mongoose.Schema(
       trim: true
     },
     studentId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true
     },
@@ -29,14 +29,35 @@ const meetingSchema = new mongoose.Schema(
       type: Number,
       default: 30
     },
+    meetingMode: {
+      type: String,
+      enum: ['online', 'offline', 'hybrid'],
+      default: 'online'
+    },
     meetingLink: {
+      type: String,
+      default: ''
+    },
+    location: {
       type: String,
       default: ''
     },
     status: {
       type: String,
-      enum: ['scheduled', 'completed', 'cancelled'],
+      enum: ['scheduled', 'rescheduled', 'completed', 'cancelled'],
       default: 'scheduled'
+    },
+    reschedulable: {
+      type: Boolean,
+      default: true
+    },
+    candidateSlots: {
+      type: [Date],
+      default: []
+    },
+    rescheduleDeadline: {
+      type: Date,
+      default: null
     },
     notes: {
       type: String,
@@ -44,10 +65,19 @@ const meetingSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id ? ret._id.toString() : ret.id;
+        return ret;
+      }
+    }
   }
 );
 
-const Meeting = mongoose.model('Meeting', meetingSchema);
+meetingSchema.index({ studentId: 1, scheduledAt: 1 });
+
+const Meeting = mongoose.models.Meeting || mongoose.model('Meeting', meetingSchema);
 
 module.exports = Meeting;

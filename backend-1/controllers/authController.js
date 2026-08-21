@@ -1,81 +1,34 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const StudentProfile = require('../models/StudentProfile');
-const config = require('../config');
-
-// Helper to generate JWT
-const generateToken = (id) => {
-  return jwt.sign({ id }, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn
-  });
-};
+const authService = require('../services/authService');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, role, cohort, batchYear } = req.body;
+    const { name, email, password, role, college, programme, cohort, batchYear } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, email, and password'
+        message: 'Please provide name and email'
       });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'A user with this email already exists'
-      });
-    }
-
-    const userRole = role === 'admin' ? 'admin' : 'student';
-
-    const user = await User.create({
+    const result = await authService.register({
       name,
       email,
-      passwordHash: password,
-      role: userRole,
-      cohort: cohort || null,
-      batchYear: batchYear || null
+      password,
+      role,
+      college,
+      programme,
+      cohort,
+      batchYear
     });
-
-    // If student, create default student profile
-    let profile = null;
-    if (user.role === 'student') {
-      profile = await StudentProfile.create({
-        userId: user._id,
-        interests: [],
-        notificationPreferences: {
-          emailNotificationsEnabled: true,
-          courseRecommendationEmails: true,
-          meetingUpdateEmails: true
-        }
-      });
-    }
-
-    const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          cohort: user.cohort,
-          batchYear: user.batchYear,
-          onboardingCompleted: user.onboardingCompleted,
-          createdAt: user.createdAt
-        },
-        profile,
-        token
-      }
+      data: result
     });
   } catch (error) {
     next(error);
@@ -89,52 +42,19 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide both email and password'
+        message: 'Please provide an email address'
       });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    const token = generateToken(user._id);
-
-    let profile = null;
-    if (user.role === 'student') {
-      profile = await StudentProfile.findOne({ userId: user._id });
-    }
+    const result = await authService.login(email, password);
 
     res.status(200).json({
       success: true,
       message: 'Login successful',
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          cohort: user.cohort,
-          batchYear: user.batchYear,
-          onboardingCompleted: user.onboardingCompleted
-        },
-        profile,
-        token
-      }
+      data: result
     });
   } catch (error) {
     next(error);
@@ -146,19 +66,28 @@ const login = async (req, res, next) => {
 // @access  Private
 const getMe = async (req, res, next) => {
   try {
-    const user = req.user;
-    let profile = null;
-
-    if (user.role === 'student') {
-      profile = await StudentProfile.findOne({ userId: user._id });
-    }
+    const result = await authService.getMe(req.user._id);
 
     res.status(200).json({
       success: true,
-      data: {
-        user,
-        profile
-      }
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Complete onboarding
+// @route   POST /api/auth/onboarding
+// @access  Private
+const completeOnboarding = async (req, res, next) => {
+  try {
+    const result = await authService.completeOnboarding(req.user._id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: 'Onboarding completed successfully',
+      data: result
     });
   } catch (error) {
     next(error);
@@ -168,5 +97,6 @@ const getMe = async (req, res, next) => {
 module.exports = {
   register,
   login,
-  getMe
+  getMe,
+  completeOnboarding
 };
