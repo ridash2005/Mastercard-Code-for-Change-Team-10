@@ -141,8 +141,10 @@ The platform enforces two roles:
 | **Certificates**| `/api/certificates` | `GET` | Private | View issued certificates |
 | **Analytics** | `/api/admin/analytics/overview`| `GET`| Admin | Programme KPI metrics |
 | | `/api/admin/analytics/reports`| `GET` | Admin | Fellow performance reports |
+| **AI gateway** | `/api/ai/coach/message` | `POST` | Private (student/admin) | Guardrailed AI Coach chat — input/output validation, rate-limited (see `services/ai/`) |
+| | `/api/ai/judge/score-submission` | `POST` | Admin + `INTERNAL_AI_KEY` | Not client-facing — scores a submission via `@katalyst/ai-judge`; requires both an admin JWT and the internal service key header |
 
-For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTING.md`](./API_TESTING.md).
+For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTING.md`](./API_TESTING.md) (covers the non-AI routes only — see `KATALYST_AI_SPEC.md` for the AI gateway's request/response contracts).
 
 ---
 

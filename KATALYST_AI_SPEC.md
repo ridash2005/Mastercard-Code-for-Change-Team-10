@@ -24,15 +24,26 @@ see `KATALYST_BACKEND_SPEC.md` §3.23 for the `knowledge_documents`/`knowledge_c
 
 ## 1. Free-tier LLM stack (no paid API required)
 
+**Current implementation**: `ai/ai-client`'s only concrete `LlmClient` is `GeminiClient` (Google
+Gemini API free tier, model `gemini-3.6-flash`, `@google/generative-ai`), gated on `GEMINI_API_KEY`.
+There is no Groq client in the codebase today — an earlier draft of this spec planned Groq as the
+primary provider with Gemini as fallback, but the build settled on Gemini-only. `LlmClient` is
+still a real interface (`generateJson`/`chatWithTools`), so adding a Groq (or any other) provider
+later is additive, not a rewrite — see `StaticLlmClient`/`MockLlmClient` in `ai/ai-client/src/index.ts`
+for the fixture/mock implementations already used in tests and dry-run mode.
+
 | Need | Provider | Notes |
 |---|---|---|
-| AI Judge + AI Coach LLM | **Groq API** (Llama 3.3 70B / Llama 4) primary | Fast, free, no card required, strong structured-output/tool-calling |
-| Fallback LLM | **Google Gemini API** free tier (Gemini 3.6 Flash) | Strong JSON-mode + tool-calling |
-| Content moderation (peer chat) | Same Groq/Gemini free call as a classifier | No dedicated moderation API needed |
+| AI Judge + AI Coach LLM | **Google Gemini API** free tier (`gemini-3.6-flash`) | JSON mode (`responseMimeType: "application/json"`) plus a provider-side `responseSchema` constraint (see below) and native tool-calling |
+| Content moderation (peer chat) | Same Gemini free call as a classifier | No dedicated moderation API needed |
 
-Provider selection is a single config switch in `ai/ai-client` (`GROQ_API_KEY` primary,
-`GEMINI_API_KEY` fallback) — swapping providers later is a one-line config change, not a rewrite.
-No `ANTHROPIC_API_KEY` is required for this build.
+No `GROQ_API_KEY` or `ANTHROPIC_API_KEY` is required for this build; only `GEMINI_API_KEY` (see
+`backend/api/.env.example`). `ai/ai-client`'s `generateJson()` also accepts an optional
+`responseSchema` (Gemini's OpenAPI-subset `GenerationConfig.responseSchema`) that constrains the
+model to the exact JSON shape instead of relying solely on prose instructions in the prompt — both
+`ai-judge` (`buildAiJudgeResponseSchema`) and the backend's Coach/Judge guardrail services
+(`backend/api/services/ai/schemas.js`) pass one; the Zod/hand-rolled `schema` validator still runs
+as the final safety net either way.
 
 ---
 

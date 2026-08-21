@@ -94,6 +94,76 @@ export async function getBackendToken(
   return token;
 }
 
+export type BackendUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: "student" | "admin";
+  college?: string;
+  programme?: string;
+  avatar?: string;
+  onboardingCompleted?: boolean;
+};
+
+export type AuthResult =
+  | { ok: true; token: string; user: BackendUser }
+  | { ok: false; status: number; message: string };
+
+/**
+ * Real registration against backend/api - the user's own password, not the
+ * AI Coach demo bridge's fixed password. This is the actual auth path once
+ * the frontend has real login/register UI (see app/api/auth/*).
+ */
+export async function registerRealUser(input: {
+  name: string;
+  email: string;
+  password: string;
+  role: "student" | "admin";
+  college?: string;
+  programme?: string;
+}): Promise<AuthResult> {
+  const { status, body } = await backendFetch<{
+    success: boolean;
+    message?: string;
+    data?: { token: string; user: BackendUser };
+  }>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+
+  if (status === 201 && body?.success && body.data) {
+    return { ok: true, token: body.data.token, user: body.data.user };
+  }
+  return { ok: false, status, message: body?.message ?? "Registration failed" };
+}
+
+/** Real login against backend/api with a user-supplied password. */
+export async function loginRealUser(email: string, password: string): Promise<AuthResult> {
+  const { status, body } = await backendFetch<{
+    success: boolean;
+    message?: string;
+    data?: { token: string; user: BackendUser };
+  }>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password })
+  });
+
+  if (status === 200 && body?.success && body.data) {
+    return { ok: true, token: body.data.token, user: body.data.user };
+  }
+  return { ok: false, status, message: body?.message ?? "Invalid email or password" };
+}
+
+/** Fetches the current user for a real backend/api JWT (from the session cookie). */
+export async function getMe(token: string): Promise<BackendUser | null> {
+  const { status, body } = await backendFetch<{ success: boolean; data?: { user: BackendUser } }>("/auth/me", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (status === 200 && body?.success && body.data) return body.data.user;
+  return null;
+}
+
 export type CoachMessageResult =
   | { ok: true; reply: string; intent: string }
   | { ok: false; status: number; reason?: string; message: string };

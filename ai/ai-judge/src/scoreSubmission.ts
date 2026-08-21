@@ -9,7 +9,7 @@ import type {
   Review,
   RubricCriterion
 } from "@katalyst/shared-types";
-import { AiJudgeOutputSchema } from "./schema.js";
+import { AiJudgeOutputSchema, buildAiJudgeResponseSchema } from "./schema.js";
 import { AI_JUDGE_SYSTEM_PROMPT, buildAiJudgeUserPrompt } from "./prompt.js";
 import { computeXp } from "./xp.js";
 import { routeReview } from "./routing.js";
@@ -42,7 +42,8 @@ export async function scoreSubmission(input: ScoreSubmissionInput): Promise<Revi
     output = await llmClient.generateJson({
       systemPrompt: AI_JUDGE_SYSTEM_PROMPT,
       userPrompt,
-      schema: AiJudgeOutputSchema
+      schema: AiJudgeOutputSchema,
+      responseSchema: buildAiJudgeResponseSchema([...validKeys])
     });
   } catch {
     return buildParseErrorReview(input);

@@ -6,6 +6,19 @@
 
 const PERFORMANCE_LEVEL_KEYS = ['not_demonstrated', 'developing', 'proficient', 'excellent'];
 
+/**
+ * Gemini `responseSchema` (generationConfig) for the Coach's `{ reply }`
+ * shape. Constrains the provider to this exact JSON so `coachReplySchema`
+ * below isn't relying solely on prose instructions in the prompt.
+ */
+const COACH_REPLY_RESPONSE_SCHEMA = {
+  type: 'object',
+  properties: {
+    reply: { type: 'string', description: "The coach's reply to the student, plain text." }
+  },
+  required: ['reply']
+};
+
 function fail(message) {
   return { success: false, error: { message } };
 }
@@ -32,6 +45,46 @@ const coachReplySchema = {
  * `criterion_key` the model returns must exist in it, or the whole response
  * is rejected (never persisted, never trusted).
  */
+/**
+ * Gemini `responseSchema` counterpart to `judgeOutputSchema` below - same
+ * field names (`criteria_levels`, `criterion_key`, `level_key`, ...),
+ * expressed as the OpenAPI-subset object Gemini's `generationConfig.
+ * responseSchema` accepts, so the provider is constrained to emit exactly
+ * this shape instead of the model guessing plausible-but-wrong key names
+ * (e.g. `criteria_evaluations` / `criterion_id` / `level`) that would then
+ * fail `judgeOutputSchema`'s validation every time.
+ */
+function judgeResponseSchema(validCriterionKeys) {
+  return {
+    type: 'object',
+    properties: {
+      criteria_levels: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            criterion_key: { type: 'string', enum: validCriterionKeys },
+            level_key: { type: 'string', enum: PERFORMANCE_LEVEL_KEYS },
+            justification: { type: 'string', description: 'Concrete evidence cited from the submission.' }
+          },
+          required: ['criterion_key', 'level_key', 'justification']
+        }
+      },
+      confidence: { type: 'number', description: 'Between 0 and 1.' },
+      flags: {
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['possible_plagiarism', 'incomplete', 'off_topic', 'late_submission', 'none']
+        }
+      },
+      suggested_bonus: { type: 'string', description: 'Advisory only, e.g. "none".' },
+      student_feedback: { type: 'string', description: 'Warm, specific, 3-5 sentence feedback for the student.' }
+    },
+    required: ['criteria_levels', 'confidence', 'student_feedback']
+  };
+}
+
 function judgeOutputSchema(validCriterionKeys) {
   return {
     safeParse(value) {
@@ -70,4 +123,10 @@ function judgeOutputSchema(validCriterionKeys) {
   };
 }
 
-module.exports = { coachReplySchema, judgeOutputSchema, PERFORMANCE_LEVEL_KEYS };
+module.exports = {
+  coachReplySchema,
+  judgeOutputSchema,
+  judgeResponseSchema,
+  COACH_REPLY_RESPONSE_SCHEMA,
+  PERFORMANCE_LEVEL_KEYS
+};

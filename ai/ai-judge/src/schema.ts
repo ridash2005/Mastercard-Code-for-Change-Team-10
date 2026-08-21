@@ -4,6 +4,7 @@
 
 import { z } from "zod";
 import { PERFORMANCE_LEVELS } from "@katalyst/shared-types";
+import type { GeminiResponseSchema } from "@katalyst/ai-client";
 
 export const AiJudgeOutputSchema = z.object({
   criteria_levels: z
@@ -22,3 +23,38 @@ export const AiJudgeOutputSchema = z.object({
 });
 
 export type AiJudgeOutput = z.infer<typeof AiJudgeOutputSchema>;
+
+/**
+ * Gemini `responseSchema` counterpart to `AiJudgeOutputSchema` above - same
+ * field names, expressed as the OpenAPI-subset object Gemini's
+ * `generationConfig.responseSchema` accepts. Constrains the provider to emit
+ * exactly this shape instead of the model guessing plausible-but-wrong key
+ * names (e.g. `criteria_evaluations` / `criterion_id` / `level`) that would
+ * then fail `AiJudgeOutputSchema`'s validation every time - `criterion_key`'s
+ * valid values are pinned per-call via `validCriterionKeys` since the rubric
+ * varies by module type.
+ */
+export function buildAiJudgeResponseSchema(validCriterionKeys: string[]): GeminiResponseSchema {
+  return {
+    type: "object",
+    properties: {
+      criteria_levels: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            criterion_key: { type: "string", enum: validCriterionKeys },
+            level_key: { type: "string", enum: [...PERFORMANCE_LEVELS] },
+            justification: { type: "string", description: "Concrete evidence cited from the submission." }
+          },
+          required: ["criterion_key", "level_key", "justification"]
+        }
+      },
+      confidence: { type: "number", description: "Between 0 and 1." },
+      flags: { type: "array", items: { type: "string" } },
+      suggested_bonus: { type: "string", description: 'Advisory only, e.g. "none".' },
+      student_feedback: { type: "string", description: "Warm, specific, 3-5 sentence feedback for the student." }
+    },
+    required: ["criteria_levels", "confidence", "student_feedback"]
+  };
+}

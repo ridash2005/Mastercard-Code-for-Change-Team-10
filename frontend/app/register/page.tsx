@@ -19,9 +19,42 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [college, setCollege] = useState("");
   const [programme, setProgramme] = useState("Katalyst Fellows 2026");
+  const [password, setPassword] = useState("");
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function createAccount() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role, college, programme }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.success) {
+        setError(body.message ?? "Could not register");
+        return;
+      }
+      // Real account now exists in backend/api. Mirror it into the mock
+      // store too (see login/page.tsx's comment - most pages still read
+      // from there pending later migration phases).
+      const localResult = register({ name, email, college, programme, role });
+      if (!localResult.ok) {
+        setError(localResult.error ?? "Could not register");
+        return;
+      }
+      setOk(true);
+      router.push(role === "admin" ? "/admin" : "/student");
+    } catch {
+      setError("Could not reach the backend. Is it running?");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <PublicShell>
@@ -65,23 +98,13 @@ export default function RegisterPage() {
           <Field label="Email" value={email} onChange={setEmail} type="email" />
           <Field label="College" value={college} onChange={setCollege} />
           <Field label="Programme" value={programme} onChange={setProgramme} />
+          <Field label="Password" value={password} onChange={setPassword} type="password" />
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} />
             I have verified the details above
           </label>
-          <Button
-            disabled={!verified}
-            onClick={() => {
-              const res = register({ name, email, college, programme, role });
-              if (!res.ok) {
-                setError(res.error ?? "Could not register");
-                return;
-              }
-              setOk(true);
-              router.push(role === "admin" ? "/admin" : "/student");
-            }}
-          >
-            Create account
+          <Button disabled={!verified || busy || password.length < 6} onClick={() => void createAccount()}>
+            {busy ? "Creating account…" : "Create account"}
           </Button>
           {error ? <ErrorState title={error} /> : null}
           {ok ? <SuccessState title="Welcome to Katalyst." /> : null}

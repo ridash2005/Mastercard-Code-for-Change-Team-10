@@ -11,7 +11,7 @@
 // this module only returns validated levels, never a number to trust as-is.
 
 const { getLlmClient } = require('./aiClientBridge');
-const { judgeOutputSchema } = require('./schemas');
+const { judgeOutputSchema, judgeResponseSchema } = require('./schemas');
 const { guardJudgeOutput, OutputGuardrailError } = require('./outputGuard');
 
 class AiJudgeError extends Error {
@@ -58,6 +58,7 @@ async function scoreSubmission(guardedSubmissionText, rubricCriteria) {
       systemPrompt: buildJudgePrompt(rubricCriteria),
       userPrompt: guardedSubmissionText,
       schema,
+      responseSchema: judgeResponseSchema(criterionKeys),
       temperature: 0.2
     });
   } catch (err) {

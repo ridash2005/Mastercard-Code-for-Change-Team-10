@@ -797,10 +797,14 @@ Do not expose `/mentor/*` or any `higher_management`-role-gated route for the MV
 
 ## 14. Environment & config
 
-`.env` (never committed): `MONGODB_URI`, `REDIS_URL` (Upstash), `GROQ_API_KEY`, `GEMINI_API_KEY`
-(both — see AI spec's provider fallback), `EMAIL_PROVIDER_*`, `JWT_SECRET`, storage provider keys,
-`KATALYST_KONNECT_API_*` (if/when SSO is wired). No `ANTHROPIC_API_KEY` requirement for the
-hackathon build — free-tier LLMs only (AI spec §free-tier stack).
+`.env` (never committed): `MONGODB_URI`, `REDIS_URL` (Upstash), `GEMINI_API_KEY` (the only LLM key
+required — see `KATALYST_AI_SPEC.md` §1; no `GROQ_API_KEY`), `EMAIL_PROVIDER_*`, `JWT_SECRET`,
+storage provider keys, `KATALYST_KONNECT_API_*` (if/when SSO is wired). No `ANTHROPIC_API_KEY`
+requirement for the hackathon build — free-tier LLM only. The current `backend/api` build (see
+`backend/api/.env.example`) is narrower than this full list: `PORT`, `NODE_ENV`, `MONGO_URI`,
+`JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL`, `GEMINI_API_KEY`, `INTERNAL_AI_KEY` (a separate
+shared secret gating the non-client-facing AI Judge scoring route) — Redis/email/storage/SSO vars
+are not yet wired up.
 
 Feature-flag/config collection: AI Judge confidence thresholds per module type, nudge rule
 toggles, escalation thresholds — Admin-tunable without a redeploy.

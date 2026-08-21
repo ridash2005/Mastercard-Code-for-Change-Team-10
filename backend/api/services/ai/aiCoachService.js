@@ -12,7 +12,7 @@
 // guardrail/auth/rate-limit layers around it don't change.
 
 const { getLlmClient } = require('./aiClientBridge');
-const { coachReplySchema } = require('./schemas');
+const { coachReplySchema, COACH_REPLY_RESPONSE_SCHEMA } = require('./schemas');
 const { guardCoachReply, OutputGuardrailError } = require('./outputGuard');
 const { AI_COACH_SYSTEM_PROMPT } = require('./coachPrompt');
 
@@ -31,12 +31,13 @@ class AiCoachError extends Error {
 async function getCoachReply(guardedUserMessage) {
   const client = await getLlmClient();
 
-  // generateJson() sets responseMimeType: "application/json" but does not
-  // pin a response schema on the provider side (ai/ai-client's GeminiClient
-  // has no responseSchema support) - so the exact JSON shape has to be
-  // spelled out in-prompt, or the model returns arbitrary JSON that fails
-  // coachReplySchema every time. This was caught by an end-to-end test that
-  // actually called the live model rather than trusting the fixture path.
+  // generateJson() now also pins Gemini's provider-side responseSchema
+  // (COACH_REPLY_RESPONSE_SCHEMA) so the model is constrained to this exact
+  // JSON shape rather than relying solely on prose instructions - that prose
+  // reminder stays below as a redundant safety net, and coachReplySchema
+  // still runs as the final validation either way. The provider-side
+  // constraint was missing until ai/ai-client's GeminiClient gained
+  // responseSchema support; before that this failed every live call.
   const userPrompt = `${guardedUserMessage}\n\nRespond with ONLY a JSON object of the exact shape {"reply": "<your reply text>"} - no other keys, no markdown fences, no prose outside the JSON.`;
 
   let result;
@@ -45,6 +46,7 @@ async function getCoachReply(guardedUserMessage) {
       systemPrompt: AI_COACH_SYSTEM_PROMPT,
       userPrompt,
       schema: coachReplySchema,
+      responseSchema: COACH_REPLY_RESPONSE_SCHEMA,
       temperature: 0.4
     });
   } catch (err) {

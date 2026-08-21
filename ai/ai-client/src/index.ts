@@ -26,11 +26,37 @@ export interface ChatMessage {
   toolName?: string;
 }
 
+/**
+ * Subset of the OpenAPI 3.0 schema object Gemini accepts for
+ * `GenerationConfig.responseSchema` (see @google/generative-ai's `Schema`
+ * type). Hand-rolled here instead of imported so callers that don't use
+ * Gemini (fixture/mock clients) don't need the provider SDK as a type dep.
+ */
+export interface GeminiResponseSchema {
+  type?: "string" | "number" | "integer" | "boolean" | "array" | "object";
+  format?: string;
+  description?: string;
+  nullable?: boolean;
+  items?: GeminiResponseSchema;
+  enum?: string[];
+  properties?: Record<string, GeminiResponseSchema>;
+  required?: string[];
+}
+
 export interface GenerateJsonOptions<T> {
   systemPrompt: string;
   userPrompt: string;
   schema: ZodType<T>;
   temperature?: number;
+  /**
+   * Optional provider-side response schema (Gemini's `responseSchema`
+   * generation-config field). When set, the provider is constrained to
+   * emit exactly this JSON shape instead of relying solely on prose
+   * instructions in the prompt - `schema` (above) still runs as the
+   * final safety-net validation either way. Providers that don't support
+   * constrained JSON output may ignore this field.
+   */
+  responseSchema?: GeminiResponseSchema;
 }
 
 export interface ChatWithToolsOptions {
@@ -94,7 +120,8 @@ export class GeminiClient implements LlmClient {
       systemInstruction: opts.systemPrompt,
       generationConfig: {
         temperature: opts.temperature ?? 0.2,
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        ...(opts.responseSchema ? { responseSchema: opts.responseSchema as never } : {})
       }
     });
 
