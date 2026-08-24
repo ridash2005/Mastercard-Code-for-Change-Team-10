@@ -10,7 +10,7 @@ export default function TeamsPage() {
       <h1 className="font-serif text-3xl">Teams</h1>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         {store.teams.map((t) => {
-          const members = store.teamMembers.filter((m) => m.teamId === t.id);
+          const members = t.members;
           const xp = members.reduce((s, m) => s + (store.studentProfiles.find((p) => p.userId === m.studentId)?.xp ?? 0), 0);
           return (
             <Link key={t.id} href={`/student/teams/${t.id}`} className="k-card p-4">

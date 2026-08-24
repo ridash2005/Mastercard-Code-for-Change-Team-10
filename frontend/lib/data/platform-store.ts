@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import * as seed from "@/lib/data/seed";
+import { api, ApiError, type TeamWithMembers } from "@/lib/services/api";
 import type {
   Activity,
   ActivityType,
@@ -16,7 +17,6 @@ import type {
   VolunteerApplication,
   Participation,
   Requirement,
-  Role,
   StudentProfile,
   Submission,
   User,
@@ -26,7 +26,15 @@ import { uid } from "@/lib/utils";
 export type PlatformState = {
   hydrated: boolean;
   setHydrated: (v: boolean) => void;
+  hydrating: boolean;
+  /** Fetches this session's real data from backend/api and populates the
+   * store. Call once sessionUserId is known (see components/providers.tsx).
+   * Safe to call repeatedly - e.g. after a mutation, to refresh from the
+   * source of truth instead of hand-rolling every local update. */
+  hydrate: () => Promise<void>;
   sessionUserId: string | null;
+  setSession: (user: User) => void;
+  clearSession: () => void;
   users: User[];
   studentProfiles: StudentProfile[];
   adminProfiles: typeof seed.adminProfiles;
@@ -36,469 +44,302 @@ export type PlatformState = {
   achievements: typeof seed.achievements;
   studentAchievements: typeof seed.studentAchievements;
   missions: typeof seed.missions;
-  teams: typeof seed.teams;
-  teamMembers: typeof seed.teamMembers;
+  /** Real, role-agnostic rankings with names already joined server-side -
+   * prefer this over deriving from studentProfiles/users, which (by
+   * design - see backend/api's privacy-scoped routes) a student session
+   * only has for themselves, not their peers. */
+  leaderboard: { userId: string; name: string; xp: number; rank: number }[];
+  teams: TeamWithMembers[];
   xpTransactions: typeof seed.xpTransactions;
   notifications: AppNotification[];
   complaints: Complaint[];
   feedbackRecords: FeedbackRecord[];
   certificates: typeof seed.certificates;
   extracurricular: typeof seed.extracurricular;
-  reschedules: { id: string; activityId: string; studentId: string; slot: string }[];
+  meetings: { id: string; title: string; scheduledAt: string; reschedulable?: boolean; candidateSlots?: string[]; [k: string]: unknown }[];
+  // Not backed by backend/api yet - no Collaboration/VolunteerApplication
+  // model or routes exist there. Kept as local-only demo state pending that
+  // backend work; see KATALYST_BACKEND_SPEC.md for the intended shape.
   collaborations: CollaborationInvite[];
   volunteerApplications: VolunteerApplication[];
-  login: (email: string) => { ok: boolean; role?: Role; error?: string };
-  logout: () => void;
-  register: (input: {
-    name: string;
-    email: string;
-    college: string;
-    programme: string;
-    role: Role;
-  }) => { ok: boolean; error?: string };
   updateProfile: (
     userId: string,
-    patch: { name?: string; skills?: string[]; interests?: string[]; onboarded?: boolean },
-  ) => void;
-  enroll: (activityId: string, studentId: string) => void;
-  startActivity: (activityId: string, studentId: string) => void;
+    patch: { name?: string; skills?: string[]; interests?: string[]; careerGoal?: string; onboarded?: boolean },
+  ) => Promise<void>;
+  enroll: (activityId: string, studentId?: string) => Promise<void>;
+  startActivity: (activityId: string, studentId?: string) => Promise<void>;
   submitWork: (input: {
     activityId: string;
-    studentId: string;
+    studentId?: string;
     text: string;
     link: string;
     notes: string;
     fileName?: string;
-  }) => void;
-  createActivity: (activity: Omit<Activity, "id" | "createdBy"> & { createdBy?: string }) => string;
+  }) => Promise<void>;
+  createActivity: (activity: Omit<Activity, "id" | "createdBy"> & { createdBy?: string }) => Promise<string | null>;
   reviewSubmission: (input: {
     submissionId: string;
-    reviewerId: string;
+    reviewerId?: string;
     action: "approve" | "reject" | "resubmit";
     score: number;
     feedback: string;
-  }) => void;
-  addFeedback: (record: Omit<FeedbackRecord, "id" | "createdAt">) => void;
-  addComplaint: (record: Omit<Complaint, "id" | "createdAt" | "status">) => void;
-  addContact: (name: string, email: string, category: string, message: string) => void;
-  markNotificationRead: (id: string) => void;
-  reschedule: (activityId: string, studentId: string, slot: string) => void;
+  }) => Promise<void>;
+  addFeedback: (record: Omit<FeedbackRecord, "id" | "createdAt">) => Promise<void>;
+  addComplaint: (record: Omit<Complaint, "id" | "createdAt" | "status">) => Promise<void>;
+  addContact: (name: string, email: string, category: string, message: string) => Promise<void>;
+  markNotificationRead: (id: string) => Promise<void>;
+  /** meetingId, not activityId - backend/api's reschedule is a Meeting
+   * resource, distinct from Activity. See lib/services/api.ts's meetings. */
+  reschedule: (meetingId: string, slot: string) => Promise<void>;
   createCollaboration: (input: { studentIds: string[]; projectTitle: string; adminRationale: string }) => void;
   respondCollaboration: (id: string, studentId: string, status: "accepted" | "declined") => void;
   reviewVolunteer: (id: string, status: "approved" | "rejected") => void;
 };
 
-const initial = {
-  hydrated: false,
+const empty = {
+  hydrating: false,
   sessionUserId: null as string | null,
-  users: seed.users,
-  studentProfiles: seed.studentProfiles,
-  adminProfiles: seed.adminProfiles,
-  activities: seed.activities,
-  enrollments: seed.enrollments,
-  submissions: seed.submissions,
-  achievements: seed.achievements,
-  studentAchievements: seed.studentAchievements,
-  missions: seed.missions,
-  teams: seed.teams,
-  teamMembers: seed.teamMembers,
-  xpTransactions: seed.xpTransactions,
-  notifications: seed.notifications,
-  complaints: seed.complaints,
-  feedbackRecords: seed.feedbackRecords,
-  certificates: seed.certificates,
-  extracurricular: seed.extracurricular,
-  reschedules: [] as PlatformState["reschedules"],
+  users: [] as User[],
+  studentProfiles: [] as StudentProfile[],
+  adminProfiles: [] as typeof seed.adminProfiles,
+  activities: [] as Activity[],
+  enrollments: [] as Enrollment[],
+  submissions: [] as Submission[],
+  achievements: [] as typeof seed.achievements,
+  studentAchievements: [] as typeof seed.studentAchievements,
+  missions: [] as typeof seed.missions,
+  leaderboard: [] as PlatformState["leaderboard"],
+  teams: [] as TeamWithMembers[],
+  xpTransactions: [] as typeof seed.xpTransactions,
+  notifications: [] as AppNotification[],
+  complaints: [] as Complaint[],
+  feedbackRecords: [] as FeedbackRecord[],
+  certificates: [] as typeof seed.certificates,
+  extracurricular: [] as typeof seed.extracurricular,
+  meetings: [] as PlatformState["meetings"],
   collaborations: seed.collaborations,
   volunteerApplications: seed.volunteerApplications,
 };
 
+/** Best-effort - a single failed call (e.g. a 403 on an admin-only endpoint
+ * for a student session) shouldn't blank out everything else that loaded
+ * fine, so failures degrade to "leave that slice empty" rather than
+ * throwing. */
+async function settle<T>(p: Promise<T>): Promise<T | null> {
+  try {
+    return await p;
+  } catch (err) {
+    if (!(err instanceof ApiError)) console.error(err);
+    return null;
+  }
+}
+
 export const usePlatform = create<PlatformState>()(
   persist(
     (set, get) => ({
-      ...initial,
+      hydrated: false,
+      ...empty,
       setHydrated: (v) => set({ hydrated: v }),
-      login: (email) => {
-        const user = get().users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-        if (!user) return { ok: false, error: "No account for that email in this demo." };
-        set({ sessionUserId: user.id });
-        if (typeof document !== "undefined") {
-          document.cookie = `katalyst-role=${user.role}; path=/; SameSite=Lax`;
-          document.cookie = `katalyst-user=${user.id}; path=/; SameSite=Lax`;
-        }
-        return { ok: true, role: user.role };
-      },
-      logout: () => {
-        set({ sessionUserId: null });
-        if (typeof document !== "undefined") {
-          document.cookie = "katalyst-role=; path=/; max-age=0";
-          document.cookie = "katalyst-user=; path=/; max-age=0";
-        }
-      },
-      register: (input) => {
-        if (get().users.some((u) => u.email.toLowerCase() === input.email.toLowerCase())) {
-          return { ok: false, error: "That email is already registered in this demo." };
-        }
-        const id = uid("u");
-        const user: User = {
-          id,
-          name: input.name,
-          email: input.email,
-          role: input.role,
-          college: input.college,
-          programme: input.programme,
-          avatar: input.name
-            .split(" ")
-            .map((p) => p[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase(),
-          createdAt: new Date().toISOString(),
-        };
+      setSession: (user) => {
         set((s) => ({
-          users: [...s.users, user],
-          studentProfiles:
-            input.role === "student"
-              ? [
-                  ...s.studentProfiles,
-                  {
-                    userId: id,
-                    skills: [],
-                    interests: [],
-                    careerGoal: "",
-                    xp: 0,
-                    streak: 0,
-                    lastActiveAt: new Date().toISOString(),
-                    teamId: null,
-                    completedCourseIds: [],
-                    inactive: false,
-                    atRisk: false,
-                    onboarded: false,
-                  },
-                ]
-              : s.studentProfiles,
-          sessionUserId: id,
-        }));
-        if (typeof document !== "undefined") {
-          document.cookie = `katalyst-role=${input.role}; path=/; SameSite=Lax`;
-          document.cookie = `katalyst-user=${id}; path=/; SameSite=Lax`;
-        }
-        return { ok: true };
-      },
-      updateProfile: (userId, patch) => {
-        set((s) => ({
-          users: s.users.map((u) => (u.id === userId && patch.name ? { ...u, name: patch.name } : u)),
-          studentProfiles: s.studentProfiles.map((p) =>
-            p.userId === userId
-              ? {
-                  ...p,
-                  skills: patch.skills ?? p.skills,
-                  interests: patch.interests ?? p.interests,
-                  onboarded: patch.onboarded ?? p.onboarded,
-                }
-              : p,
-          ),
+          sessionUserId: user.id,
+          users: [user, ...s.users.filter((u) => u.id !== user.id)],
         }));
       },
-      enroll: (activityId, studentId) => {
-        const exists = get().enrollments.some((e) => e.activityId === activityId && e.studentId === studentId);
-        if (exists) return;
-        const enrollment: Enrollment = {
-          id: uid("en"),
-          activityId,
-          studentId,
-          status: "not_started",
-          progress: 0,
-        };
-        const first = !get().studentAchievements.some(
-          (a) => a.studentId === studentId && a.achievementId === "ach-first",
-        );
-        set((s) => ({
-          enrollments: [...s.enrollments, enrollment],
-          studentAchievements: first
-            ? [...s.studentAchievements, { studentId, achievementId: "ach-first", unlockedAt: new Date().toISOString() }]
-            : s.studentAchievements,
-          notifications: first
-            ? [
-                {
-                  id: uid("nt"),
-                  audience: "student",
-                  userId: studentId,
-                  title: "First Step",
-                  body: "You enrolled in your first activity.",
-                  kind: "achievement",
-                  read: false,
-                  createdAt: new Date().toISOString(),
-                },
-                ...s.notifications,
-              ]
-            : s.notifications,
-        }));
+      clearSession: () => {
+        set({ ...empty, sessionUserId: null });
       },
-      startActivity: (activityId, studentId) => {
-        set((s) => ({
-          enrollments: s.enrollments.map((e) =>
-            e.activityId === activityId && e.studentId === studentId
-              ? { ...e, status: "in_progress", progress: Math.max(e.progress, 15), startedAt: e.startedAt ?? new Date().toISOString() }
-              : e,
-          ),
-        }));
-      },
-      submitWork: (input) => {
-        const enrollment =
-          get().enrollments.find((e) => e.activityId === input.activityId && e.studentId === input.studentId) ??
-          ({
-            id: uid("en"),
-            activityId: input.activityId,
-            studentId: input.studentId,
-            status: "submitted" as EnrollmentStatus,
-            progress: 80,
-          } satisfies Enrollment);
-        const attempt = {
-          id: uid("att"),
-          submittedAt: new Date().toISOString(),
-          text: input.text,
-          link: input.link,
-          notes: input.notes,
-          fileName: input.fileName,
-        };
+      hydrate: async () => {
+        const sid = get().sessionUserId;
+        if (!sid) return;
+        set({ hydrating: true });
+
+        const isAdmin = get().users.find((u) => u.id === sid)?.role === "admin";
+
+        const [
+          activities,
+          enrollments,
+          submissions,
+          notifications,
+          teams,
+          certificates,
+          extracurricular,
+          complaints,
+          feedbackRecords,
+          meetings,
+          missions,
+          xpTransactions,
+          gamAchievements,
+          leaderboard,
+          ownProfile,
+          allUsers,
+          reports,
+        ] = await Promise.all([
+          settle(api.activities.list()),
+          settle(api.enrollments.list()),
+          settle(api.submissions.list()),
+          settle(api.notifications.list()),
+          settle(api.teams.list()),
+          settle(api.certificates.list()),
+          settle(api.extracurricular.list()),
+          settle(api.complaints.list()),
+          settle(api.feedback.list()),
+          settle(api.meetings.list()),
+          settle(api.gamification.missions()),
+          settle(api.gamification.xpTransactions()),
+          settle(api.gamification.achievements()),
+          settle(api.gamification.leaderboard()),
+          settle(api.users.profile()),
+          isAdmin ? settle(api.users.list()) : Promise.resolve(null),
+          isAdmin ? settle(api.analytics.reports()) : Promise.resolve(null),
+        ]);
+
+        const gamList = (gamAchievements ?? []) as { id: string; key: string; title: string; description: string; unlocked?: boolean; unlockedAt?: string | null }[];
+        const achievements = gamList.map(({ id, key, title, description }) => ({ id, key, title, description }));
+        const studentAchievements = gamList
+          .filter((a) => a.unlocked)
+          .map((a) => ({ studentId: sid, achievementId: a.id, unlockedAt: a.unlockedAt ?? new Date().toISOString() }));
+
         set((s) => {
-          const existing = s.submissions.find(
-            (sub) => sub.activityId === input.activityId && sub.studentId === input.studentId,
-          );
-          const submissions = existing
-            ? s.submissions.map((sub) =>
-                sub.id === existing.id
-                  ? { ...sub, status: "submitted" as EnrollmentStatus, attempts: [...sub.attempts, attempt] }
-                  : sub,
-              )
-            : [
-                ...s.submissions,
-                {
-                  id: uid("sub"),
-                  activityId: input.activityId,
-                  studentId: input.studentId,
-                  enrollmentId: enrollment.id,
-                  status: "submitted" as EnrollmentStatus,
-                  attempts: [attempt],
-                  xpAwarded: 0,
-                },
-              ];
-          const hasEn = s.enrollments.some((e) => e.activityId === input.activityId && e.studentId === input.studentId);
+          const patch: Partial<PlatformState> = { hydrating: false };
+          if (activities) patch.activities = activities;
+          if (enrollments) patch.enrollments = enrollments;
+          if (submissions) patch.submissions = submissions;
+          if (notifications) patch.notifications = notifications;
+          if (teams) patch.teams = teams;
+          if (certificates) patch.certificates = certificates;
+          if (extracurricular) patch.extracurricular = extracurricular;
+          if (complaints) patch.complaints = complaints;
+          if (feedbackRecords) patch.feedbackRecords = feedbackRecords;
+          if (meetings) patch.meetings = meetings;
+          if (missions) patch.missions = missions as typeof seed.missions;
+          if (leaderboard) patch.leaderboard = leaderboard;
+          if (xpTransactions) patch.xpTransactions = xpTransactions as typeof seed.xpTransactions;
+          if (gamAchievements) {
+            patch.achievements = achievements as typeof seed.achievements;
+            patch.studentAchievements = studentAchievements as typeof seed.studentAchievements;
+          }
+          if (allUsers) patch.users = allUsers;
+          if (ownProfile) {
+            patch.studentProfiles = [
+              ownProfile.profile,
+              ...s.studentProfiles.filter((p) => p.userId !== sid),
+            ].filter((p): p is StudentProfile => p != null);
+            if (!allUsers) patch.users = [ownProfile.user, ...s.users.filter((u) => u.id !== sid)];
+          }
+          if (reports) {
+            // Admin-only combined roster - backfills studentProfiles for
+            // every fellow (not just the admin's own, which they don't
+            // have). Fields the report doesn't carry (skills, interests,
+            // teamId, ...) default empty; only /api/users/profile (self)
+            // has those, per backend/api's privacy-scoped routes.
+            const fromReports: StudentProfile[] = (
+              reports as { studentId: string; xp: number; streak: number; atRisk: boolean; inactive: boolean }[]
+            ).map((r) => ({
+              userId: r.studentId,
+              skills: [],
+              interests: [],
+              careerGoal: "",
+              xp: r.xp,
+              streak: r.streak,
+              lastActiveAt: new Date().toISOString(),
+              teamId: null,
+              completedCourseIds: [],
+              inactive: r.inactive,
+              atRisk: r.atRisk,
+              onboarded: true,
+            }));
+            const own = patch.studentProfiles ?? s.studentProfiles;
+            patch.studentProfiles = [...own.filter((p) => fromReports.every((r) => r.userId !== p.userId)), ...fromReports];
+          }
+          return patch;
+        });
+      },
+      updateProfile: async (_userId, patch) => {
+        const result = await settle(api.users.updateProfile(patch));
+        if (!result) return;
+        set((s) => ({
+          users: s.users.map((u) => (u.id === result.user.id ? result.user : u)),
+          studentProfiles: result.profile
+            ? [result.profile, ...s.studentProfiles.filter((p) => p.userId !== result.profile!.userId)]
+            : s.studentProfiles,
+        }));
+      },
+      enroll: async (activityId) => {
+        const exists = get().enrollments.some((e) => e.activityId === activityId);
+        if (exists) return;
+        const enrollment = await settle(api.enrollments.enroll(activityId));
+        if (!enrollment) return;
+        set((s) => ({ enrollments: [...s.enrollments, enrollment] }));
+        void get().hydrate(); // picks up the "first enrollment" achievement + notification
+      },
+      startActivity: async (activityId) => {
+        const enrollment = await settle(api.enrollments.start(activityId));
+        if (!enrollment) return;
+        set((s) => ({
+          enrollments: s.enrollments.map((e) => (e.activityId === activityId ? enrollment : e)),
+        }));
+      },
+      submitWork: async (input) => {
+        const submission = await settle(
+          api.submissions.submit({
+            activityId: input.activityId,
+            text: input.text,
+            link: input.link,
+            notes: input.notes,
+            fileName: input.fileName,
+          }),
+        );
+        if (!submission) return;
+        set((s) => {
+          const existing = s.submissions.find((sub) => sub.id === submission.id);
           return {
-            submissions,
-            enrollments: hasEn
-              ? s.enrollments.map((e) =>
-                  e.activityId === input.activityId && e.studentId === input.studentId
-                    ? { ...e, status: "submitted", progress: 80 }
-                    : e,
-                )
-              : [...s.enrollments, { ...enrollment, status: "submitted", progress: 80 }],
-            notifications: [
-              {
-                id: uid("nt"),
-                audience: "admin",
-                title: "New submission",
-                body: `${s.users.find((u) => u.id === input.studentId)?.name ?? "Student"} submitted work.`,
-                kind: "review",
-                read: false,
-                createdAt: new Date().toISOString(),
-              },
-              ...s.notifications,
-            ],
+            submissions: existing
+              ? s.submissions.map((sub) => (sub.id === submission.id ? submission : sub))
+              : [...s.submissions, submission],
+            enrollments: s.enrollments.map((e) =>
+              e.activityId === input.activityId ? { ...e, status: submission.status, progress: 80 } : e,
+            ),
           };
         });
       },
-      createActivity: (activity) => {
-        const id = uid("act");
-        const created: Activity = {
-          ...activity,
-          id,
-          createdBy: activity.createdBy ?? get().sessionUserId ?? "u-priya",
-        };
-        set((s) => ({
-          activities: [created, ...s.activities],
-          notifications: [
-            {
-              id: uid("nt"),
-              audience: "student",
-              title: "New activity",
-              body: `${created.title} is now on Explore.`,
-              kind: "ai",
-              read: false,
-              createdAt: new Date().toISOString(),
-            },
-            ...s.notifications,
-          ],
-        }));
-        return id;
+      createActivity: async (activity) => {
+        const created = await settle(api.activities.create(activity));
+        if (!created) return null;
+        set((s) => ({ activities: [created, ...s.activities] }));
+        return created.id;
       },
-      reviewSubmission: ({ submissionId, reviewerId, action, score, feedback }) => {
-        const sub = get().submissions.find((s) => s.id === submissionId);
-        if (!sub) return;
-        const activity = get().activities.find((a) => a.id === sub.activityId);
-        const status: EnrollmentStatus =
-          action === "approve" ? "approved" : action === "resubmit" ? "needs_resubmission" : "submitted";
-        const complete = action === "approve";
-        const xp = complete ? activity?.xpReward ?? 0 : 0;
+      reviewSubmission: async ({ submissionId, action, score, feedback }) => {
+        const submission = await settle(api.submissions.review(submissionId, { action, score, feedback }));
+        if (!submission) return;
         set((s) => ({
-          submissions: s.submissions.map((item) =>
-            item.id === submissionId
-              ? {
-                  ...item,
-                  status: complete ? "approved" : status,
-                  score,
-                  feedback,
-                  xpAwarded: xp,
-                  reviewedAt: new Date().toISOString(),
-                  reviewerId,
-                }
-              : item,
-          ),
-          enrollments: s.enrollments.map((e) =>
-            e.activityId === sub.activityId && e.studentId === sub.studentId
-              ? {
-                  ...e,
-                  status: complete ? "completed" : status,
-                  progress: complete ? 100 : e.progress,
-                  completedAt: complete ? new Date().toISOString() : e.completedAt,
-                }
-              : e,
-          ),
-          studentProfiles: s.studentProfiles.map((p) =>
-            p.userId === sub.studentId && complete
-              ? {
-                  ...p,
-                  xp: p.xp + xp,
-                  completedCourseIds:
-                    activity?.type === "course" && !p.completedCourseIds.includes(activity.id)
-                      ? [...p.completedCourseIds, activity.id]
-                      : p.completedCourseIds,
-                  lastActiveAt: new Date().toISOString(),
-                  atRisk: false,
-                  inactive: false,
-                }
-              : p,
-          ),
-          xpTransactions: complete
-            ? [
-                {
-                  id: uid("xp"),
-                  studentId: sub.studentId,
-                  amount: xp,
-                  reason: `${activity?.title ?? "Activity"} approved`,
-                  activityId: sub.activityId,
-                  createdAt: new Date().toISOString(),
-                },
-                ...s.xpTransactions,
-              ]
-            : s.xpTransactions,
-          certificates:
-            complete && activity?.certificate
-              ? [
-                  {
-                    id: uid("cert"),
-                    studentId: sub.studentId,
-                    activityId: activity.id,
-                    title: activity.title,
-                    issuedAt: new Date().toISOString().slice(0, 10),
-                  },
-                  ...s.certificates,
-                ]
-              : s.certificates,
-          notifications: [
-            {
-              id: uid("nt"),
-              audience: "student",
-              userId: sub.studentId,
-              title: complete ? `Approved · ${score}` : action === "resubmit" ? "Please resubmit" : "Review update",
-              body: feedback,
-              kind: "feedback",
-              read: false,
-              createdAt: new Date().toISOString(),
-            },
-            ...(complete
-              ? [
-                  {
-                    id: uid("nt"),
-                    audience: "student" as const,
-                    userId: sub.studentId,
-                    title: `+${xp} XP`,
-                    body: `${activity?.title} is complete.`,
-                    kind: "xp" as const,
-                    read: false,
-                    createdAt: new Date().toISOString(),
-                  },
-                ]
-              : []),
-            ...s.notifications,
-          ],
+          submissions: s.submissions.map((item) => (item.id === submissionId ? submission : item)),
         }));
+        void get().hydrate(); // picks up XP/enrollment/certificate/notification side effects
       },
-      addFeedback: (record) => {
-        set((s) => ({
-          feedbackRecords: [
-            { ...record, id: uid("fb"), createdAt: new Date().toISOString() },
-            ...s.feedbackRecords,
-          ],
-        }));
+      addFeedback: async (record) => {
+        const created = await settle(api.feedback.create(record));
+        if (!created) return;
+        set((s) => ({ feedbackRecords: [created, ...s.feedbackRecords] }));
       },
-      addComplaint: (record) => {
-        set((s) => ({
-          complaints: [
-            { ...record, id: uid("cp"), createdAt: new Date().toISOString(), status: "submitted" },
-            ...s.complaints,
-          ],
-        }));
+      addComplaint: async (record) => {
+        const created = await settle(api.complaints.create(record));
+        if (!created) return;
+        set((s) => ({ complaints: [created, ...s.complaints] }));
       },
-      addContact: (name, email, category, message) => {
-        set((s) => ({
-          notifications: [
-            {
-              id: uid("nt"),
-              audience: "admin",
-              title: `Contact · ${category}`,
-              body: `${name} (${email}): ${message.slice(0, 140)}`,
-              kind: "review",
-              read: false,
-              createdAt: new Date().toISOString(),
-            },
-            ...s.notifications,
-          ],
-        }));
+      addContact: async (name, email, category, message) => {
+        await settle(api.contact.submit({ name, email, category, message }));
       },
-      markNotificationRead: (id) => {
-        set((s) => ({
-          notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-        }));
+      markNotificationRead: async (id) => {
+        set((s) => ({ notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) }));
+        await settle(api.notifications.markRead(id));
       },
-      reschedule: (activityId, studentId, slot) => {
-        set((s) => ({
-          reschedules: [...s.reschedules, { id: uid("rs"), activityId, studentId, slot }],
-          notifications: [
-            {
-              id: uid("nt"),
-              audience: "student",
-              userId: studentId,
-              title: "Session moved",
-              body: `New slot ${new Date(slot).toLocaleString("en-IN")}. Staff have been notified.`,
-              kind: "reschedule",
-              read: false,
-              createdAt: new Date().toISOString(),
-            },
-            {
-              id: uid("nt"),
-              audience: "admin",
-              title: "Reschedule request",
-              body: `${s.users.find((u) => u.id === studentId)?.name} moved a session.`,
-              kind: "review",
-              read: false,
-              createdAt: new Date().toISOString(),
-            },
-            ...s.notifications,
-          ],
-        }));
+      reschedule: async (meetingId, slot) => {
+        const ok = await settle(api.meetings.reschedule(meetingId, slot));
+        if (ok === null) return;
+        void get().hydrate();
       },
+      // --- Below: no backend/api model yet (see PlatformState's comment) ---
       createCollaboration: ({ studentIds, projectTitle, adminRationale }) => {
         const invite: CollaborationInvite = {
           id: uid("col"),
@@ -509,31 +350,13 @@ export const usePlatform = create<PlatformState>()(
           createdAt: new Date().toISOString(),
           responses: studentIds.map((studentId) => ({ studentId, status: "pending" })),
         };
-        set((s) => ({
-          collaborations: [invite, ...(s.collaborations ?? [])],
-          notifications: [
-            ...studentIds.map((userId) => ({
-              id: uid("nt"),
-              audience: "student" as const,
-              userId,
-              title: "New collaborator request",
-              body: `You've been matched with a new collaborator for ${projectTitle}.`,
-              kind: "team" as const,
-              read: false,
-              createdAt: new Date().toISOString(),
-            })),
-            ...s.notifications,
-          ],
-        }));
+        set((s) => ({ collaborations: [invite, ...(s.collaborations ?? [])] }));
       },
       respondCollaboration: (id, studentId, status) => {
         set((s) => ({
           collaborations: (s.collaborations ?? []).map((c) =>
             c.id === id
-              ? {
-                  ...c,
-                  responses: c.responses.map((r) => (r.studentId === studentId ? { ...r, status } : r)),
-                }
+              ? { ...c, responses: c.responses.map((r) => (r.studentId === studentId ? { ...r, status } : r)) }
               : c,
           ),
         }));
@@ -547,29 +370,10 @@ export const usePlatform = create<PlatformState>()(
     {
       name: "katalyst-platform",
       skipHydration: true,
-      partialize: (s) => ({
-        sessionUserId: s.sessionUserId,
-        users: s.users,
-        studentProfiles: s.studentProfiles,
-        adminProfiles: s.adminProfiles,
-        activities: s.activities,
-        enrollments: s.enrollments,
-        submissions: s.submissions,
-        achievements: s.achievements,
-        studentAchievements: s.studentAchievements,
-        missions: s.missions,
-        teams: s.teams,
-        teamMembers: s.teamMembers,
-        xpTransactions: s.xpTransactions,
-        notifications: s.notifications,
-        complaints: s.complaints,
-        feedbackRecords: s.feedbackRecords,
-        certificates: s.certificates,
-        extracurricular: s.extracurricular,
-        reschedules: s.reschedules,
-        collaborations: s.collaborations,
-        volunteerApplications: s.volunteerApplications,
-      }),
+      // Only the session id is worth persisting across reloads - everything
+      // else is refetched live from backend/api on each hydrate() and would
+      // otherwise go stale in localStorage.
+      partialize: (s) => ({ sessionUserId: s.sessionUserId }),
     },
   ),
 );

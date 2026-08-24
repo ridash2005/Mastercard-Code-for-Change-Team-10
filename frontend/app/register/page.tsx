@@ -13,8 +13,7 @@ import { InterestPicker } from "@/components/onboarding/interest-picker";
 import type { Role } from "@/lib/types";
 
 export default function RegisterPage() {
-  const register = usePlatform((s) => s.register);
-  const updateProfile = usePlatform((s) => s.updateProfile);
+  const setSession = usePlatform((s) => s.setSession);
   const sessionUserId = usePlatform((s) => s.sessionUserId);
   const studentProfiles = usePlatform((s) => s.studentProfiles);
   const router = useRouter();
@@ -70,18 +69,14 @@ export default function RegisterPage() {
         return;
       }
 
-      const localResult = register({ name, email, college, programme, role });
-      if (!localResult.ok) {
-        setError(localResult.error ?? "Could not register");
-        return;
-      }
+      setSession(body.user);
 
       if (role === "admin") {
         setOk(true);
         router.push("/admin");
         return;
       }
-      setNewUserId(usePlatform.getState().sessionUserId);
+      setNewUserId(body.user.id);
       setStep("interests");
     } catch {
       setError("Could not reach the backend. Is it running?");
@@ -90,7 +85,7 @@ export default function RegisterPage() {
     }
   }
 
-  /** Persists the chosen interests to backend/api, then to the mock store. */
+  /** Persists the chosen interests to backend/api and marks onboarding done. */
   async function finish(selected: string[]) {
     if (!userId) return;
     try {
@@ -103,7 +98,7 @@ export default function RegisterPage() {
       // Interests are a personalisation nicety - a backend hiccup here must
       // not strand a student who already has a real account.
     }
-    updateProfile(userId, { interests: selected, onboarded: true });
+    void usePlatform.getState().hydrate();
     setOk(true);
     router.push("/student");
   }

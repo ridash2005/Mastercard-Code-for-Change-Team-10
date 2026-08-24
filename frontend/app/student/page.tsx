@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ActivityCard, CompletionCard, MissionCard, RankCard, StreakCard, XPCard } from "@/components/cards";
 import { EnrolledLearningJourney } from "@/components/student/enrolled-journey";
 import { CollaborationRequests } from "@/components/student/collaboration-requests";
@@ -9,7 +9,6 @@ import { usePlatform } from "@/lib/data/platform-store";
 import { coachReply } from "@/lib/ai/coach";
 import { levelFromXp } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/provider";
-import { globalRanks } from "@/lib/services/repository";
 
 export default function StudentHome() {
   const store = usePlatform();
@@ -18,8 +17,7 @@ export default function StudentHome() {
   const user = store.users.find((u) => u.id === sid);
   const profile = store.studentProfiles.find((p) => p.userId === sid);
   const lvl = levelFromXp(profile?.xp ?? 0);
-  const ranks = globalRanks(store.studentProfiles);
-  const rank = ranks.find((r) => r.userId === sid)?.rank ?? "—";
+  const rank = store.leaderboard.find((r) => r.userId === sid)?.rank ?? "—";
   const mine = store.enrollments.filter((e) => e.studentId === sid);
   const completed = mine.filter((e) => e.status === "completed" || e.status === "approved").length;
   const pending = mine.filter((e) => !["completed", "approved"].includes(e.status)).length;
@@ -34,15 +32,7 @@ export default function StudentHome() {
   const unlocked = store.studentAchievements.filter((a) => a.studentId === sid);
   const [nudge, setNudge] = useState<string | null>(null);
 
-  const board = useMemo(
-    () =>
-      ranks.slice(0, 5).map((r) => ({
-        name: store.users.find((u) => u.id === r.userId)?.name ?? r.userId,
-        xp: r.xp,
-        rank: r.rank,
-      })),
-    [ranks, store.users],
-  );
+  const board = store.leaderboard.slice(0, 5);
 
   return (
     <div className="space-y-8">

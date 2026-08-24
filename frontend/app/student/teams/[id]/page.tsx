@@ -8,7 +8,7 @@ export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const store = usePlatform();
   const team = store.teams.find((t) => t.id === id);
-  const members = store.teamMembers.filter((m) => m.teamId === id);
+  const members = team?.members ?? [];
   if (!team) return <p>Team not found.</p>;
   const total = members.reduce((s, m) => s + m.contribution, 0) || 1;
   return (
@@ -19,13 +19,12 @@ export default function TeamDetailPage() {
       </p>
       <ul className="mt-6 space-y-4">
         {members.map((m) => {
-          const u = store.users.find((x) => x.id === m.studentId);
           const xp = store.studentProfiles.find((p) => p.userId === m.studentId)?.xp ?? 0;
           return (
             <li key={m.studentId} className="k-card p-4">
               <div className="flex justify-between text-sm">
                 <span>
-                  {u?.name} · {m.role}
+                  {m.student?.name} · {m.role}
                 </span>
                 <span>
                   {xp} XP · {m.contribution}% share

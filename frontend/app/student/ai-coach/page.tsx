@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VoiceAssist } from "@/components/voice/voice-assist";
 import { usePlatform } from "@/lib/data/platform-store";
-import { globalRanks } from "@/lib/services/repository";
 
 export default function CoachPage() {
   const store = usePlatform();
   const sid = store.sessionUserId ?? "";
   const user = store.users.find((u) => u.id === sid);
   const profile = store.studentProfiles.find((p) => p.userId === sid);
-  const rank = globalRanks(store.studentProfiles).find((r) => r.userId === sid)?.rank ?? 0;
+  const rank = store.leaderboard.find((r) => r.userId === sid)?.rank ?? 0;
   const pending = store.enrollments
     .filter((e) => e.studentId === sid && !["completed", "approved"].includes(e.status))
     .map((e) => store.activities.find((a) => a.id === e.activityId)?.title ?? "")

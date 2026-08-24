@@ -55,8 +55,10 @@ export function Topbar({ variant, onOpenMenu }: { variant: "student" | "admin"; 
         <Button
           variant="ghost"
           onClick={() => {
-            store.logout();
-            router.push("/");
+            void fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+              store.clearSession();
+              router.push("/");
+            });
           }}
         >
           Sign out

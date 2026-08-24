@@ -57,22 +57,9 @@ export default function LoginPage() {
         setError(body.message ?? "Unable to sign in");
         return;
       }
-      // Real credentials are now checked against backend/api. Sync the mock
-      // store (still what most pages read from, pending later migration
-      // phases) so this session keeps working across the rest of the app -
-      // matching by email for existing demo/mock users, or creating a
-      // mirror entry for a real account backend/api knows but the mock
-      // store doesn't yet.
-      const local = store.login(signInEmail);
-      if (!local.ok) {
-        store.register({
-          name: body.user.name,
-          email: body.user.email,
-          college: body.user.college ?? "",
-          programme: body.user.programme ?? "",
-          role: body.user.role,
-        });
-      }
+      // Real credentials are now checked against backend/api - this is the
+      // real user record (real Mongo id), not a mock/demo lookup.
+      store.setSession(body.user);
       router.push(body.user.role === "admin" ? "/admin" : "/student");
     } catch {
       setError("Could not reach the backend. Is it running?");

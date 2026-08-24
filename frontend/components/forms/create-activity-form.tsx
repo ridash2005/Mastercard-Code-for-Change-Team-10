@@ -58,8 +58,8 @@ export function CreateActivityForm() {
   return (
     <form
       className="grid gap-4 md:grid-cols-2"
-      onSubmit={form.handleSubmit((values) => {
-        const created = create({
+      onSubmit={form.handleSubmit(async (values) => {
+        const created = await create({
           title: values.title,
           description: values.description,
           type: values.type as ActivityType,

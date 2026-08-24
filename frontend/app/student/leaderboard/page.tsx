@@ -1,31 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { EmptyState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
-import { globalRanks } from "@/lib/services/repository";
 import { cn } from "@/lib/utils";
 
 export default function LeaderboardPage() {
   const store = usePlatform();
-  const [tab, setTab] = useState<"global" | "weekly" | "monthly" | "team">("global");
-  const global = globalRanks(store.studentProfiles);
-  const weekly = [...global].sort((a, b) => b.streak - a.streak);
-  const monthly = [...global].sort((a, b) => a.userId.localeCompare(b.userId));
-  const rows = tab === "team" ? [] : tab === "weekly" ? weekly : tab === "monthly" ? monthly : global;
-  const teamRows = useMemo(() => {
-    return store.teams.map((t) => {
-      const xp = store.teamMembers
-        .filter((m) => m.teamId === t.id)
-        .reduce((sum, m) => sum + (store.studentProfiles.find((p) => p.userId === m.studentId)?.xp ?? 0), 0);
-      return { ...t, xp };
-    }).sort((a, b) => b.xp - a.xp);
-  }, [store.teams, store.teamMembers, store.studentProfiles]);
+  const [tab, setTab] = useState<"global" | "team">("global");
+  // Global rows come pre-joined (name + xp + rank) from backend/api's
+  // GET /api/gamification/leaderboard, which - unlike studentProfiles/users
+  // - every role can see in full (it's the one place a student session gets
+  // more than just their own profile back). Weekly/monthly cuts aren't
+  // exposed by that endpoint yet, so this page only offers what's real.
+  const rows = store.leaderboard;
+  const teamRows = [...store.teams].sort((a, b) => a.rank - b.rank);
 
   return (
     <div>
       <h1 className="font-serif text-3xl">Leaderboard</h1>
       <div className="mt-4 flex flex-wrap gap-2">
-        {(["global", "weekly", "monthly", "team"] as const).map((k) => (
+        {(["global", "team"] as const).map((k) => (
           <button
             key={k}
             className={cn(
@@ -39,24 +34,30 @@ export default function LeaderboardPage() {
         ))}
       </div>
       {tab === "team" ? (
-        <ol className="k-card mt-4">
-          {teamRows.map((t, i) => (
-            <li key={t.id} className="flex justify-between border-b border-line px-4 py-2 text-sm last:border-0">
-              <span className="text-plum">
-                <span className={cn("mr-2", i < 3 ? "text-gold" : "text-purple")}>#{i + 1}</span>
-                {t.name}
-              </span>
-              <span className="font-semibold text-gold">{t.xp} XP</span>
-            </li>
-          ))}
-        </ol>
+        teamRows.length === 0 ? (
+          <div className="mt-8"><EmptyState title="No teams yet." /></div>
+        ) : (
+          <ol className="k-card mt-4">
+            {teamRows.map((t, i) => (
+              <li key={t.id} className="flex justify-between border-b border-line px-4 py-2 text-sm last:border-0">
+                <span className="text-plum">
+                  <span className={cn("mr-2", i < 3 ? "text-gold" : "text-purple")}>#{t.rank}</span>
+                  {t.name}
+                </span>
+                <span className="font-semibold text-gold">{t.projectTitle}</span>
+              </li>
+            ))}
+          </ol>
+        )
+      ) : rows.length === 0 ? (
+        <div className="mt-8"><EmptyState title="No ranked students yet." /></div>
       ) : (
         <ol className="k-card mt-4">
-          {rows.map((r, i) => (
+          {rows.map((r) => (
             <li key={r.userId} className="flex justify-between border-b border-line px-4 py-2 text-sm last:border-0">
               <span className="text-plum">
-                <span className={cn("mr-2", i < 3 ? "text-gold" : "text-purple")}>#{i + 1}</span>
-                {store.users.find((u) => u.id === r.userId)?.name}
+                <span className={cn("mr-2", r.rank <= 3 ? "text-gold" : "text-purple")}>#{r.rank}</span>
+                {r.name}
               </span>
               <span className="font-semibold text-gold">{r.xp} XP</span>
             </li>

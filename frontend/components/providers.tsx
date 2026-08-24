@@ -7,10 +7,20 @@ import { usePlatform } from "@/lib/data/platform-store";
 
 function Hydrate() {
   const setHydrated = usePlatform((s) => s.setHydrated);
+  const sessionUserId = usePlatform((s) => s.sessionUserId);
+  const hydrate = usePlatform((s) => s.hydrate);
+
   useEffect(() => {
-    void usePlatform.persist.rehydrate();
-    setHydrated(true);
+    void Promise.resolve(usePlatform.persist.rehydrate()).then(() => setHydrated(true));
   }, [setHydrated]);
+
+  // Refetches real data from backend/api whenever the session appears (page
+  // load with an existing cookie, or right after login/register) or changes
+  // (switching accounts without a full reload).
+  useEffect(() => {
+    if (sessionUserId) void hydrate();
+  }, [sessionUserId, hydrate]);
+
   return null;
 }
 
