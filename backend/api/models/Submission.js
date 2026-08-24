@@ -85,6 +85,33 @@ const submissionSchema = new mongoose.Schema(
     reviewerId: {
       type: String,
       default: null
+    },
+    // Populated asynchronously by the AI Judge after the latest attempt is
+    // submitted - see services/submissionService.js's triggerAiJudge and
+    // KATALYST_AI_SPEC.md §2.1 (the Judge is a backend job, never called
+    // directly from the browser). A human reviewer still sets the final
+    // score/feedback above; this is only ever a suggestion.
+    aiSuggestion: {
+      type: {
+        suggestedScore: Number,
+        suggestedFeedback: String,
+        criteriaLevels: [
+          {
+            criterionKey: String,
+            criterionName: String,
+            levelKey: String,
+            weightPct: Number,
+            earnedPct: Number,
+            justification: String,
+            _id: false
+          }
+        ],
+        confidence: Number,
+        flags: [String],
+        generatedAt: Date,
+        error: String
+      },
+      default: null
     }
   },
   {

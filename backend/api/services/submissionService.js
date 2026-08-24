@@ -6,6 +6,64 @@ const XPTransaction = require('../models/XPTransaction');
 const Certificate = require('../models/Certificate');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const { sanitizeAndValidateInput, GuardrailError } = require('./ai/inputGuard');
+const { scoreSubmission, AiJudgeError } = require('./ai/aiJudgeService');
+const { getRubricCriteria } = require('./ai/rubrics');
+const { computeXp } = require('./ai/computeXp');
+
+/**
+ * Runs the AI Judge on a submission's latest attempt and stores the result
+ * as a suggestion for the human reviewer - never awaited by the request
+ * that triggers it (see submitWork below), per KATALYST_AI_SPEC.md §2.1:
+ * the Judge is a backend job, not something a browser click waits on.
+ * Failures are stored on the submission (aiSuggestion.error) rather than
+ * thrown - this must never crash the request path that kicked it off.
+ */
+async function triggerAiJudge(submissionId, activity, attemptText) {
+  try {
+    const guard = sanitizeAndValidateInput(attemptText, { maxLen: 20000 });
+    if (guard.blockedReason) {
+      await Submission.findByIdAndUpdate(submissionId, {
+        aiSuggestion: { error: `blocked_by_guardrail: ${guard.blockedReason}`, generatedAt: new Date() }
+      });
+      return;
+    }
+
+    const criteria = getRubricCriteria(activity.type);
+    const result = await scoreSubmission(
+      guard.clean,
+      criteria.map((c) => ({ key: c.key, name: c.name, weightPct: c.weight_pct, description: c.description }))
+    );
+
+    const xp = computeXp(criteria, result.criteria_levels, activity.xpReward || 0);
+    const criteriaByKey = new Map(criteria.map((c) => [c.key, c]));
+
+    await Submission.findByIdAndUpdate(submissionId, {
+      aiSuggestion: {
+        suggestedScore: Math.round(xp.totalEarnedPct),
+        suggestedFeedback: result.student_feedback,
+        criteriaLevels: xp.criteriaLevels.map((l) => ({
+          criterionKey: l.criterionKey,
+          criterionName: criteriaByKey.get(l.criterionKey)?.name || l.criterionKey,
+          levelKey: l.levelKey,
+          weightPct: l.weightPct,
+          earnedPct: l.earnedPct,
+          justification: l.justification
+        })),
+        confidence: result.confidence,
+        flags: result.flags,
+        generatedAt: new Date()
+      }
+    });
+  } catch (err) {
+    const message =
+      err instanceof GuardrailError || err instanceof AiJudgeError ? err.message : 'AI Judge failed unexpectedly';
+    console.error('AI Judge auto-scoring failed:', err);
+    await Submission.findByIdAndUpdate(submissionId, {
+      aiSuggestion: { error: message, generatedAt: new Date() }
+    }).catch(() => {});
+  }
+}
 
 const getSubmissions = async (studentId = null, query = {}) => {
   const filter = {};
@@ -111,6 +169,13 @@ const submitWork = async (data) => {
     body: `${student?.name || 'Student'} submitted work for ${activity.title}.`,
     kind: 'review',
     read: false
+  });
+
+  // Fire-and-forget: the reviewing admin doesn't need to wait on this, and
+  // per KATALYST_AI_SPEC.md §2.1 it must never be something a submit click
+  // blocks on. Deliberately not awaited or returned - see triggerAiJudge.
+  triggerAiJudge(submission.id, activity, attempt.text).catch((err) => {
+    console.error('triggerAiJudge threw unexpectedly (should be unreachable - it catches internally):', err);
   });
 
   return submission;

@@ -1,7 +1,5 @@
 "use client";
 
-import { AUTH_PROVIDER } from "@/lib/auth/session";
-
 export default function AdminSettings() {
   return (
     <div>
@@ -9,18 +7,29 @@ export default function AdminSettings() {
       <dl className="mt-6 space-y-3 text-sm">
         <div>
           <dt className="text-stone-500">Auth</dt>
-          <dd>Provider: {AUTH_PROVIDER}. Passwords are never stored. Swap in Auth.js via lib/auth/config.ts.</dd>
+          <dd>
+            Real backend/api auth: bcrypt-checked password, JWT in an httpOnly cookie. Passwords are never stored in
+            the frontend.
+          </dd>
         </div>
         <div>
           <dt className="text-stone-500">Database</dt>
           <dd>
-            UI reads the mock repository. Mongoose models live in lib/models. Set MONGODB_URI from .env.example when you
-            switch off mocks. A live database is not required for this demo.
+            Activities, enrollments, submissions, gamification, teams, notifications, feedback, complaints,
+            certificates, extracurricular, meetings, and collaborations/volunteer applications all read and write
+            through backend/api&apos;s real MongoDB-backed REST API (see lib/services/api.ts).
           </dd>
         </div>
         <div>
-          <dt className="text-stone-500">OCR / AI</dt>
-          <dd>lib/ocr/service.ts, lib/ai/coach.ts, lib/ai/chatbot.ts and lib/ai/review.ts are explicitly mocked.</dd>
+          <dt className="text-stone-500">AI</dt>
+          <dd>
+            The AI Coach and the AI Judge submission scoring above both call a real LLM through backend/api&apos;s
+            guardrailed AI gateway. lib/ai/chatbot.ts (the general help widget) is still a canned/local reply.
+          </dd>
+        </div>
+        <div>
+          <dt className="text-stone-500">OCR</dt>
+          <dd>lib/ocr/service.ts (registration document scan) is still mocked.</dd>
         </div>
       </dl>
     </div>

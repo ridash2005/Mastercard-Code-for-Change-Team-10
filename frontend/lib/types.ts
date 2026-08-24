@@ -126,6 +126,29 @@ export type SubmissionAttempt = {
   fileName?: string;
 };
 
+export type AiJudgeCriterionLevel = {
+  criterionKey: string;
+  criterionName: string;
+  levelKey: "not_demonstrated" | "developing" | "proficient" | "excellent";
+  weightPct: number;
+  earnedPct: number;
+  justification: string;
+};
+
+/** Populated asynchronously by backend/api's AI Judge after a submission
+ * comes in - see backend/api/services/submissionService.js's
+ * triggerAiJudge. Never the final word: a human reviewer still sets the
+ * real score/feedback on the Submission itself. */
+export type AiJudgeSuggestion = {
+  suggestedScore?: number;
+  suggestedFeedback?: string;
+  criteriaLevels?: AiJudgeCriterionLevel[];
+  confidence?: number;
+  flags?: string[];
+  generatedAt?: string;
+  error?: string;
+};
+
 export type Submission = {
   id: string;
   activityId: string;
@@ -138,6 +161,7 @@ export type Submission = {
   xpAwarded: number;
   reviewedAt?: string;
   reviewerId?: string;
+  aiSuggestion?: AiJudgeSuggestion | null;
 };
 
 export type FeedbackRecord = {
