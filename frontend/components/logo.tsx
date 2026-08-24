@@ -1,12 +1,18 @@
-export function Logo({ className = "h-8" }: { className?: string }) {
+export function Logo({ className = "h-8", invert = false }: { className?: string; invert?: boolean }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden>
-        <rect width="32" height="32" rx="6" fill="#1F3D2B" />
-        <path d="M8 22V10h4l4 6 4-6h4v12h-3.2v-7.2L16.6 22h-1.2l-4.2-7.2V22H8z" fill="#F4EFE6" />
-        <path d="M8 24h16" stroke="#B08D3E" strokeWidth="1.6" />
+      <svg viewBox="0 0 32 32" className="h-8 w-8 shrink-0" aria-hidden>
+        <rect width="32" height="32" rx="8" fill={invert ? "#ffffff" : "var(--pink)"} />
+        <path
+          d="M9 8h3.6v6.15L20.7 8H25l-8.35 8.15L25 24h-4.4l-8-7.85V24H9V8z"
+          fill={invert ? "var(--pink)" : "#ffffff"}
+        />
+        <path
+          d="M24.2 4.6 25 6.8l2.4.28-1.8 1.78.5 2.36L24.2 10l-2.1 1.22.5-2.36-1.8-1.78 2.4-.28z"
+          fill="var(--gold)"
+        />
       </svg>
-      <span className="font-serif text-lg tracking-tight">Katalyst</span>
+      <span className={`font-serif text-lg tracking-tight ${invert ? "text-white" : "text-plum"}`}>Katalyst</span>
     </span>
   );
 }

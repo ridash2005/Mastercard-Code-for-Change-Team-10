@@ -12,6 +12,8 @@ import type {
   Enrollment,
   EnrollmentStatus,
   FeedbackRecord,
+  CollaborationInvite,
+  VolunteerApplication,
   Participation,
   Requirement,
   Role,
@@ -43,6 +45,8 @@ export type PlatformState = {
   certificates: typeof seed.certificates;
   extracurricular: typeof seed.extracurricular;
   reschedules: { id: string; activityId: string; studentId: string; slot: string }[];
+  collaborations: CollaborationInvite[];
+  volunteerApplications: VolunteerApplication[];
   login: (email: string) => { ok: boolean; role?: Role; error?: string };
   logout: () => void;
   register: (input: {
@@ -54,7 +58,7 @@ export type PlatformState = {
   }) => { ok: boolean; error?: string };
   updateProfile: (
     userId: string,
-    patch: { name?: string; skills?: string[]; interests?: string[] },
+    patch: { name?: string; skills?: string[]; interests?: string[]; onboarded?: boolean },
   ) => void;
   enroll: (activityId: string, studentId: string) => void;
   startActivity: (activityId: string, studentId: string) => void;
@@ -79,6 +83,9 @@ export type PlatformState = {
   addContact: (name: string, email: string, category: string, message: string) => void;
   markNotificationRead: (id: string) => void;
   reschedule: (activityId: string, studentId: string, slot: string) => void;
+  createCollaboration: (input: { studentIds: string[]; projectTitle: string; adminRationale: string }) => void;
+  respondCollaboration: (id: string, studentId: string, status: "accepted" | "declined") => void;
+  reviewVolunteer: (id: string, status: "approved" | "rejected") => void;
 };
 
 const initial = {
@@ -102,6 +109,8 @@ const initial = {
   certificates: seed.certificates,
   extracurricular: seed.extracurricular,
   reschedules: [] as PlatformState["reschedules"],
+  collaborations: seed.collaborations,
+  volunteerApplications: seed.volunteerApplications,
 };
 
 export const usePlatform = create<PlatformState>()(
@@ -185,6 +194,7 @@ export const usePlatform = create<PlatformState>()(
                   ...p,
                   skills: patch.skills ?? p.skills,
                   interests: patch.interests ?? p.interests,
+                  onboarded: patch.onboarded ?? p.onboarded,
                 }
               : p,
           ),
@@ -489,6 +499,50 @@ export const usePlatform = create<PlatformState>()(
           ],
         }));
       },
+      createCollaboration: ({ studentIds, projectTitle, adminRationale }) => {
+        const invite: CollaborationInvite = {
+          id: uid("col"),
+          studentIds,
+          projectTitle,
+          adminRationale,
+          studentMessage: "Your skill sets complement each other.",
+          createdAt: new Date().toISOString(),
+          responses: studentIds.map((studentId) => ({ studentId, status: "pending" })),
+        };
+        set((s) => ({
+          collaborations: [invite, ...(s.collaborations ?? [])],
+          notifications: [
+            ...studentIds.map((userId) => ({
+              id: uid("nt"),
+              audience: "student" as const,
+              userId,
+              title: "New collaborator request",
+              body: `You've been matched with a new collaborator for ${projectTitle}.`,
+              kind: "team" as const,
+              read: false,
+              createdAt: new Date().toISOString(),
+            })),
+            ...s.notifications,
+          ],
+        }));
+      },
+      respondCollaboration: (id, studentId, status) => {
+        set((s) => ({
+          collaborations: (s.collaborations ?? []).map((c) =>
+            c.id === id
+              ? {
+                  ...c,
+                  responses: c.responses.map((r) => (r.studentId === studentId ? { ...r, status } : r)),
+                }
+              : c,
+          ),
+        }));
+      },
+      reviewVolunteer: (id, status) => {
+        set((s) => ({
+          volunteerApplications: (s.volunteerApplications ?? []).map((v) => (v.id === id ? { ...v, status } : v)),
+        }));
+      },
     }),
     {
       name: "katalyst-platform",
@@ -513,6 +567,8 @@ export const usePlatform = create<PlatformState>()(
         certificates: s.certificates,
         extracurricular: s.extracurricular,
         reschedules: s.reschedules,
+        collaborations: s.collaborations,
+        volunteerApplications: s.volunteerApplications,
       }),
     },
   ),

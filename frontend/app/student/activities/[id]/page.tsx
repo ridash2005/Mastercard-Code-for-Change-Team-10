@@ -26,9 +26,9 @@ export default function ActivityDetailPage() {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2 space-y-4">
-        <p className="text-xs uppercase text-stone-500">{activity.type}</p>
+        <p className="text-xs uppercase text-muted">{activity.type}</p>
         <h1 className="font-serif text-3xl">{activity.title}</h1>
-        <p className="text-stone-600">{activity.description}</p>
+        <p className="text-muted">{activity.description}</p>
         <dl className="grid grid-cols-2 gap-2 text-sm">
           <div>Domain · {activity.domain}</div>
           <div>Problem · {activity.problemDomain}</div>
@@ -43,7 +43,7 @@ export default function ActivityDetailPage() {
           <div>{activity.participation}</div>
         </dl>
         <p className="text-sm">{activity.instructions}</p>
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-muted">
           Attachments: {activity.attachments.map((a) => a.name).join(", ") || "None"}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -56,7 +56,7 @@ export default function ActivityDetailPage() {
         </div>
         {enrollment && !["completed", "approved"].includes(enrollment.status) ? (
           <form
-            className="space-y-3 rounded-xl border bg-white p-4"
+            className="space-y-3 k-card p-4"
             onSubmit={(e) => {
               e.preventDefault();
               store.submitWork({ activityId: activity.id, studentId: sid, text, link, notes, fileName });
@@ -85,12 +85,12 @@ export default function ActivityDetailPage() {
           </form>
         ) : null}
       </div>
-      <aside className="space-y-3 rounded-xl border bg-white p-4 text-sm">
+      <aside className="space-y-3 k-card p-4 text-sm">
         <h2 className="font-serif text-xl">History</h2>
         {submission?.attempts.map((a) => (
           <div key={a.id} className="border-t pt-2">
             <p>{new Date(a.submittedAt).toLocaleString("en-IN")}</p>
-            <p className="text-stone-600">{a.text}</p>
+            <p className="text-muted">{a.text}</p>
             {a.fileName ? <p>File: {a.fileName}</p> : null}
             {a.link ? <p>Link: {a.link}</p> : null}
           </div>

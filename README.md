@@ -25,14 +25,20 @@ The AI Coach page (`/student/ai-coach`) calls a real backend and a real LLM inst
 reply. To enable it, also run the backend:
 
 ```bash
-npm run dev:backend   # starts backend/api on :5000 (needs MONGO_URI, or runs DB-less for auth+AI)
+npm run dev:backend   # starts backend/api on :5000 - needs a reachable MONGO_URI
 npm run dev           # starts the frontend on :3000, in another terminal
+npm run seed --workspace @katalyst/backend-api   # first run only: seeds demo accounts
 ```
 
-Without `backend/api` running (or without a `GEMINI_API_KEY` set there), the Coach page falls back
-to a local mock reply automatically — nothing breaks, it just isn't live. See
-`backend/api/.env.example` for the backend's own env vars, and root `.env.example` for the
-frontend's bridge config (`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD`).
+The AI Coach needs a real, working login, and every authenticated `backend/api` request re-checks
+the caller against MongoDB (see `middleware/authMiddleware.js`) — so **MongoDB is required for a
+live Coach reply**, not optional. Without it (or without `backend/api` running at all, or without a
+`GEMINI_API_KEY` set there), the Coach page falls back to a local mock reply automatically — nothing
+breaks, it just isn't live. `backend/api` itself fails fast (503, not a hang) on any DB-dependent
+route when Mongo is unreachable, via `middleware/dbMiddleware.js`; only `/api/health` works without
+a database. See `backend/api/.env.example` for the backend's own env vars, and root `.env.example`
+for the frontend's bridge config (`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD` — must match the
+password `backend/api`'s seed script hashes for the demo accounts).
 
 ## Monorepo layout
 
@@ -72,8 +78,12 @@ Mongoose, JWT auth. `ai/`: Gemini via `@katalyst/ai-client`, Zod-validated schem
 
 ## Notes
 
-- Database is **not required** for the demo UI, and `backend/api` runs (auth + AI gateway only,
-  degrading gracefully) even without a reachable MongoDB — see `backend/api/config/db.js`.
+- Database is **not required** for the demo UI (the Zustand mock store needs nothing but the
+  frontend). It **is** required for `backend/api`'s real auth and, by extension, the live AI
+  Coach — `backend/api` itself still starts and serves `/api/health` without a reachable MongoDB
+  (see `backend/api/config/db.js`), and every other route fails fast with a `503` instead of
+  hanging on a Mongoose timeout (see `backend/api/middleware/dbMiddleware.js`), but no
+  authenticated request can succeed until Mongo is reachable.
 - Auth never stores passwords in the frontend mock; `frontend/lib/auth` is shaped for Auth.js
   later. `backend/api` uses real bcrypt + JWT.
 - The AI gateway is guardrailed: input/output validation, regex-based prompt-injection and PII

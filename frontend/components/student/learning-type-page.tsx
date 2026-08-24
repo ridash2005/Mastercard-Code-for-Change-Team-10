@@ -18,7 +18,7 @@ export function LearningTypePage({ type, title, blurb }: { type: ActivityType; t
   return (
     <div>
       <h1 className="font-serif text-3xl">{title}</h1>
-      <p className="mt-1 text-sm text-stone-600">{blurb}</p>
+      <p className="mt-1 text-sm text-muted">{blurb}</p>
       <div className="mt-4 max-w-md">
         <SearchBar value={q} onChange={setQ} />
       </div>
@@ -39,7 +39,7 @@ export function LearningTypePage({ type, title, blurb }: { type: ActivityType; t
         </div>
       )}
       <p className="mt-6 text-sm">
-        <Link className="underline" href="/student/explore">
+        <Link className="font-semibold text-barbie" href="/student/explore">
           Browse all in Explore
         </Link>
       </p>

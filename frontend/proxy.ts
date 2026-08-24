@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const role = req.cookies.get("katalyst-role")?.value;
   const { pathname } = req.nextUrl;
   if (pathname.startsWith("/student") && role !== "student") {

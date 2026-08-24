@@ -57,7 +57,7 @@ export function FilterPanel({
 }) {
   const set = <K extends keyof FilterValues>(k: K, v: FilterValues[K]) => onChange({ ...value, [k]: v });
   return (
-    <div className="grid gap-3 rounded-xl border border-stone-200 bg-white p-4 md:grid-cols-3 lg:grid-cols-4">
+    <div className="k-card grid gap-3 p-4 md:grid-cols-3 lg:grid-cols-4">
       <div className="md:col-span-2 lg:col-span-4">
         <SearchBar value={value.search} onChange={(s) => set("search", s)} />
       </div>

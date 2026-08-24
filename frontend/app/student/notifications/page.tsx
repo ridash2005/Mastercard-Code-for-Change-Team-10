@@ -11,13 +11,13 @@ export default function StudentNotifications() {
       <h1 className="font-serif text-3xl">Notifications</h1>
       <ul className="mt-6 space-y-3">
         {items.map((n) => (
-          <li key={n.id} className="rounded-xl border bg-white p-4">
+          <li key={n.id} className="k-card p-4">
             <button className="w-full text-left" onClick={() => store.markNotificationRead(n.id)}>
               <p className="font-medium">
                 {n.title} {n.read ? "" : "· unread"}
               </p>
-              <p className="text-sm text-stone-600">{n.body}</p>
-              <p className="mt-1 text-xs uppercase text-stone-400">{n.kind}</p>
+              <p className="text-sm text-muted">{n.body}</p>
+              <p className="mt-1 text-xs uppercase text-muted">{n.kind}</p>
             </button>
           </li>
         ))}

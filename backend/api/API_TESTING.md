@@ -94,7 +94,7 @@ graph TD
 ```json
 {
   "email": "ananya@katalyst.edu",
-  "password": "password123"
+  "password": "katalyst-demo-bridge-2026"
 }
 ```
 - **Expected Status:** `200 OK`
@@ -142,7 +142,7 @@ pm.environment.set("studentToken", pm.response.json().data.token);
 ```json
 {
   "email": "priya.admin@katalyst.edu",
-  "password": "password123"
+  "password": "katalyst-demo-bridge-2026"
 }
 ```
 - **Expected Status:** `200 OK`
@@ -161,7 +161,7 @@ pm.environment.set("adminToken", pm.response.json().data.token);
 {
   "name": "Tanvi Deshmukh",
   "email": "tanvi.d@katalyst.edu",
-  "password": "password123",
+  "password": "katalyst-demo-bridge-2026",
   "role": "student",
   "college": "COEP Pune",
   "programme": "Katalyst Fellows 2026",

@@ -18,6 +18,13 @@ const contactRoutes = require('./contactRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const healthRoutes = require('./healthRoutes');
 const aiRoutes = require('./aiRoutes');
+const { requireDatabase } = require('../middleware/dbMiddleware');
+
+// Health must work regardless of DB state (it reports DB status itself), so
+// it's mounted before the guard. Everything else - including /ai, whose
+// auth middleware does its own DB lookup - needs Mongo.
+router.use('/health', healthRoutes);
+router.use(requireDatabase);
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -34,7 +41,6 @@ router.use('/certificates', certificateRoutes);
 router.use('/extracurricular', extracurricularRoutes);
 router.use('/contact', contactRoutes);
 router.use('/admin/analytics', analyticsRoutes);
-router.use('/health', healthRoutes);
 router.use('/ai', aiRoutes);
 
 module.exports = router;

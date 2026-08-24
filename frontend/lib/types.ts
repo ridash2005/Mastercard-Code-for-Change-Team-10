@@ -147,6 +147,7 @@ export type FeedbackRecord = {
   rating: number;
   message: string;
   createdAt: string;
+  activityId?: string;
 };
 
 export type Achievement = {
@@ -260,5 +261,32 @@ export type ContactMessage = {
   email: string;
   category: string;
   message: string;
+  createdAt: string;
+};
+
+export type CollaborationResponse = {
+  studentId: string;
+  status: "pending" | "accepted" | "declined";
+};
+
+export type CollaborationInvite = {
+  id: string;
+  studentIds: string[];
+  projectTitle: string;
+  adminRationale: string;
+  studentMessage: string;
+  createdAt: string;
+  responses: CollaborationResponse[];
+};
+
+export type VolunteerApplication = {
+  id: string;
+  name: string;
+  email: string;
+  interests: string[];
+  skills: string[];
+  college?: string;
+  message?: string;
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
 };

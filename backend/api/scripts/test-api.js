@@ -40,6 +40,9 @@ const makeRequest = (server, options, body = null) => {
   });
 };
 
+// Matches scripts/seed.js's default password for demo accounts.
+const DEMO_PASSWORD = process.env.BACKEND_DEMO_PASSWORD || 'katalyst-demo-bridge-2026';
+
 const runTests = async () => {
   console.log('🧪 Starting Katalyst Backend-1 API Verification Test Suite...\n');
 
@@ -81,7 +84,7 @@ const runTests = async () => {
       method: 'POST'
     }, {
       email: 'ananya@katalyst.edu',
-      password: 'password123'
+      password: DEMO_PASSWORD
     });
     assert(studentLogin.status === 200, 'POST /api/auth/login succeeds for demo student');
     assert(studentLogin.data.data && studentLogin.data.data.token, 'Student login returns JWT token');
@@ -93,7 +96,7 @@ const runTests = async () => {
       method: 'POST'
     }, {
       email: 'priya.admin@katalyst.edu',
-      password: 'password123'
+      password: DEMO_PASSWORD
     });
     assert(adminLogin.status === 200, 'POST /api/auth/login succeeds for admin');
     const adminToken = adminLogin.data.data ? adminLogin.data.data.token : null;

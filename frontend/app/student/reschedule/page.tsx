@@ -20,7 +20,7 @@ export default function ReschedulePage() {
   return (
     <div className="max-w-lg">
       <h1 className="font-serif text-3xl">Reschedule</h1>
-      <p className="mt-1 text-sm text-stone-600">Pick an enrolled mentoring or training session, then an open slot.</p>
+      <p className="mt-1 text-sm text-muted">Pick an enrolled mentoring or training session, then an open slot.</p>
       <div className="mt-6 space-y-3">
         <div>
           <Label>Session</Label>

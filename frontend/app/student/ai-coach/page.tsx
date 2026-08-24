@@ -48,17 +48,17 @@ export default function CoachPage() {
   return (
     <div>
       <h1 className="font-serif text-3xl">AI Coach</h1>
-      <p className="mt-1 text-sm text-stone-600">
+      <p className="mt-1 text-sm text-muted">
         Personalised learning, scoring hints and nudges. The floating Chatbot answers catalogue questions instead.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {coachPrompts.map((p) => (
-          <button key={p} className="rounded-full border px-3 py-1 text-xs" onClick={() => ask(p)}>
+          <button key={p} className="rounded-full border border-line bg-card px-3 py-1 text-xs text-plum" onClick={() => ask(p)}>
             {p}
           </button>
         ))}
       </div>
-      <div className="mt-4 min-h-40 space-y-2 rounded-xl border bg-white p-4 text-sm">
+      <div className="mt-4 min-h-40 space-y-2 k-card p-4 text-sm">
         {log.map((l, i) => (
           <p key={i}>{l}</p>
         ))}

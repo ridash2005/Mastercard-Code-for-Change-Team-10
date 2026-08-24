@@ -1,4 +1,6 @@
 import type {
+  CollaborationInvite,
+  VolunteerApplication,
   Achievement,
   Activity,
   AdminProfile,
@@ -684,6 +686,33 @@ export const feedbackRecords: FeedbackRecord[] = [
     rating: 5,
     message: "Payments Studio felt like real work, not a slideshow.",
     createdAt: "2026-08-11T10:00:00.000Z",
+    activityId: "act-payments-studio",
+  },
+];
+
+export const collaborations: CollaborationInvite[] = [];
+
+export const volunteerApplications: VolunteerApplication[] = [
+  {
+    id: "vol-1",
+    name: "Neha Iyer",
+    email: "neha.iyer@example.com",
+    interests: ["Mentoring", "Career Guidance"],
+    skills: ["React", "Node.js"],
+    createdAt: "2026-08-18T09:00:00.000Z",
+    status: "pending",
+    message: "I can support weekend mentoring clinics.",
+  },
+  {
+    id: "vol-2",
+    name: "Rohit Menon",
+    email: "rohit.menon@example.com",
+    interests: ["Mentoring"],
+    skills: ["SQL", "Python"],
+    college: "IIT Madras",
+    createdAt: "2026-08-19T11:00:00.000Z",
+    status: "pending",
+    message: "Available for data-clinic office hours.",
   },
 ];
 

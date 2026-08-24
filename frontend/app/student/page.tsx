@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ActivityCard, DashboardCard, MissionCard, XPCard } from "@/components/cards";
+import { ActivityCard, CompletionCard, MissionCard, RankCard, StreakCard, XPCard } from "@/components/cards";
+import { EnrolledLearningJourney } from "@/components/student/enrolled-journey";
+import { CollaborationRequests } from "@/components/student/collaboration-requests";
 import { usePlatform } from "@/lib/data/platform-store";
 import { coachReply } from "@/lib/ai/coach";
 import { levelFromXp } from "@/lib/utils";
@@ -48,17 +50,26 @@ export default function StudentHome() {
         <h1 className="font-serif text-3xl">
           Hello, {user?.name?.split(" ")[0] ?? "fellow"}
         </h1>
-        <p className="mt-1 text-stone-600">
-          You are {completion}% through enrolled work. Next: finish {deadlines[0]?.title ?? "an open activity"} to stay on
+        <p className="mt-1 text-muted">
+          You are <span className="font-semibold text-blue">{completion}%</span> through enrolled work. Next: finish{" "}
+          <span className="font-semibold text-barbie">{deadlines[0]?.title ?? "an open activity"}</span> to stay on
           the path.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <XPCard xp={profile?.xp ?? 0} level={lvl.level} toNext={lvl.xpToNext} progress={lvl.progress} />
-        <DashboardCard label={t.streak} value={`${profile?.streak ?? 0} days`} />
-        <DashboardCard label={t.rank} value={`#${rank}`} hint="Global XP" />
-        <DashboardCard label="Completion" value={`${completion}%`} hint={`${completed} done · ${pending} open`} />
+        <StreakCard days={profile?.streak ?? 0} />
+        <RankCard rank={rank} />
+        <CompletionCard value={completion} hint={`${completed} done · ${pending} open`} />
       </div>
+      <CollaborationRequests />
+      <EnrolledLearningJourney
+        enrollments={mine}
+        activities={store.activities}
+        xp={profile?.xp ?? 0}
+        completion={completion}
+        studentId={sid}
+      />
       <section>
         <h2 className="font-serif text-2xl">{t.continueLearning}</h2>
         <div className="mt-3 grid gap-4 md:grid-cols-2">
@@ -70,13 +81,13 @@ export default function StudentHome() {
       </section>
       <section>
         <h2 className="font-serif text-2xl">{t.upcomingDeadlines}</h2>
-        <ul className="mt-3 divide-y rounded-xl border border-stone-200 bg-white">
+        <ul className="k-card mt-3 divide-y divide-line">
           {deadlines.map((a) => (
             <li key={a.id} className="flex items-center justify-between px-4 py-3 text-sm">
-              <Link href={`/student/activities/${a.id}`} className="underline">
+              <Link href={`/student/activities/${a.id}`} className="font-medium text-plum">
                 {a.title}
               </Link>
-              <span className="text-stone-500">{a.dueDate}</span>
+              <span className="font-semibold text-barbie">{a.dueDate}</span>
             </li>
           ))}
         </ul>
@@ -114,29 +125,29 @@ export default function StudentHome() {
           <p className="mt-3 text-sm">
             {team?.name} · rank {team?.rank} · {team?.projectTitle}
           </p>
-          <Link href="/student/teams" className="text-sm underline">
+          <Link href="/student/teams" className="text-sm font-semibold text-barbie">
             Open teams
           </Link>
         </div>
       </div>
       <section>
         <h2 className="font-serif text-2xl">{t.leaderboard}</h2>
-        <ol className="mt-3 rounded-xl border border-stone-200 bg-white">
+        <ol className="k-card mt-3">
           {board.map((b) => (
-            <li key={b.rank} className="flex justify-between px-4 py-2 text-sm">
-              <span>
+            <li key={b.rank} className="flex justify-between border-b border-line px-4 py-2 text-sm last:border-0">
+              <span className="text-plum">
                 #{b.rank} {b.name}
               </span>
-              <span>{b.xp} XP</span>
+              <span className="font-semibold text-gold">{b.xp} XP</span>
             </li>
           ))}
         </ol>
       </section>
-      <section className="rounded-xl border border-stone-200 bg-white p-4">
+      <section className="k-card p-5">
         <h2 className="font-serif text-2xl">AI Coach</h2>
-        <p className="mt-1 text-sm text-stone-600">Personalised — not the general chatbot.</p>
+        <p className="mt-1 text-sm text-muted">Personalised — not the general chatbot.</p>
         <button
-          className="mt-3 text-sm underline"
+          className="mt-3 text-sm font-semibold text-barbie"
           onClick={async () => {
             if (!profile || !user) return;
             setNudge(
@@ -159,7 +170,7 @@ export default function StudentHome() {
         </button>
         {nudge ? <p className="mt-3 text-sm">{nudge}</p> : null}
         <p className="mt-3 text-sm">
-          <Link className="underline" href="/student/ai-coach">
+          <Link className="font-semibold text-barbie" href="/student/ai-coach">
             Open AI Coach
           </Link>
         </p>

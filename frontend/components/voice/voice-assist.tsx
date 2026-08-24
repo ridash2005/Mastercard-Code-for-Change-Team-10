@@ -45,7 +45,7 @@ export function VoiceAssist({ textToRead, onTranscript }: { textToRead?: string;
           Voice input
         </Button>
       ) : null}
-      {msg ? <p className="text-xs text-stone-500">{msg}</p> : null}
+      {msg ? <p className="text-xs text-muted">{msg}</p> : null}
     </div>
   );
 }

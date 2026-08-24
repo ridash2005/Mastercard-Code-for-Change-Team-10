@@ -1,28 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --sand: #f4efe6;
-  --stone: #1c1917;
-  --forest: #1f3d2b;
-  --moss: #3d6b4f;
-  --gold: #b08d3e;
-  --paper: #faf7f2;
+  --navy: #1a1630;
+  --ivory: #f4efe6;
+  --card: #fffcf7;
+  --line: #e4ddd2;
+  --track: #ebe6dc;
+  --muted: #6a6478;
+  --pink: #ec1975;
+  --violet: #8c3d7a;
+  --gold: #c9a227;
+  --coral: #d36b4a;
+  --blue: #45658c;
+
+  --plum: var(--navy);
+  --plum-2: var(--navy);
+  --barbie: var(--pink);
+  --barbie-deep: #c91864;
+  --hot: var(--pink);
+  --purple: var(--violet);
+  --teal: var(--blue);
+  --jungle: var(--blue);
+  --forest: var(--pink);
+  --moss: #c91864;
+  --sand: var(--ivory);
+  --paper: var(--ivory);
+  --stone: var(--navy);
+  --blush: var(--card);
+  --blush-2: var(--track);
+  --peach: var(--card);
+  --lavender: var(--ivory);
+  --lavender-2: var(--ivory);
+  --sky: var(--card);
+  --sky-2: var(--card);
 }
 
 @theme inline {
+  --color-navy: var(--navy);
+  --color-pink: var(--pink);
+  --color-violet: var(--violet);
+  --color-blue: var(--blue);
+  --color-track: var(--track);
   --color-sand: var(--sand);
   --color-forest: var(--forest);
   --color-moss: var(--moss);
   --color-gold: var(--gold);
   --color-paper: var(--paper);
+  --color-barbie: var(--barbie);
+  --color-hot: var(--hot);
+  --color-blush: var(--blush);
+  --color-blush-2: var(--blush-2);
+  --color-lavender: var(--lavender);
+  --color-lavender-2: var(--lavender-2);
+  --color-purple: var(--purple);
+  --color-plum: var(--plum);
+  --color-plum-2: var(--plum-2);
+  --color-peach: var(--peach);
+  --color-sky: var(--sky);
+  --color-sky-2: var(--sky-2);
+  --color-muted: var(--muted);
+  --color-ivory: var(--ivory);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-coral: var(--coral);
+  --color-teal: var(--teal);
+  --color-jungle: var(--jungle);
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
+  --font-serif: var(--font-sans);
 }
 
 html,
 body {
-  background: var(--paper);
-  color: var(--stone);
+  background: var(--ivory);
+  color: var(--navy);
 }
 
 body {
@@ -33,10 +83,131 @@ h1,
 h2,
 h3,
 .font-serif {
-  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--navy);
 }
 
 *:focus-visible {
-  outline: 2px solid var(--forest);
+  outline: 2px solid var(--pink);
   outline-offset: 2px;
+}
+
+.portal-header {
+  background: var(--navy);
+  box-shadow: inset 0 -2px 0 0 var(--pink);
+}
+
+.portal-header button,
+.portal-header a,
+.portal-header select {
+  border-radius: 9999px !important;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.portal-header button,
+.portal-header a {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+.portal-header button:hover,
+.portal-header a:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.portal-header select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.portal-header select option {
+  color: var(--navy);
+}
+
+.k-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  box-shadow: 0 8px 22px -16px rgba(26, 22, 48, 0.16);
+}
+
+.k-chip {
+  background: var(--ivory);
+}
+
+.xp-fill {
+  background: var(--pink);
+}
+
+.playground-scene {
+  overflow: hidden;
+  border-radius: 1.1rem;
+  background: #b7d48a;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .journey-progress {
+    transition: stroke-dashoffset 420ms ease;
+  }
+
+  .journey-pulse {
+    animation: journey-pulse 2.6s ease-in-out infinite;
+  }
+
+  .rabbit-idle {
+    animation: rabbit-idle 2.8s ease-in-out infinite;
+  }
+
+  .rabbit-ear {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: rabbit-ear 3.4s ease-in-out infinite;
+  }
+
+  .rabbit-ear-right {
+    animation-delay: 0.4s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-progress,
+  .journey-pulse,
+  .rabbit-idle,
+  .rabbit-ear {
+    animation: none;
+    transition: none;
+  }
+}
+
+@keyframes journey-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 6px rgba(236, 25, 117, 0.16);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(236, 25, 117, 0.08);
+  }
+}
+
+@keyframes rabbit-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes rabbit-ear {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-7deg);
+  }
 }

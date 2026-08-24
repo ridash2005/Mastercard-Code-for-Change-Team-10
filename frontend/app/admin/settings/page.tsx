@@ -14,17 +14,13 @@ export default function AdminSettings() {
         <div>
           <dt className="text-stone-500">Database</dt>
           <dd>
-            UI reads the mock repository (lib/data/platform-store.ts). Real persistence lives in backend/api/models,
-            behind backend/api&apos;s own MONGO_URI — a live database is not required for this demo.
+            UI reads the mock repository. Mongoose models live in lib/models. Set MONGODB_URI from .env.example when you
+            switch off mocks. A live database is not required for this demo.
           </dd>
         </div>
         <div>
           <dt className="text-stone-500">OCR / AI</dt>
-          <dd>
-            lib/ocr/service.ts, lib/ai/chatbot.ts and lib/ai/review.ts are explicitly mocked. The AI Coach
-            (lib/ai/coach.ts&apos;s coachReplyLive) calls the real backend/api AI gateway via /api/coach, falling
-            back to a local mock reply only when the backend is unreachable.
-          </dd>
+          <dd>lib/ocr/service.ts, lib/ai/coach.ts, lib/ai/chatbot.ts and lib/ai/review.ts are explicitly mocked.</dd>
         </div>
       </dl>
     </div>

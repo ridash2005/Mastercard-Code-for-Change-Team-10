@@ -20,14 +20,14 @@ export function NotificationPanel({ audience, userId }: { audience: "student" | 
         Alerts{unread ? ` (${unread})` : ""}
       </Button>
       {open ? (
-        <div className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-stone-200 bg-white p-3 shadow-sm">
+        <div className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-line bg-card p-3 shadow-sm">
           <p className="text-sm font-medium">Notifications</p>
           <ul className="mt-2 max-h-72 space-y-2 overflow-y-auto text-sm">
             {items.map((n) => (
               <li key={n.id}>
                 <button className="w-full text-left" onClick={() => store.markNotificationRead(n.id)}>
                   <span className="font-medium">{n.title}</span>
-                  <span className="block text-xs text-stone-500">{n.body}</span>
+                  <span className="block text-xs text-muted">{n.body}</span>
                 </button>
               </li>
             ))}

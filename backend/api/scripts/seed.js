@@ -53,7 +53,12 @@ const seedDatabase = async () => {
 
     console.log('Cleared collections. Seeding fresh data...');
 
-    const defaultPassword = 'password123';
+    // Matches the frontend's BACKEND_DEMO_PASSWORD default (see root
+    // .env.example) so the AI Coach's login-or-register bridge (which uses a
+    // fixed demo password per shadow account) can still log in to these same
+    // seeded emails instead of hitting an email-already-registered conflict
+    // with no matching password.
+    const defaultPassword = process.env.BACKEND_DEMO_PASSWORD || 'katalyst-demo-bridge-2026';
     const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
     // 1. Users

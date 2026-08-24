@@ -61,7 +61,7 @@ export default function StudentComplaints() {
         {store.complaints
           .filter((c) => c.userId === sid)
           .map((c) => (
-            <li key={c.id} className="flex justify-between rounded-xl border bg-white p-3 text-sm">
+            <li key={c.id} className="flex justify-between k-card p-3 text-sm">
               {c.subject} <StatusBadge status={c.status} />
             </li>
           ))}

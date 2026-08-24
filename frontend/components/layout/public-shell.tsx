@@ -18,21 +18,21 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   ];
   return (
     <div className="min-h-screen">
-      <header className="border-b border-stone-200 bg-white/90 backdrop-blur">
+      <header className="border-b border-line bg-card/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link href="/" aria-label="Katalyst home">
             <Logo />
           </Link>
           <nav className="hidden items-center gap-4 text-sm md:flex">
             {links.map((l) => (
-              <Link key={l.href} href={l.href} className={pathname === l.href ? "font-medium" : "text-stone-600"}>
+              <Link key={l.href} href={l.href} className={pathname === l.href ? "font-medium text-barbie" : "text-muted"}>
                 {l.label}
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-2">
             <LanguageSelector />
-            <Link href="/login" className="rounded-md px-3 py-1.5 text-sm hover:bg-stone-100">
+            <Link href="/login" className="rounded-md px-3 py-1.5 text-sm hover:bg-ivory">
               {t.signIn}
             </Link>
             <Link href="/register" className="rounded-md bg-forest px-3 py-1.5 text-sm text-white">
@@ -42,7 +42,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       {children}
-      <footer className="border-t border-stone-200 px-4 py-8 text-center text-xs text-stone-500">
+      <footer className="border-t border-line px-4 py-8 text-center text-xs text-muted">
         Katalyst is a programme engagement demo for Mastercard Code for Change. Mock data only.
       </footer>
     </div>

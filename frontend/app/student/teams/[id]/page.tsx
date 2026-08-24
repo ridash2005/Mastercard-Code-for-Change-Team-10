@@ -14,7 +14,7 @@ export default function TeamDetailPage() {
   return (
     <div>
       <h1 className="font-serif text-3xl">{team.name}</h1>
-      <p className="mt-1 text-sm text-stone-600">
+      <p className="mt-1 text-sm text-muted">
         {team.projectTitle} · squad rank {team.rank}
       </p>
       <ul className="mt-6 space-y-4">
@@ -22,7 +22,7 @@ export default function TeamDetailPage() {
           const u = store.users.find((x) => x.id === m.studentId);
           const xp = store.studentProfiles.find((p) => p.userId === m.studentId)?.xp ?? 0;
           return (
-            <li key={m.studentId} className="rounded-xl border bg-white p-4">
+            <li key={m.studentId} className="k-card p-4">
               <div className="flex justify-between text-sm">
                 <span>
                   {u?.name} · {m.role}

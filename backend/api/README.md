@@ -53,7 +53,18 @@ JWT_EXPIRES_IN=7d
 
 # Frontend Connection
 CLIENT_URL=http://localhost:3000
+
+# AI gateway (backend/api -> ai/ai-client -> Gemini). Leave unset to run the
+# AI Coach in fixture mode (no live calls, no key required) for local dev.
+GEMINI_API_KEY=
+
+# Shared secret required (in addition to an admin JWT) for the internal,
+# non-client-facing AI Judge scoring route. No default - that route stays
+# disabled (503) until this is set.
+INTERNAL_AI_KEY=
 ```
+
+See `.env.example` in this directory for the full annotated list, and root `.env.example` for the frontend's AI Coach bridge config (`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD` — must match the demo accounts' seeded password below).
 
 ---
 
@@ -98,10 +109,10 @@ The platform enforces two roles:
 
 | Name | Email | Password | Role |
 |---|---|---|---|
-| Ananya Munshi | `ananya@katalyst.edu` | `password123` | `student` |
-| Isha Verma | `isha@katalyst.edu` | `password123` | `student` |
-| Priya Sharma | `priya.admin@katalyst.edu` | `password123` | `admin` |
-| Arjun Desai | `arjun.admin@katalyst.edu` | `password123` | `admin` |
+| Ananya Munshi | `ananya@katalyst.edu` | `katalyst-demo-bridge-2026` | `student` |
+| Isha Verma | `isha@katalyst.edu` | `katalyst-demo-bridge-2026` | `student` |
+| Priya Sharma | `priya.admin@katalyst.edu` | `katalyst-demo-bridge-2026` | `admin` |
+| Arjun Desai | `arjun.admin@katalyst.edu` | `katalyst-demo-bridge-2026` | `admin` |
 
 ---
 
@@ -123,11 +134,15 @@ The platform enforces two roles:
 | | `/api/activities/:id` | `PUT / DELETE`| Admin | Update or delete activity |
 | **Enrollments**| `/api/enrollments` | `GET` | Private | List student enrollments |
 | | `/api/enrollments` | `POST` | Private | Enroll in an activity |
-| | `/api/enrollments/:id/start`| `PATCH` | Private | Transition status to `in_progress` |
+| | `/api/enrollments/:activityId` | `GET` | Private | Get one enrollment's detail |
+| | `/api/enrollments/:activityId/start`| `PATCH` | Private | Transition status to `in_progress` |
 | **Submissions**| `/api/submissions` | `GET / POST` | Private | Submit work / view attempts |
+| | `/api/submissions/:id` | `GET` | Private | Get one submission's detail |
 | | `/api/submissions/:id/review`| `POST` | Admin | Approve/reject & award XP |
 | **Meetings** | `/api/meetings` | `GET` | Private | List sessions |
-| | `/api/meetings` | `POST / PUT` | Admin | Schedule/edit meeting |
+| | `/api/meetings/:id` | `GET` | Private | Get one meeting's detail |
+| | `/api/meetings` | `POST` | Admin | Schedule a meeting |
+| | `/api/meetings/:id` | `PUT / DELETE` | Admin | Update or cancel a meeting |
 | | `/api/meetings/:id/reschedule`| `POST` | Private | Student reschedule slot |
 | **Gamification**| `/api/gamification/dashboard`| `GET` | Private | Level, XP, streak, rank metrics |
 | | `/api/gamification/leaderboard`| `GET` | Public/Auth | Global student leaderboard |
@@ -139,6 +154,15 @@ The platform enforces two roles:
 | | `/api/complaints/:id/status`| `PATCH` | Admin | Update grievance status |
 | **Feedback** | `/api/feedback` | `GET / POST` | Private | Submit star rating & review |
 | **Certificates**| `/api/certificates` | `GET` | Private | View issued certificates |
+| | `/api/certificates/:id` | `GET` | Private | Get one certificate's detail |
+| **Notifications**| `/api/notifications` | `GET` | Private | List current user's notifications |
+| | `/api/notifications/:id/read`| `PATCH` | Private | Mark one notification read |
+| | `/api/notifications/read-all`| `PATCH` | Private | Mark all notifications read |
+| **Extracurricular**| `/api/extracurricular` | `GET` | Public/Auth | List clubs, volunteering, drives |
+| | `/api/extracurricular/:id` | `GET` | Public/Auth | Get one activity's detail |
+| | `/api/extracurricular` | `POST` | Admin | Create an extracurricular activity |
+| **Contact** | `/api/contact` | `POST` | Public | Submit a contact form message |
+| | `/api/contact` | `GET` | Admin | List contact form submissions |
 | **Analytics** | `/api/admin/analytics/overview`| `GET`| Admin | Programme KPI metrics |
 | | `/api/admin/analytics/reports`| `GET` | Admin | Fellow performance reports |
 | **AI gateway** | `/api/ai/coach/message` | `POST` | Private (student/admin) | Guardrailed AI Coach chat — input/output validation, rate-limited (see `services/ai/`) |
