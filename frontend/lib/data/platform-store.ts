@@ -21,7 +21,6 @@ import type {
   Submission,
   User,
 } from "@/lib/types";
-import { uid } from "@/lib/utils";
 
 export type PlatformState = {
   hydrated: boolean;
@@ -57,9 +56,6 @@ export type PlatformState = {
   certificates: typeof seed.certificates;
   extracurricular: typeof seed.extracurricular;
   meetings: { id: string; title: string; scheduledAt: string; reschedulable?: boolean; candidateSlots?: string[]; [k: string]: unknown }[];
-  // Not backed by backend/api yet - no Collaboration/VolunteerApplication
-  // model or routes exist there. Kept as local-only demo state pending that
-  // backend work; see KATALYST_BACKEND_SPEC.md for the intended shape.
   collaborations: CollaborationInvite[];
   volunteerApplications: VolunteerApplication[];
   updateProfile: (
@@ -91,9 +87,9 @@ export type PlatformState = {
   /** meetingId, not activityId - backend/api's reschedule is a Meeting
    * resource, distinct from Activity. See lib/services/api.ts's meetings. */
   reschedule: (meetingId: string, slot: string) => Promise<void>;
-  createCollaboration: (input: { studentIds: string[]; projectTitle: string; adminRationale: string }) => void;
-  respondCollaboration: (id: string, studentId: string, status: "accepted" | "declined") => void;
-  reviewVolunteer: (id: string, status: "approved" | "rejected") => void;
+  createCollaboration: (input: { studentIds: string[]; projectTitle: string; adminRationale: string }) => Promise<void>;
+  respondCollaboration: (id: string, studentId: string, status: "accepted" | "declined") => Promise<void>;
+  reviewVolunteer: (id: string, status: "approved" | "rejected") => Promise<void>;
 };
 
 const empty = {
@@ -117,8 +113,8 @@ const empty = {
   certificates: [] as typeof seed.certificates,
   extracurricular: [] as typeof seed.extracurricular,
   meetings: [] as PlatformState["meetings"],
-  collaborations: seed.collaborations,
-  volunteerApplications: seed.volunteerApplications,
+  collaborations: [] as CollaborationInvite[],
+  volunteerApplications: [] as VolunteerApplication[],
 };
 
 /** Best-effort - a single failed call (e.g. a 403 on an admin-only endpoint
@@ -171,6 +167,8 @@ export const usePlatform = create<PlatformState>()(
           xpTransactions,
           gamAchievements,
           leaderboard,
+          collaborations,
+          volunteerApplications,
           ownProfile,
           allUsers,
           reports,
@@ -189,6 +187,8 @@ export const usePlatform = create<PlatformState>()(
           settle(api.gamification.xpTransactions()),
           settle(api.gamification.achievements()),
           settle(api.gamification.leaderboard()),
+          settle(api.collaborations.list()),
+          isAdmin ? settle(api.volunteerApplications.list()) : Promise.resolve(null),
           settle(api.users.profile()),
           isAdmin ? settle(api.users.list()) : Promise.resolve(null),
           isAdmin ? settle(api.analytics.reports()) : Promise.resolve(null),
@@ -214,6 +214,8 @@ export const usePlatform = create<PlatformState>()(
           if (meetings) patch.meetings = meetings;
           if (missions) patch.missions = missions as typeof seed.missions;
           if (leaderboard) patch.leaderboard = leaderboard;
+          if (collaborations) patch.collaborations = collaborations;
+          if (volunteerApplications) patch.volunteerApplications = volunteerApplications;
           if (xpTransactions) patch.xpTransactions = xpTransactions as typeof seed.xpTransactions;
           if (gamAchievements) {
             patch.achievements = achievements as typeof seed.achievements;
@@ -339,32 +341,20 @@ export const usePlatform = create<PlatformState>()(
         if (ok === null) return;
         void get().hydrate();
       },
-      // --- Below: no backend/api model yet (see PlatformState's comment) ---
-      createCollaboration: ({ studentIds, projectTitle, adminRationale }) => {
-        const invite: CollaborationInvite = {
-          id: uid("col"),
-          studentIds,
-          projectTitle,
-          adminRationale,
-          studentMessage: "Your skill sets complement each other.",
-          createdAt: new Date().toISOString(),
-          responses: studentIds.map((studentId) => ({ studentId, status: "pending" })),
-        };
-        set((s) => ({ collaborations: [invite, ...(s.collaborations ?? [])] }));
+      createCollaboration: async ({ studentIds, projectTitle, adminRationale }) => {
+        const created = await settle(api.collaborations.create({ studentIds, projectTitle, adminRationale }));
+        if (!created) return;
+        set((s) => ({ collaborations: [created, ...s.collaborations] }));
       },
-      respondCollaboration: (id, studentId, status) => {
-        set((s) => ({
-          collaborations: (s.collaborations ?? []).map((c) =>
-            c.id === id
-              ? { ...c, responses: c.responses.map((r) => (r.studentId === studentId ? { ...r, status } : r)) }
-              : c,
-          ),
-        }));
+      respondCollaboration: async (id, _studentId, status) => {
+        const updated = await settle(api.collaborations.respond(id, status));
+        if (!updated) return;
+        set((s) => ({ collaborations: s.collaborations.map((c) => (c.id === id ? updated : c)) }));
       },
-      reviewVolunteer: (id, status) => {
-        set((s) => ({
-          volunteerApplications: (s.volunteerApplications ?? []).map((v) => (v.id === id ? { ...v, status } : v)),
-        }));
+      reviewVolunteer: async (id, status) => {
+        const updated = await settle(api.volunteerApplications.updateStatus(id, status));
+        if (!updated) return;
+        set((s) => ({ volunteerApplications: s.volunteerApplications.map((v) => (v.id === id ? updated : v)) }));
       },
     }),
     {

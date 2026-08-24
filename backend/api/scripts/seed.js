@@ -22,6 +22,8 @@ const Feedback = require('../models/Feedback');
 const Certificate = require('../models/Certificate');
 const Extracurricular = require('../models/Extracurricular');
 const ContactMessage = require('../models/ContactMessage');
+const Collaboration = require('../models/Collaboration');
+const VolunteerApplication = require('../models/VolunteerApplication');
 
 const seedDatabase = async () => {
   try {
@@ -48,7 +50,9 @@ const seedDatabase = async () => {
       Feedback.deleteMany({}),
       Certificate.deleteMany({}),
       Extracurricular.deleteMany({}),
-      ContactMessage.deleteMany({})
+      ContactMessage.deleteMany({}),
+      Collaboration.deleteMany({}),
+      VolunteerApplication.deleteMany({})
     ]);
 
     console.log('Cleared collections. Seeding fresh data...');
@@ -829,6 +833,50 @@ const seedDatabase = async () => {
           new Date('2026-08-26T10:00:00.000Z')
         ],
         rescheduleDeadline: new Date('2026-08-24T09:30:00.000Z')
+      }
+    ]);
+
+    // 18. Collaborations
+    await Collaboration.insertMany([
+      {
+        studentIds: [users[0]._id.toString(), users[1]._id.toString()],
+        projectTitle: 'Inclusion Wallet pairing',
+        adminRationale: 'Frontend + backend skill sets complement each other.',
+        studentMessage: 'Your skill sets complement each other.',
+        responses: [
+          { studentId: users[0]._id.toString(), status: 'pending' },
+          { studentId: users[1]._id.toString(), status: 'pending' }
+        ]
+      }
+    ]);
+
+    // 19. Volunteer applications
+    await VolunteerApplication.insertMany([
+      {
+        name: 'Neha Iyer',
+        email: 'neha.iyer@example.com',
+        interests: ['Mentoring', 'Career Guidance'],
+        skills: ['React', 'Node.js'],
+        status: 'pending',
+        message: 'I can support weekend mentoring clinics.'
+      },
+      {
+        name: 'Rohit Menon',
+        email: 'rohit.menon@example.com',
+        interests: ['Mentoring'],
+        skills: ['SQL', 'Python'],
+        college: 'IIT Madras',
+        status: 'pending',
+        message: 'Available for data-clinic office hours.'
+      },
+      {
+        name: 'Aditi Rao',
+        email: 'aditi.rao@example.com',
+        interests: ['Volunteering', 'Mentoring'],
+        skills: ['Public speaking', 'Excel'],
+        college: 'SNDT Women\'s University',
+        status: 'approved',
+        message: 'Already volunteers with the campus NSS desk.'
       }
     ]);
 

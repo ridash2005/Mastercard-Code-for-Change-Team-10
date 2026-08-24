@@ -10,6 +10,7 @@ import type {
   Activity,
   AppNotification,
   Certificate,
+  CollaborationInvite,
   Complaint,
   Enrollment,
   ExtracurricularActivity,
@@ -19,6 +20,7 @@ import type {
   Team,
   TeamRole,
   User,
+  VolunteerApplication,
 } from "@/lib/types";
 
 export type TeamWithMembers = Team & {
@@ -143,5 +145,19 @@ export const api = {
   analytics: {
     overview: () => get<unknown>("admin/analytics/overview"),
     reports: () => get<unknown>("admin/analytics/reports"),
+  },
+  collaborations: {
+    list: () => get<CollaborationInvite[]>("collaborations"),
+    create: (data: { studentIds: string[]; projectTitle: string; adminRationale: string }) =>
+      post<CollaborationInvite>("collaborations", data),
+    respond: (id: string, status: "accepted" | "declined") =>
+      post<CollaborationInvite>(`collaborations/${id}/respond`, { status }),
+  },
+  volunteerApplications: {
+    list: () => get<VolunteerApplication[]>("volunteer-applications"),
+    create: (data: { name: string; email: string; interests: string[]; skills: string[]; college?: string; message?: string }) =>
+      post<VolunteerApplication>("volunteer-applications", data),
+    updateStatus: (id: string, status: "approved" | "rejected") =>
+      patch<VolunteerApplication>(`volunteer-applications/${id}/status`, { status }),
   },
 };

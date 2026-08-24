@@ -18,6 +18,8 @@ const contactRoutes = require('./contactRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const healthRoutes = require('./healthRoutes');
 const aiRoutes = require('./aiRoutes');
+const collaborationRoutes = require('./collaborationRoutes');
+const volunteerApplicationRoutes = require('./volunteerApplicationRoutes');
 
 // /api/health works regardless of DB state (it reports DB status itself).
 // Every other route needs Mongo, but the fast-fail guard for that
@@ -45,6 +47,8 @@ router.use('/certificates', certificateRoutes);
 router.use('/extracurricular', extracurricularRoutes);
 router.use('/contact', contactRoutes);
 router.use('/admin/analytics', analyticsRoutes);
+router.use('/collaborations', collaborationRoutes);
+router.use('/volunteer-applications', volunteerApplicationRoutes);
 router.use('/ai', aiRoutes);
 
 module.exports = router;
