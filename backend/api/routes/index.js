@@ -18,13 +18,17 @@ const contactRoutes = require('./contactRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const healthRoutes = require('./healthRoutes');
 const aiRoutes = require('./aiRoutes');
-const { requireDatabase } = require('../middleware/dbMiddleware');
 
-// Health must work regardless of DB state (it reports DB status itself), so
-// it's mounted before the guard. Everything else - including /ai, whose
-// auth middleware does its own DB lookup - needs Mongo.
+// /api/health works regardless of DB state (it reports DB status itself).
+// Every other route needs Mongo, but the fast-fail guard for that
+// (middleware/dbMiddleware.js's requireDatabase) is applied per-route rather
+// than blanket here: routes gated by `authenticate` get it for free (it
+// runs inside authenticate, after the token-presence check but before the
+// DB lookup) so an unauthenticated request still gets a fast 401 instead of
+// a DB-availability 503 - see middleware/authMiddleware.js. Routes with no
+// auth gate at all, or gated by `optionalAuth` (which never blocks), apply
+// requireDatabase explicitly in their own route file.
 router.use('/health', healthRoutes);
-router.use(requireDatabase);
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);

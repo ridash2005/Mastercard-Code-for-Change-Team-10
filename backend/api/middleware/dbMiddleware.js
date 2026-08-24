@@ -1,13 +1,16 @@
 const mongoose = require('mongoose');
 
-// Every route except /api/health needs Mongo (auth alone does a DB lookup on
-// every authenticated request - see middleware/authMiddleware.js). Without
-// this guard, a request made while Mongo is unreachable doesn't fail fast:
-// it sits on Mongoose's command buffer for its full bufferTimeoutMS (10s by
-// default) before erroring out. Checking the connection state up front turns
-// that into an instant, honest 503 instead.
+const isDatabaseAvailable = () => mongoose.connection.readyState === 1;
+
+// For routes with no auth gate in front of them (or gated by `optionalAuth`,
+// which never blocks a request) but whose controller still needs Mongo -
+// e.g. public catalog listings, register/login, the public contact form.
+// Without this, a request made while Mongo is unreachable doesn't fail
+// fast: it sits on Mongoose's command buffer for its full bufferTimeoutMS
+// (10s by default) before erroring out. See middleware/authMiddleware.js
+// for the equivalent check on `authenticate`-gated routes.
 const requireDatabase = (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
+  if (!isDatabaseAvailable()) {
     return res.status(503).json({
       success: false,
       message: 'Database is currently unavailable. Please try again shortly.'
@@ -16,4 +19,4 @@ const requireDatabase = (req, res, next) => {
   next();
 };
 
-module.exports = { requireDatabase };
+module.exports = { requireDatabase, isDatabaseAvailable };

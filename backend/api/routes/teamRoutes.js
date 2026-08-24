@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const teamController = require('../controllers/teamController');
 const { authenticate, authorize, optionalAuth } = require('../middleware/authMiddleware');
+const { requireDatabase } = require('../middleware/dbMiddleware');
 
-router.get('/', optionalAuth, teamController.getTeams);
-router.get('/:id', optionalAuth, teamController.getTeamById);
+router.get('/', optionalAuth, requireDatabase, teamController.getTeams);
+router.get('/:id', optionalAuth, requireDatabase, teamController.getTeamById);
 router.post('/', authenticate, authorize('admin'), teamController.createTeam);
 router.post('/:id/members', authenticate, authorize('admin'), teamController.addOrUpdateMember);
 

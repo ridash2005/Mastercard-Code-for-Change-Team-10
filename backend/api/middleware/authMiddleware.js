@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const User = require('../models/User');
+const { isDatabaseAvailable } = require('./dbMiddleware');
 
 const authenticate = async (req, res, next) => {
   let token = null;
@@ -13,6 +14,17 @@ const authenticate = async (req, res, next) => {
     return res.status(401).json({
       success: false,
       message: 'Access denied. No authentication token provided.'
+    });
+  }
+
+  // Checked after the token-presence check (so a request with no token at
+  // all still gets a fast, honest 401 regardless of DB state) but before
+  // the DB lookup below (so a request with a token fails fast with a 503
+  // instead of hanging on Mongoose's command buffer for its full timeout).
+  if (!isDatabaseAvailable()) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database is currently unavailable. Please try again shortly.'
     });
   }
 
