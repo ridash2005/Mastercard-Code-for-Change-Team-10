@@ -23,13 +23,18 @@ export default function AdminSettings() {
         <div>
           <dt className="text-stone-500">AI</dt>
           <dd>
-            The AI Coach and the AI Judge submission scoring above both call a real LLM through backend/api&apos;s
-            guardrailed AI gateway. lib/ai/chatbot.ts (the general help widget) is still a canned/local reply.
+            AI Coach, AI Judge submission scoring, the general Chatbot, and the AI Course Designer all call a real
+            LLM through backend/api&apos;s guardrailed AI gateway. The Chatbot can also act for you (enroll, submit
+            feedback/complaints, mark notifications read, reschedule, draft a course) - see
+            services/ai/chatbotService.js.
           </dd>
         </div>
         <div>
           <dt className="text-stone-500">OCR</dt>
-          <dd>lib/ocr/service.ts (registration document scan) is still mocked.</dd>
+          <dd>
+            Real OCR.space API call (lib/ocr/service.ts, proxied through app/api/ocr/route.ts) - reads
+            name/email/college off an uploaded registration document.
+          </dd>
         </div>
       </dl>
     </div>

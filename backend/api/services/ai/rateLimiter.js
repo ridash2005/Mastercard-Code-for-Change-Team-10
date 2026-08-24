@@ -35,4 +35,10 @@ const aiCoachLimiter = createRateLimiter({ windowMs: 60_000, max: 15, keyPrefix:
 // LLM provider.
 const aiJudgeLimiter = createRateLimiter({ windowMs: 60_000, max: 30, keyPrefix: 'ai_judge' });
 
-module.exports = { createRateLimiter, aiCoachLimiter, aiJudgeLimiter };
+// Chatbot: can trigger real writes (enroll, submit feedback/complaints,
+// reschedule, create a draft course), so kept tighter than the
+// conversational-only Coach - protects against both LLM spend and
+// action-spam from a single account.
+const aiChatbotLimiter = createRateLimiter({ windowMs: 60_000, max: 10, keyPrefix: 'ai_chatbot' });
+
+module.exports = { createRateLimiter, aiCoachLimiter, aiJudgeLimiter, aiChatbotLimiter };

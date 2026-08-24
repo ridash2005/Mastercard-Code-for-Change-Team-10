@@ -49,10 +49,11 @@ export default function RegisterPage() {
   }, [pendingOnboarding, sessionUserId]);
 
   /**
-   * Creates the real backend/api account first (bcrypt + JWT, sets the
-   * httpOnly session cookie via app/api/auth/register), then mirrors it into
-   * the mock store the rest of the UI still reads from. Students then go to
-   * the interest step; admins land straight in the admin portal.
+   * Creates the real backend/api account (bcrypt + JWT, sets the httpOnly
+   * session cookie via app/api/auth/register), then sets the client-side
+   * session (lib/data/platform-store.ts's setSession) so the rest of the UI
+   * hydrates from that real account. Students then go to the interest step;
+   * admins land straight in the admin portal.
    */
   async function createAccount() {
     setBusy(true);
@@ -131,7 +132,7 @@ export default function RegisterPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="doc">Document (mock OCR)</Label>
+                <Label htmlFor="doc">Document (OCR — auto-fills the fields below)</Label>
                 <Input
                   id="doc"
                   type="file"

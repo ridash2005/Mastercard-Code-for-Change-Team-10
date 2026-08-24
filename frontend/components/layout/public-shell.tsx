@@ -43,7 +43,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       </header>
       {children}
       <footer className="border-t border-line px-4 py-8 text-center text-xs text-muted">
-        Katalyst is a programme engagement demo for Mastercard Code for Change. Mock data only.
+        Katalyst is a programme engagement platform built for Mastercard Code for Change.
       </footer>
     </div>
   );

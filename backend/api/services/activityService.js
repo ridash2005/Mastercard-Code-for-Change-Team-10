@@ -2,7 +2,7 @@ const Activity = require('../models/Activity');
 const Enrollment = require('../models/Enrollment');
 const Notification = require('../models/Notification');
 
-const listActivities = async (query = {}, studentId = null) => {
+const listActivities = async (query = {}, user = null) => {
   const {
     search,
     type,
@@ -17,7 +17,17 @@ const listActivities = async (query = {}, studentId = null) => {
     status
   } = query;
 
+  const isAdmin = user?.role === 'admin';
+  const studentId = user && !isAdmin ? user._id.toString() : null;
+
   const mongoQuery = {};
+
+  // Drafts (e.g. a student-suggested course pending review - see
+  // services/chatbotActionService.js) never appear in the public/student
+  // catalog. Admins see everything so they have something to review.
+  if (!isAdmin) {
+    mongoQuery.status = { $ne: 'draft' };
+  }
 
   if (type && type !== 'all') {
     mongoQuery.type = type;
@@ -91,7 +101,7 @@ const listActivities = async (query = {}, studentId = null) => {
   return activities.map((a) => a.toJSON());
 };
 
-const getActivityById = async (id, studentId = null) => {
+const getActivityById = async (id, user = null) => {
   let activity = await Activity.findById(id);
   if (!activity) {
     // Try by custom string id if mongo ObjectId fails
@@ -104,6 +114,15 @@ const getActivityById = async (id, studentId = null) => {
     throw error;
   }
 
+  const isAdmin = user?.role === 'admin';
+  const isOwner = user && activity.createdBy === user._id.toString();
+  if (activity.status === 'draft' && !isAdmin && !isOwner) {
+    const error = new Error('Activity not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const studentId = user && !isAdmin ? user._id.toString() : null;
   const result = activity.toJSON();
   if (studentId) {
     const enrollment = await Enrollment.findOne({ activityId: activity.id, studentId });

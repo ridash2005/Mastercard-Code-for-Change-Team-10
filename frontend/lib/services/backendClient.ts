@@ -3,13 +3,18 @@
 // the JWTs it manages are meant to stay server-side, proxied through this
 // app's own /api/* route handlers rather than exposed to the browser.
 //
-// This is intentionally scoped to the AI Coach path only (KATALYST_AI_SPEC.md
-// §3), matching the demo's mock-account model: the frontend has no real
-// registration/login UI wired to backend/api yet (see README's "Monorepo
-// status"), so this transparently provisions/logs in a shadow backend/api
-// account per demo user email, using a fixed demo password. That's fine for
-// a hackathon demo bridge — swap for backend/api's real login flow once the
-// frontend has one.
+// Two auth paths live here:
+//   - registerRealUser/loginRealUser/getMe: the real path, used by
+//     app/api/auth/{register,login,me}/route.ts for actual sign-up/sign-in -
+//     the user's own password, checked by backend/api's bcrypt+JWT.
+//   - getBackendToken (login/registerAndLogin below): a demo-bridge that
+//     transparently provisions/logs in a shadow backend/api account per
+//     user email with a fixed demo password (KATALYST_AI_SPEC.md §3), used
+//     ONLY by the AI Coach route (app/api/coach/route.ts). It predates real
+//     auth and stayed scoped to Coach rather than being ripped out, since
+//     other routes (app/api/backend/[...path]/route.ts,
+//     app/api/chatbot/route.ts) now read the real session cookie directly
+//     instead of needing this bridge.
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:5000/api";
 const DEMO_PASSWORD = process.env.BACKEND_DEMO_PASSWORD ?? "katalyst-demo-bridge-2026";

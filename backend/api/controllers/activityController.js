@@ -5,8 +5,7 @@ const activityService = require('../services/activityService');
 // @access  Public / Optional Auth
 const listActivities = async (req, res, next) => {
   try {
-    const studentId = req.user ? req.user._id.toString() : req.query.studentId || null;
-    const activities = await activityService.listActivities(req.query, studentId);
+    const activities = await activityService.listActivities(req.query, req.user || null);
 
     res.status(200).json({
       success: true,
@@ -23,8 +22,7 @@ const listActivities = async (req, res, next) => {
 // @access  Public / Optional Auth
 const getActivityById = async (req, res, next) => {
   try {
-    const studentId = req.user ? req.user._id.toString() : req.query.studentId || null;
-    const activity = await activityService.getActivityById(req.params.id, studentId);
+    const activity = await activityService.getActivityById(req.params.id, req.user || null);
 
     res.status(200).json({
       success: true,

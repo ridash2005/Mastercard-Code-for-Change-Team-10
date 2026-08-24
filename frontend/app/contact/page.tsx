@@ -9,7 +9,7 @@ import { usePlatform } from "@/lib/data/platform-store";
 
 const faqs = [
   { q: "How do I enrol?", a: "Open Explore, pick an activity, press Enrol. Mandatory items also appear on My Learning." },
-  { q: "Who awards XP?", a: "Faculty approval of a submission. The mock ledger updates immediately in this demo." },
+  { q: "Who awards XP?", a: "Faculty approval of a submission. Your XP ledger updates immediately once approved." },
   { q: "Where is emergency help?", a: "Use Emergency Help — not the complaint form — for safety or wellbeing crises." },
 ];
 

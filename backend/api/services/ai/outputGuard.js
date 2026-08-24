@@ -11,6 +11,12 @@ const SYSTEM_PROMPT_LEAK_PATTERNS = [
   /you never invent xp totals/i
 ];
 
+const CHATBOT_PROMPT_LEAK_PATTERNS = [
+  /you are the katalyst chatbot/i,
+  /pick exactly one "?intent"?/i,
+  /you never fabricate xp totals/i
+];
+
 const FALLBACK_REPLY =
   "I can't share that. Ask me about your progress, XP, missions, or anything you're studying instead!";
 
@@ -61,4 +67,20 @@ function guardJudgeOutput(output) {
   return output;
 }
 
-module.exports = { guardCoachReply, guardJudgeOutput, OutputGuardrailError };
+/**
+ * Same shape as guardCoachReply, for the Chatbot's free-text "reply" field
+ * (services/ai/chatbotService.js) - separate leak-pattern list since the
+ * two features have different system prompts to guard against leaking.
+ */
+function guardChatbotReply(reply) {
+  if (typeof reply !== 'string' || !reply.trim()) {
+    throw new OutputGuardrailError('Chatbot returned an empty reply', 'empty_output');
+  }
+
+  const leaked = CHATBOT_PROMPT_LEAK_PATTERNS.some((re) => re.test(reply));
+  if (leaked) return FALLBACK_REPLY;
+
+  return stripMarkup(reply).trim();
+}
+
+module.exports = { guardCoachReply, guardChatbotReply, guardJudgeOutput, OutputGuardrailError };

@@ -7,6 +7,7 @@
 const { sanitizeAndValidateInput, GuardrailError } = require('../services/ai/inputGuard');
 const { getCoachReply, AiCoachError } = require('../services/ai/aiCoachService');
 const { scoreSubmission, AiJudgeError } = require('../services/ai/aiJudgeService');
+const { getChatbotReply, ChatbotError } = require('../services/ai/chatbotService');
 const { OutputGuardrailError } = require('../services/ai/outputGuard');
 const AuditLog = require('../models/AuditLog');
 
@@ -57,6 +58,45 @@ exports.coachMessage = async (req, res) => {
     return res.status(status).json({
       success: false,
       message: 'AI Coach is temporarily unavailable. Please try again shortly.'
+    });
+  }
+};
+
+exports.chatbotMessage = async (req, res) => {
+  const { message } = req.body;
+
+  let guard;
+  try {
+    guard = sanitizeAndValidateInput(message);
+  } catch (err) {
+    if (err instanceof GuardrailError) {
+      return res.status(400).json({ success: false, message: err.message, code: err.code });
+    }
+    throw err;
+  }
+
+  if (guard.blockedReason) {
+    await logAudit(req.user._id, 'ai_chatbot_blocked', 'ai_chatbot', {
+      reason: guard.blockedReason,
+      intent: guard.intent
+    });
+    return res.status(422).json({
+      success: false,
+      message: 'Your message was blocked by AI safety guardrails.',
+      reason: guard.blockedReason
+    });
+  }
+
+  try {
+    const { reply, intent } = await getChatbotReply(guard.clean, req.user);
+    await logAudit(req.user._id, 'ai_chatbot_message', 'ai_chatbot', { intent });
+    return res.json({ success: true, data: { reply, intent } });
+  } catch (err) {
+    await logAudit(req.user._id, 'ai_chatbot_error', 'ai_chatbot', { error: err.message });
+    const status = err instanceof ChatbotError || err instanceof OutputGuardrailError ? 502 : 500;
+    return res.status(status).json({
+      success: false,
+      message: 'The chatbot is temporarily unavailable. Please try again shortly.'
     });
   }
 };

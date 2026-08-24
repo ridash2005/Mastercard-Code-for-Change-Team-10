@@ -1,6 +1,7 @@
 import type { Role } from "@/lib/types";
 
-/** Mock session helpers. Replace with Auth.js/NextAuth without changing UI contracts. */
+/** Seeded demo accounts for the login page's one-click buttons - real
+ * backend/api accounts (see backend/api/scripts/seed.js), not mock data. */
 export const demoAccounts: { name: string; email: string; role: Role }[] = [
   { name: "Ananya Munshi", email: "ananya@katalyst.edu", role: "student" },
   { name: "Isha Verma", email: "isha@katalyst.edu", role: "student" },
@@ -8,4 +9,4 @@ export const demoAccounts: { name: string; email: string; role: Role }[] = [
   { name: "Arjun Desai", email: "arjun.admin@katalyst.edu", role: "admin" },
 ];
 
-export const AUTH_PROVIDER = "mock" as const;
+export const AUTH_PROVIDER = "backend-jwt" as const;

@@ -44,3 +44,47 @@ export const suggestedPrompts = [
   "What courses should I take next?",
   "How does the leaderboard work?",
 ];
+
+export type LiveChatbotReply = {
+  reply: string;
+  intent?: string;
+  source: "live" | "guardrail_blocked" | "offline_fallback" | "signed_out";
+};
+
+/**
+ * Calls the REAL chatbot: app/api/chatbot/route.ts -> backend/api's guarded
+ * /api/ai/chatbot/message -> Gemini, with real actions (enroll, submit
+ * feedback/complaints, reschedule, draft a course, ...) executed
+ * server-side against the signed-in user's own data - see
+ * services/ai/chatbotService.js. Falls back to the local canned
+ * `chatbotReply` only when signed out or the backend is unreachable, never
+ * when the backend deliberately blocked the message.
+ */
+export async function chatbotReplyLive(prompt: string): Promise<LiveChatbotReply> {
+  let res: Response;
+  try {
+    res = await fetch("/api/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: prompt }),
+    });
+  } catch {
+    return { reply: await chatbotReply(prompt), source: "offline_fallback" };
+  }
+
+  const body = await res.json().catch(() => null);
+
+  if (res.status === 401) {
+    return { reply: await chatbotReply(prompt), source: "signed_out" };
+  }
+  if (res.status === 503 && body?.offline) {
+    return { reply: await chatbotReply(prompt), source: "offline_fallback" };
+  }
+  if (!body?.success) {
+    return {
+      reply: body?.message ?? "Your message was blocked by AI safety guardrails.",
+      source: "guardrail_blocked",
+    };
+  }
+  return { reply: body.data.reply as string, intent: body.data.intent as string, source: "live" };
+}

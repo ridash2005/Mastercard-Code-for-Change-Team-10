@@ -10,6 +10,7 @@ import {
   BookOpen,
   Bot,
   CalendarClock,
+  Code2,
   ChevronDown,
   Compass,
   Flag,
@@ -70,6 +71,7 @@ export const studentGroups: { id: string; heading: string; items: { href: string
       { href: "/student/teams", key: "teams", icon: Users },
       { href: "/student/ai-coach", key: "aiCoach", icon: Bot },
       { href: "/student/chatbot", key: "chatbot", icon: MessageCircle },
+      { href: "/student/playground", label: "Playground", icon: Code2 },
     ],
   },
   {

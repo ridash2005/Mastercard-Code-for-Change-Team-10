@@ -134,6 +134,14 @@ const activitySchema = new mongoose.Schema(
       type: String,
       enum: ['draft', 'published', 'archived'],
       default: 'published'
+    },
+    // Populated when this course was designed by the AI Course Designer
+    // (see services/ai/courseDesignService.js) - the full lesson content
+    // and quiz, beyond what `modules` (titles only) holds. Absent for
+    // hand-created activities.
+    courseContent: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
     }
   },
   {

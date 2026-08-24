@@ -17,7 +17,7 @@ export default function SettingsPage() {
   return (
     <div>
       <h1 className="font-serif text-3xl">Settings</h1>
-      <p className="mt-1 text-sm text-muted">Language lives in the top bar. Auth remains mock until Auth.js is wired.</p>
+      <p className="mt-1 text-sm text-muted">Language lives in the top bar. Auth is real (backend/api, JWT).</p>
       <form
         className="mt-6 max-w-3xl space-y-6"
         onSubmit={(e) => {
@@ -42,7 +42,7 @@ export default function SettingsPage() {
           <input type="checkbox" defaultChecked /> Streak warnings
         </label>
         <Button type="submit">Save preferences</Button>
-        {ok ? <SuccessState title="Preferences saved on this device." /> : null}
+        {ok ? <SuccessState title="Interests saved to your profile." /> : null}
       </form>
     </div>
   );

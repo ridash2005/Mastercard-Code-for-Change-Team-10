@@ -163,10 +163,17 @@ The platform enforces two roles:
 | | `/api/extracurricular` | `POST` | Admin | Create an extracurricular activity |
 | **Contact** | `/api/contact` | `POST` | Public | Submit a contact form message |
 | | `/api/contact` | `GET` | Admin | List contact form submissions |
+| **Collaborations**| `/api/collaborations` | `GET` | Private | List collaboration invites (own, or all for admin) |
+| | `/api/collaborations` | `POST` | Admin | Create a collaboration invite between students |
+| | `/api/collaborations/:id/respond` | `POST` | Private | Student accepts/declines an invite |
+| **Volunteers** | `/api/volunteer-applications` | `GET` | Admin | List volunteer applications |
+| | `/api/volunteer-applications` | `POST` | Public | Submit a volunteer application |
+| | `/api/volunteer-applications/:id/status` | `PATCH` | Admin | Approve/reject an application |
 | **Analytics** | `/api/admin/analytics/overview`| `GET`| Admin | Programme KPI metrics |
 | | `/api/admin/analytics/reports`| `GET` | Admin | Fellow performance reports |
 | **AI gateway** | `/api/ai/coach/message` | `POST` | Private (student/admin) | Guardrailed AI Coach chat — input/output validation, rate-limited (see `services/ai/`) |
-| | `/api/ai/judge/score-submission` | `POST` | Admin + `INTERNAL_AI_KEY` | Not client-facing — scores a submission via `@katalyst/ai-judge`; requires both an admin JWT and the internal service key header |
+| | `/api/ai/chatbot/message` | `POST` | Private (student/admin) | Guardrailed general chatbot — classifies intent and can perform real actions (enroll, submit feedback/complaint, mark notifications read, reschedule, draft a course) via `services/chatbotActionService.js` |
+| | `/api/ai/judge/score-submission` | `POST` | Admin + `INTERNAL_AI_KEY` | Not client-facing — scores a submission via `@katalyst/ai-judge`; requires both an admin JWT and the internal service key header. In practice the Judge runs automatically per-submission (see `submissionService.js`'s `triggerAiJudge`), not via this route — see `KATALYST_AI_SPEC.md` §2.1 |
 
 For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTING.md`](./API_TESTING.md) (covers the non-AI routes only — see `KATALYST_AI_SPEC.md` for the AI gateway's request/response contracts).
 

@@ -1,8 +1,9 @@
 import type { Activity, Enrollment, StudentProfile, Submission, User } from "@/lib/types";
 
 /**
- * Repository layer. UI should call these helpers (or the Zustand store which
- * implements the same mutations) so Mongo can replace the mock later.
+ * Small, pure lookup/derive helpers over the arrays lib/data/platform-store.ts
+ * hydrates from backend/api's real data - kept separate from the store so
+ * they're trivially unit-testable and reusable across pages.
  */
 export function getStudent(users: User[], profiles: StudentProfile[], id: string) {
   return {

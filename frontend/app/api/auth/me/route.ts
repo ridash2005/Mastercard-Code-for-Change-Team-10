@@ -1,7 +1,8 @@
 // Returns the real backend/api user for the current session cookie, or null.
-// Used by server components/pages that need to know who's really logged in
-// (as opposed to the mock store's sessionUserId, which is being phased out
-// page by page).
+// Used by server components/pages that need to know who's logged in without
+// going through the client-side store (lib/data/platform-store.ts's
+// sessionUserId holds the same real backend id, but only after it hydrates
+// client-side).
 
 import { NextRequest, NextResponse } from "next/server";
 import { getMe } from "@/lib/services/backendClient";

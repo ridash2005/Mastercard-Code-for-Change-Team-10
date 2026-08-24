@@ -1,9 +1,8 @@
 // Real registration: browser -> this route -> backend/api's real
 // /auth/register (bcrypt-hashed password, real Mongo user). On success, the
 // real JWT is stored in an httpOnly cookie - never readable by client JS -
-// plus the existing katalyst-role/katalyst-user cookies so the rest of the
-// (still largely mock-data-driven) app keeps working during the ongoing
-// migration off the Zustand store.
+// plus katalyst-role/katalyst-user cookies (read by proxy.ts for
+// route-guard redirects) and lib/data/platform-store.ts's session state.
 
 import { NextRequest, NextResponse } from "next/server";
 import { registerRealUser } from "@/lib/services/backendClient";
