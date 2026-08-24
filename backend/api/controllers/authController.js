@@ -94,9 +94,58 @@ const completeOnboarding = async (req, res, next) => {
   }
 };
 
+// @desc    Request a password reset email
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please provide an email address' });
+    }
+
+    const result = await authService.forgotPassword(email);
+
+    res.status(200).json({
+      success: true,
+      // Always the same message regardless of whether the account exists -
+      // don't let this endpoint be used to enumerate registered emails.
+      message: 'If an account exists for that email, a reset link has been sent.',
+      // Only present when RESEND_API_KEY isn't configured (local dev) - see
+      // authService.js's forgotPassword.
+      ...(result.devResetUrl && { devResetUrl: result.devResetUrl })
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reset password using a token from the email link
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: 'token and password are required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'password must be at least 6 characters' });
+    }
+
+    await authService.resetPassword(token, password);
+
+    res.status(200).json({ success: true, message: 'Password reset successfully. You can now log in.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
-  completeOnboarding
+  completeOnboarding,
+  forgotPassword,
+  resetPassword
 };

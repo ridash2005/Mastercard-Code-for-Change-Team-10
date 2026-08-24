@@ -1,6 +1,19 @@
 const Activity = require('../models/Activity');
 const Enrollment = require('../models/Enrollment');
 const Notification = require('../models/Notification');
+const { validateCustomRubric } = require('./ai/rubrics');
+
+function assertValidCustomRubric(data) {
+  if (data.customRubric === undefined || (Array.isArray(data.customRubric) && data.customRubric.length === 0)) {
+    return;
+  }
+  const err = validateCustomRubric(data.customRubric);
+  if (err) {
+    const error = new Error(`Invalid customRubric: ${err}`);
+    error.statusCode = 400;
+    throw error;
+  }
+}
 
 const listActivities = async (query = {}, user = null) => {
   const {
@@ -133,6 +146,7 @@ const getActivityById = async (id, user = null) => {
 };
 
 const createActivity = async (data, creatorId = null) => {
+  assertValidCustomRubric(data);
   const activityData = {
     ...data,
     createdBy: creatorId || data.createdBy
@@ -153,6 +167,7 @@ const createActivity = async (data, creatorId = null) => {
 };
 
 const updateActivity = async (id, data) => {
+  assertValidCustomRubric(data);
   const activity = await Activity.findByIdAndUpdate(id, data, { new: true, runValidators: true });
   if (!activity) {
     const error = new Error('Activity not found');

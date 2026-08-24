@@ -60,7 +60,14 @@ export type PlatformState = {
   volunteerApplications: VolunteerApplication[];
   updateProfile: (
     userId: string,
-    patch: { name?: string; skills?: string[]; interests?: string[]; careerGoal?: string; onboarded?: boolean },
+    patch: {
+      name?: string;
+      skills?: string[];
+      interests?: string[];
+      careerGoal?: string;
+      onboarded?: boolean;
+      notificationPreferences?: { emailNotificationsEnabled?: boolean; courseRecommendationEmails?: boolean; meetingUpdateEmails?: boolean };
+    },
   ) => Promise<void>;
   enroll: (activityId: string, studentId?: string) => Promise<void>;
   startActivity: (activityId: string, studentId?: string) => Promise<void>;

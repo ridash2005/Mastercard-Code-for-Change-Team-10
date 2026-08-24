@@ -14,7 +14,15 @@ const config = {
   // Shared secret required (in addition to admin JWT) to call internal,
   // non-client-facing AI routes such as judge scoring. Must be set in
   // production — there is no safe default, unlike jwtSecret above.
-  internalAiKey: process.env.INTERNAL_AI_KEY || null
+  internalAiKey: process.env.INTERNAL_AI_KEY || null,
+
+  // Password reset email delivery (services/emailService.js). Leave
+  // resendApiKey unset to disable real sending - forgot-password then
+  // responds with the reset link directly instead of emailing it (fine for
+  // local dev, never for production).
+  resendApiKey: process.env.RESEND_API_KEY || null,
+  resendFromEmail: process.env.RESEND_FROM_EMAIL || 'Katalyst <onboarding@resend.dev>',
+  frontendUrl: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000'
 };
 
 module.exports = config;

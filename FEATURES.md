@@ -18,7 +18,7 @@ backed by anything yet (explicitly out of scope, listed for completeness)
 | Login | 🟢 | `POST /api/auth/login` — bcrypt password check, JWT cookie |
 | Session persistence across reloads | 🟢 | httpOnly `katalyst_token` cookie (7d) is the source of truth; `GET /api/auth/me` reconciles the client-side store from it |
 | Logout | 🟢 | Clears the session cookie server-side, clears client store |
-| Password reset | ⚪ | Not implemented — no route, no email delivery |
+| Password reset | 🟢 | `POST /api/auth/{forgot-password,reset-password}` — single-use, 1-hour-expiring hashed token (a TTL index auto-deletes it from Mongo on expiry); real email delivery via Resend (`services/emailService.js`). Always responds identically regardless of whether the email matches an account, and regardless of whether delivery itself succeeds — never a signal an attacker (or a broken mail provider) can use to enumerate accounts. Falls back to returning the reset link directly in the API response only when `RESEND_API_KEY` is unset (local dev) |
 
 ## Student portal
 
@@ -39,7 +39,7 @@ backed by anything yet (explicitly out of scope, listed for completeness)
 | Notifications | 🟢 | Real, role-scoped `Notification` docs; mark-one/mark-all read both persist |
 | Profile (view/edit own) | 🟢 | `GET`/`PUT /api/users/profile` |
 | Settings — interests | 🟢 | Persists via `updateProfile` |
-| Settings — email/streak notification toggles | 🟡 | UI-only checkboxes, not wired to `StudentProfile.notificationPreferences` yet |
+| Settings — email notification toggles | 🟢 | Three real toggles (`emailNotificationsEnabled`, `courseRecommendationEmails`, `meetingUpdateEmails`) persisted to `StudentProfile.notificationPreferences` |
 | Reschedule a mentoring/training session | 🟢 | Rewired off the real `Meeting` resource (was previously conflated with `Activity`) — real `candidateSlots`, deadline enforcement |
 | Feedback (rating + message) | 🟢 | `POST /api/feedback` |
 | Complaints (ticketed, priority, status) | 🟢 | `POST /api/complaints` |
@@ -56,7 +56,8 @@ backed by anything yet (explicitly out of scope, listed for completeness)
 |---|---|---|
 | Create/edit/delete activities | 🟢 | `POST`/`PUT`/`DELETE /api/activities` |
 | Review submissions (approve/reject/resubmit) | 🟢 | `POST /api/submissions/:id/review` — awards XP, issues certificates, notifies the student |
-| AI Judge suggestion on each submission | 🟢 | Runs automatically per submission (not a button — see "Why the AI Judge isn't a button" below); rubric matched to the activity's type, real per-criterion justifications, confidence, and flags |
+| AI Judge suggestion on each submission | 🟢 | Runs automatically per submission (not a button — see "Why the AI Judge isn't a button" below); real per-criterion justifications, confidence, and flags |
+| AI Judge rubric customization | 🟢 | Optional per-activity rubric override (`Activity.customRubric`, set from the create-activity form) — validated server-side (weights must sum to 100) on write and used in place of the fixed per-type rubric when present; falls back to the type-based rubric otherwise |
 | Teams (roster view) | 🟢 | Same real `GET /api/teams` |
 | Collaborator matching (create an invite) | 🟢 | `POST /api/collaborations` |
 | Volunteers / volunteer applications (approve/reject) | 🟢 | `PATCH /api/volunteer-applications/:id/status` |
@@ -77,11 +78,13 @@ backed by anything yet (explicitly out of scope, listed for completeness)
 | Graceful degradation without a database | 🟢 | Every DB-dependent route fails fast (503) instead of hanging; `/api/health` always works |
 | Graceful degradation without Gemini | 🟢 | AI Coach/Chatbot fall back to a local canned reply rather than erroring; the AI Judge stores the failure on the submission instead of blocking review |
 
+Public "apply to volunteer" form: `/volunteer` — real, submits to `POST /api/volunteer-applications`.
+
 ## Not built (explicitly out of scope, not a gap in what's listed above)
 
-- Password reset / email delivery of any kind.
-- A public "apply to volunteer" form (the backend route exists and is real — `POST /api/volunteer-applications` — nothing in the UI calls it yet).
-- Per-student rubric customization for the AI Judge (it uses one fixed rubric per activity *type*, from `KATALYST_AI_SPEC.md`'s §11 seed rubrics).
+Nothing remains in this section as of the latest pass — the three gaps previously listed here
+(password reset, the public volunteer form, AI Judge rubric customization) are now built; see their
+rows above.
 
 ## Why the AI Judge isn't a button
 
@@ -105,4 +108,13 @@ at **20 requests/day** per model. That's more than enough to demo the AI Coach, 
 individually, but a full walkthrough of everything AI-touched (Coach + Chatbot + course generation +
 every submission's auto-scoring) can burn through it quickly. For a live demo or real deployment,
 upgrade to a paid Gemini tier (or a key with a higher quota) beforehand — see
-https://ai.google.dev/gemini-api/docs/rate-limits.
+https://ai.google.dev/gemini-api/docs/rate-limits. AI Judge rubric customization was verified by
+directly confirming `getEffectiveRubric` selects the custom rubric over the type-based default
+(the scoring call itself hit the same quota limit).
+
+**A note on the email free tier**: `RESEND_API_KEY`'s current plan is Resend's sandbox tier, which
+can only deliver to the account owner's own verified address until a custom domain is verified at
+resend.com/domains. Verified with a real delivered email to that address; a request for any other
+address (including the seeded demo accounts' fake `@katalyst.edu` addresses) is rejected by Resend
+but still returns the same safe, generic response to the caller (see `authService.js`'s
+`forgotPassword`) - never a 500, and never a hint that the account did or didn't exist.

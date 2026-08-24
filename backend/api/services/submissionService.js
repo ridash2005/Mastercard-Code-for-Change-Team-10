@@ -8,7 +8,7 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 const { sanitizeAndValidateInput, GuardrailError } = require('./ai/inputGuard');
 const { scoreSubmission, AiJudgeError } = require('./ai/aiJudgeService');
-const { getRubricCriteria } = require('./ai/rubrics');
+const { getEffectiveRubric } = require('./ai/rubrics');
 const { computeXp } = require('./ai/computeXp');
 
 /**
@@ -29,7 +29,7 @@ async function triggerAiJudge(submissionId, activity, attemptText) {
       return;
     }
 
-    const criteria = getRubricCriteria(activity.type);
+    const criteria = getEffectiveRubric(activity);
     const result = await scoreSubmission(
       guard.clean,
       criteria.map((c) => ({ key: c.key, name: c.name, weightPct: c.weight_pct, description: c.description }))

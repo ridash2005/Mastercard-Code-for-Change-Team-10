@@ -11,8 +11,9 @@ import { usePlatform } from "@/lib/data/platform-store";
 import { ErrorState } from "@/components/states";
 import Link from "next/link";
 
-// Matches backend/api/scripts/seed.js's seeded demo accounts.
-const DEMO_PASSWORD = "password123";
+// Matches backend/api/scripts/seed.js's default demo account password
+// (itself matching root .env.example's BACKEND_DEMO_PASSWORD default).
+const DEMO_PASSWORD = "katalyst-demo-bridge-2026";
 const DEMO_EMAILS = new Set(demoAccounts.map((a) => a.email.toLowerCase()));
 
 async function postJson(path: string, body: unknown) {
@@ -88,7 +89,12 @@ export default function LoginPage() {
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link href="/forgot-password" className="text-xs underline text-stone-500">
+                Forgot password?
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"

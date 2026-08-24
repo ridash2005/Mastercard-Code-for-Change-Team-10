@@ -1,8 +1,15 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
 const StudentProfile = require('../models/StudentProfile');
 const AdminProfile = require('../models/AdminProfile');
+const PasswordResetToken = require('../models/PasswordResetToken');
 const config = require('../config');
+const { sendPasswordResetEmail, isEmailConfigured } = require('./emailService');
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1h
+
+const hashToken = (raw) => crypto.createHash('sha256').update(raw).digest('hex');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, config.jwtSecret, {
@@ -155,10 +162,89 @@ const completeOnboarding = async (userId, data) => {
   return { user, profile };
 };
 
+/**
+ * Always succeeds from the caller's point of view regardless of whether the
+ * email matches an account - never reveals account existence. When Resend
+ * isn't configured (RESEND_API_KEY unset), the raw reset link is returned
+ * directly instead of emailed, for local dev only (see emailService.js).
+ */
+const forgotPassword = async (email) => {
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail });
+
+  if (!user) {
+    return { sent: false, devResetUrl: null };
+  }
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  await PasswordResetToken.create({
+    userId: user._id,
+    tokenHash: hashToken(rawToken),
+    expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS)
+  });
+
+  const resetUrl = `${config.frontendUrl}/reset-password?token=${rawToken}`;
+
+  if (isEmailConfigured()) {
+    try {
+      await sendPasswordResetEmail(user.email, user.name, resetUrl);
+    } catch (err) {
+      // Never let an email-provider hiccup (sandbox restrictions, a
+      // transient outage, ...) turn into a 500 here - that status-code
+      // difference from the "no such account" case would itself leak
+      // whether the account exists, on top of just being a broken UX for
+      // a real account. Log it and still respond as if it went out; the
+      // token is already stored so a retry (or an admin manually sharing
+      // the link) still works.
+      console.error('sendPasswordResetEmail failed:', err);
+    }
+    return { sent: true, devResetUrl: null };
+  }
+
+  // Dev-mode fallback - no email provider configured. Never do this in
+  // production; the whole point of email delivery is that only the account
+  // owner (who controls the inbox) sees the link.
+  return { sent: false, devResetUrl: resetUrl };
+};
+
+const resetPassword = async (rawToken, newPassword) => {
+  const record = await PasswordResetToken.findOne({
+    tokenHash: hashToken(rawToken),
+    used: false,
+    expiresAt: { $gt: new Date() }
+  });
+
+  if (!record) {
+    const error = new Error('This reset link is invalid or has expired');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const user = await User.findById(record.userId);
+  if (!user) {
+    const error = new Error('This reset link is invalid or has expired');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  user.passwordHash = newPassword; // re-hashed by User's pre-save hook
+  await user.save();
+
+  record.used = true;
+  await record.save();
+
+  // Invalidate any other outstanding reset requests for this user.
+  await PasswordResetToken.updateMany({ userId: user._id, used: false }, { used: true });
+
+  return { email: user.email };
+};
+
 module.exports = {
   generateToken,
   register,
   login,
   getMe,
-  completeOnboarding
+  completeOnboarding,
+  forgotPassword,
+  resetPassword
 };

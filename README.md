@@ -29,8 +29,9 @@ Open [http://localhost:3000](http://localhost:3000). Demo accounts (password
 other route fails fast with a `503` instead of hanging on a Mongoose timeout (see
 `backend/api/middleware/dbMiddleware.js`) — but no authenticated request succeeds until Mongo is
 reachable. See `backend/api/.env.example` for the backend's env vars (`MONGO_URI`, `JWT_SECRET`,
-`GEMINI_API_KEY`, `INTERNAL_AI_KEY`), and root `.env.example` for the frontend's own
-(`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD`, `OCR_SPACE_API_KEY`).
+`GEMINI_API_KEY`, `INTERNAL_AI_KEY`, `RESEND_API_KEY` for password-reset email), and root
+`.env.example` for the frontend's own (`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD`,
+`OCR_SPACE_API_KEY`).
 
 **Gemini's free tier caps at 20 requests/day per model.** That's fine for spot-checking one AI
 feature at a time, but a full walkthrough of AI Coach + Chatbot + course generation + every

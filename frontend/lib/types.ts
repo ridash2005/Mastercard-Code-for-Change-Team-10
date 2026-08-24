@@ -71,6 +71,11 @@ export type StudentProfile = {
   inactive: boolean;
   atRisk: boolean;
   onboarded: boolean;
+  notificationPreferences?: {
+    emailNotificationsEnabled: boolean;
+    courseRecommendationEmails: boolean;
+    meetingUpdateEmails: boolean;
+  };
 };
 
 export type AdminProfile = {
@@ -98,6 +103,9 @@ export type Activity = {
   attachments: { name: string; url: string }[];
   instructions: string;
   createdBy: string;
+  /** Optional AI Judge rubric override for this activity - weights must sum
+   * to 100. Falls back to the fixed per-type rubric when empty/absent. */
+  customRubric?: { key: string; name: string; weightPct: number; description?: string }[];
 };
 
 export type Course = Activity & { modules: string[] };

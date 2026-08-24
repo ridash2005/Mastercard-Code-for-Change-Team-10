@@ -62,6 +62,13 @@ GEMINI_API_KEY=
 # non-client-facing AI Judge scoring route. No default - that route stays
 # disabled (503) until this is set.
 INTERNAL_AI_KEY=
+
+# Password reset email delivery (services/emailService.js), via Resend. Leave
+# unset to run forgot-password in dev mode - the reset link is returned
+# directly in the response instead of emailed.
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=Katalyst <onboarding@resend.dev>
+FRONTEND_URL=http://localhost:3000
 ```
 
 See `.env.example` in this directory for the full annotated list, and root `.env.example` for the frontend's AI Coach bridge config (`BACKEND_API_URL`, `BACKEND_DEMO_PASSWORD` — must match the demo accounts' seeded password below).
@@ -125,12 +132,14 @@ The platform enforces two roles:
 | | `/api/auth/login` | `POST` | Public | Authenticate user & receive JWT |
 | | `/api/auth/me` | `GET` | Private | Current user & profile |
 | | `/api/auth/onboarding` | `POST` | Private | Complete onboarding profile |
+| | `/api/auth/forgot-password` | `POST` | Public | Request a password reset email (rate-limited) |
+| | `/api/auth/reset-password` | `POST` | Public | Complete a reset using the emailed token (rate-limited) |
 | **Users** | `/api/users/profile` | `GET / PUT` | Private | View/update current profile |
 | | `/api/users` | `GET` | Admin | List all users (paginated) |
 | | `/api/users/students/at-risk`| `GET` | Admin | List at-risk & inactive students |
 | **Activities** | `/api/activities` | `GET` | Public/Auth | List & filter activities |
 | | `/api/activities/:id` | `GET` | Public/Auth | Get activity details |
-| | `/api/activities` | `POST` | Admin | Create course/training/project |
+| | `/api/activities` | `POST` | Admin | Create course/training/project - optionally with a `customRubric` (weights must sum to 100) overriding the AI Judge's default per-type rubric |
 | | `/api/activities/:id` | `PUT / DELETE`| Admin | Update or delete activity |
 | **Enrollments**| `/api/enrollments` | `GET` | Private | List student enrollments |
 | | `/api/enrollments` | `POST` | Private | Enroll in an activity |

@@ -52,7 +52,7 @@ export default function ContactPage() {
               <Textarea name="message" required rows={4} />
             </div>
             <Button type="submit">Send</Button>
-            {ok ? <SuccessState title="Message recorded for programme staff (demo)." /> : null}
+            {ok ? <SuccessState title="Message sent to programme staff." /> : null}
           </form>
         </div>
         <div>

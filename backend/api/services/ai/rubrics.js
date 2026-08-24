@@ -63,6 +63,41 @@ function getRubricCriteria(activityType) {
   return RUBRIC_CRITERIA[ACTIVITY_TYPE_TO_RUBRIC[activityType]] || RUBRIC_CRITERIA.other;
 }
 
+/** @returns {string|null} an error message if invalid, else null. Weights
+ * must sum to 100 - same invariant as the fixed seed rubrics (see
+ * ai/ai-judge's assertWeightsSumTo100) - since computeXp.js scales XP off
+ * that total. */
+function validateCustomRubric(criteria) {
+  if (!Array.isArray(criteria) || criteria.length === 0) {
+    return 'customRubric must be a non-empty array';
+  }
+  const keys = new Set();
+  let total = 0;
+  for (const c of criteria) {
+    if (!c || typeof c.key !== 'string' || !c.key.trim()) return 'each criterion needs a non-empty "key"';
+    if (!c.name || typeof c.name !== 'string') return 'each criterion needs a non-empty "name"';
+    if (typeof c.weightPct !== 'number' || c.weightPct < 0 || c.weightPct > 100) {
+      return `criterion "${c.key}" needs a numeric weightPct between 0 and 100`;
+    }
+    if (keys.has(c.key)) return `duplicate criterion key: "${c.key}"`;
+    keys.add(c.key);
+    total += c.weightPct;
+  }
+  if (Math.abs(total - 100) > 0.01) return `criteria weights must sum to 100, got ${total}`;
+  return null;
+}
+
+/** The rubric to actually use for scoring this activity - its own
+ * customRubric when set and valid, else the fixed rubric for its type. An
+ * invalid stored customRubric (shouldn't happen - validated on write, see
+ * activityService.js) still falls back safely rather than breaking scoring. */
+function getEffectiveRubric(activity) {
+  if (Array.isArray(activity.customRubric) && activity.customRubric.length > 0) {
+    if (!validateCustomRubric(activity.customRubric)) return activity.customRubric;
+  }
+  return getRubricCriteria(activity.type);
+}
+
 const PERFORMANCE_LEVEL_PERCENTAGES = {
   not_demonstrated: 0,
   developing: 50,
@@ -70,4 +105,11 @@ const PERFORMANCE_LEVEL_PERCENTAGES = {
   excellent: 100
 };
 
-module.exports = { RUBRIC_CRITERIA, ACTIVITY_TYPE_TO_RUBRIC, getRubricCriteria, PERFORMANCE_LEVEL_PERCENTAGES };
+module.exports = {
+  RUBRIC_CRITERIA,
+  ACTIVITY_TYPE_TO_RUBRIC,
+  getRubricCriteria,
+  getEffectiveRubric,
+  validateCustomRubric,
+  PERFORMANCE_LEVEL_PERCENTAGES
+};

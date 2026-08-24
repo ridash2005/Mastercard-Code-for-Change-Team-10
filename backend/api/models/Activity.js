@@ -8,6 +8,19 @@ const attachmentSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Optional per-activity override for the AI Judge's rubric (see
+// services/ai/rubrics.js) - when set (and its weights sum to 100), used
+// instead of the fixed rubric for the activity's type.
+const rubricCriterionSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true },
+    weightPct: { type: Number, required: true, min: 0, max: 100 },
+    description: { type: String, default: '', trim: true }
+  },
+  { _id: false }
+);
+
 const activitySchema = new mongoose.Schema(
   {
     title: {
@@ -142,6 +155,10 @@ const activitySchema = new mongoose.Schema(
     courseContent: {
       type: mongoose.Schema.Types.Mixed,
       default: null
+    },
+    customRubric: {
+      type: [rubricCriterionSchema],
+      default: []
     }
   },
   {

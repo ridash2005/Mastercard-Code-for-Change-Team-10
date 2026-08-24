@@ -11,6 +11,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const { t } = useI18n();
   const links = [
     { href: "/", label: "Home" },
+    { href: "/volunteer", label: "Volunteer" },
     { href: "/contact", label: t.contact },
     { href: "/feedback", label: t.feedback },
     { href: "/complaint", label: t.complaints },

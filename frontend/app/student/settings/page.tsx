@@ -7,12 +7,15 @@ import { normalizeInterestIds } from "@/lib/data/interests";
 import { usePlatform } from "@/lib/data/platform-store";
 import { useState } from "react";
 
+const DEFAULT_PREFS = { emailNotificationsEnabled: true, courseRecommendationEmails: true, meetingUpdateEmails: true };
+
 export default function SettingsPage() {
   const store = usePlatform();
   const sid = store.sessionUserId ?? "";
   const profile = store.studentProfiles.find((p) => p.userId === sid);
   const [ok, setOk] = useState(false);
   const [interests, setInterests] = useState(() => normalizeInterestIds(profile?.interests ?? []));
+  const [prefs, setPrefs] = useState(() => profile?.notificationPreferences ?? DEFAULT_PREFS);
 
   return (
     <div>
@@ -22,7 +25,7 @@ export default function SettingsPage() {
         className="mt-6 max-w-3xl space-y-6"
         onSubmit={(e) => {
           e.preventDefault();
-          if (profile) store.updateProfile(sid, { interests });
+          if (profile) store.updateProfile(sid, { interests, notificationPreferences: prefs });
           setOk(true);
         }}
       >
@@ -35,14 +38,35 @@ export default function SettingsPage() {
             <InterestPicker selected={interests} onChange={setInterests} labelledBy="settings-interests" />
           </fieldset>
         ) : null}
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" defaultChecked /> Email reminders for deadlines
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" defaultChecked /> Streak warnings
-        </label>
+        <fieldset className="space-y-2">
+          <legend className="font-serif text-xl text-plum">Email notifications</legend>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={prefs.emailNotificationsEnabled}
+              onChange={(e) => setPrefs((p) => ({ ...p, emailNotificationsEnabled: e.target.checked }))}
+            />
+            Email notifications enabled
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={prefs.courseRecommendationEmails}
+              onChange={(e) => setPrefs((p) => ({ ...p, courseRecommendationEmails: e.target.checked }))}
+            />
+            Course recommendation emails
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={prefs.meetingUpdateEmails}
+              onChange={(e) => setPrefs((p) => ({ ...p, meetingUpdateEmails: e.target.checked }))}
+            />
+            Meeting/session update emails
+          </label>
+        </fieldset>
         <Button type="submit">Save preferences</Button>
-        {ok ? <SuccessState title="Interests saved to your profile." /> : null}
+        {ok ? <SuccessState title="Preferences saved to your profile." /> : null}
       </form>
     </div>
   );

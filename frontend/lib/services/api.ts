@@ -65,8 +65,21 @@ export type GamificationDashboard = Record<string, unknown>;
 export const api = {
   users: {
     profile: () => get<{ user: User; profile: StudentProfile | null }>("users/profile"),
-    updateProfile: (patch: { name?: string; skills?: string[]; interests?: string[]; careerGoal?: string }) =>
-      put<{ user: User; profile: StudentProfile | null }>("users/profile", patch),
+    updateProfile: (patch: {
+      name?: string;
+      skills?: string[];
+      interests?: string[];
+      careerGoal?: string;
+      notificationPreferences?: { emailNotificationsEnabled?: boolean; courseRecommendationEmails?: boolean; meetingUpdateEmails?: boolean };
+    }) => {
+      const { notificationPreferences, ...rest } = patch;
+      return put<{ user: User; profile: StudentProfile | null }>("users/profile", {
+        ...rest,
+        // backend/api's updateProfile only reads notificationPreferences
+        // when nested under studentProfile - see services/userService.js.
+        ...(notificationPreferences && { studentProfile: { notificationPreferences } }),
+      });
+    },
     list: () => get<User[]>("users"),
     atRisk: () => get<StudentProfile[]>("users/students/at-risk"),
   },
