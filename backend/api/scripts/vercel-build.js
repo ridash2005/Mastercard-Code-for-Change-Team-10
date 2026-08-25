@@ -1,17 +1,30 @@
 // Runs as this project's Vercel build command (see package.json's
 // "vercel-build" script, which Vercel auto-detects and runs instead of the
 // default `next build` / no-op). Builds @katalyst/ai-client from source and
-// vendors its compiled output into backend/api/vendor/ai-client — see
-// services/ai/aiClientBridge.js for why: a runtime-computed import() target
-// outside this project's rootDirectory won't get bundled by Vercel's
-// dependency tracer, but a copy that lives inside rootDirectory will.
+// vendors its compiled output into backend/api/node_modules/@katalyst/
+// ai-client-vendor — see services/ai/aiClientBridge.js for why: a
+// runtime-computed import() target outside this project's rootDirectory
+// won't get bundled by Vercel's dependency tracer, but a copy that lives
+// inside rootDirectory will.
+//
+// It has to live under node_modules specifically, not some arbitrary
+// "vendor/" folder (an earlier version of this script used exactly that,
+// see git history) - Vercel's Node.js Functions builder transpiles every
+// .js file it packages for a function from ESM to CommonJS by default
+// (going by the function's own package.json, backend/api/package.json,
+// which has no "type": "module"), and it does this for ANY included file
+// outside node_modules regardless of that file's own nested package.json
+// saying "type": "module" - only content actually under node_modules is
+// left alone as pre-built. Renaming the vendored file off "index.js" (also
+// tried, see git history) didn't help either - the transpile isn't keyed
+// on filename, it's blanket-applied to non-node_modules source.
 const path = require('path');
 const fs = require('fs');
 const { execFileSync } = require('child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 const AI_CLIENT_SRC = path.join(REPO_ROOT, 'ai', 'ai-client');
-const VENDOR_DIR = path.resolve(__dirname, '../vendor/ai-client');
+const VENDOR_DIR = path.resolve(__dirname, '../node_modules/@katalyst/ai-client-vendor');
 
 // Standalone deploys (backend/api uploaded on its own, e.g. via `vercel
 // deploy backend/api`) never have the sibling ai/ directory available on
@@ -25,7 +38,7 @@ if (!fs.existsSync(AI_CLIENT_SRC)) {
   }
   console.error(
     '[vercel-build] Neither ai/ai-client source nor a pre-vendored dist/index.js was found. ' +
-      'For a standalone backend/api deploy, run scripts/vercel-build.js locally first so vendor/ai-client is included in the upload.'
+      'For a standalone backend/api deploy, run scripts/vercel-build.js locally first so the vendored copy is included in the upload.'
   );
   process.exit(1);
 }
@@ -64,26 +77,8 @@ execFileSync('npx tsc -p tsconfig.json', {
 
 console.log(`[vercel-build] Vendoring ai-client into ${VENDOR_DIR}...`);
 fs.rmSync(VENDOR_DIR, { recursive: true, force: true });
-fs.mkdirSync(path.join(VENDOR_DIR, 'dist'), { recursive: true });
-// Renamed off "index.js" deliberately - Vercel's zero-config Node.js
-// Functions detection scans this whole project (rootDirectory) for files
-// matching its entrypoint patterns (app/index/server.{js,...}), including
-// this vendored *dependency* file, and was silently treating it as a
-// second, unintended serverless function: transpiling it ESM -> CommonJS
-// (its own default for a package.json without "type": "module", which is
-// backend/api/package.json's setting, not this vendored package's) while
-// leaving vendor/ai-client/package.json's "type": "module" untouched. The
-// mismatch then breaks at runtime with "exports is not defined in ES
-// module scope" the moment aiClientBridge.js dynamically imports it -
-// aiClientBridge.js's own import() call never triggers this misdetection,
-// only Vercel's build-time directory scan does, so the rename is the fix.
-for (const entry of fs.readdirSync(path.join(AI_CLIENT_SRC, 'dist'))) {
-  const renamed = entry.replace(/^index\./, 'aiClient.');
-  fs.copyFileSync(
-    path.join(AI_CLIENT_SRC, 'dist', entry),
-    path.join(VENDOR_DIR, 'dist', renamed)
-  );
-}
+fs.mkdirSync(VENDOR_DIR, { recursive: true });
+fs.cpSync(path.join(AI_CLIENT_SRC, 'dist'), path.join(VENDOR_DIR, 'dist'), { recursive: true });
 fs.copyFileSync(path.join(AI_CLIENT_SRC, 'package.json'), path.join(VENDOR_DIR, 'package.json'));
 
 console.log('[vercel-build] Done.');

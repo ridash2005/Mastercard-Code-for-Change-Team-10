@@ -53,7 +53,7 @@ exports.coachMessage = async (req, res) => {
     });
     return res.json({ success: true, data: { reply, intent: guard.intent } });
   } catch (err) {
-    await logAudit(req.user._id, 'ai_coach_error', 'ai_coach', { error: err.message });
+    await logAudit(req.user._id, 'ai_coach_error', 'ai_coach', { error: err.message, stack: err.stack, cause: err.cause && err.cause.stack });
     const status = err instanceof AiCoachError || err instanceof OutputGuardrailError ? 502 : 500;
     return res.status(status).json({
       success: false,

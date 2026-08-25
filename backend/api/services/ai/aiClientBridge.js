@@ -20,10 +20,10 @@ const { pathToFileURL } = require('url');
 // lives inside this function's own rootDirectory and therefore always gets
 // bundled. Local/monorepo dev never creates that vendor folder, so it falls
 // through to the normal workspace path unchanged.
-// Vendored copy is named aiClient.js, not index.js - see vercel-build.js's
-// vendoring step for why (Vercel's zero-config Functions detection was
-// mis-scanning index.js as a second serverless function entrypoint).
-const VENDORED_ENTRY = path.resolve(__dirname, '../../vendor/ai-client/dist/aiClient.js');
+// Vendored under node_modules (not some arbitrary "vendor/" folder) so
+// Vercel's Node.js Functions builder leaves it alone as pre-built content -
+// see vercel-build.js's vendoring step for the full explanation.
+const VENDORED_ENTRY = path.resolve(__dirname, '../../node_modules/@katalyst/ai-client-vendor/dist/index.js');
 const WORKSPACE_ENTRY = path.resolve(__dirname, '../../../../ai/ai-client/dist/index.js');
 const AI_CLIENT_DIST_ENTRY = fs.existsSync(VENDORED_ENTRY) ? VENDORED_ENTRY : WORKSPACE_ENTRY;
 

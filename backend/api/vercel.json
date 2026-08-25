@@ -2,7 +2,7 @@
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
   "functions": {
     "api/index.js": {
-      "includeFiles": "vendor/**"
+      "includeFiles": "node_modules/@katalyst/ai-client-vendor/**"
     }
   }
 }
