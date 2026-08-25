@@ -2,6 +2,9 @@
 
 A robust, production-grade Express.js & MongoDB backend for the Katalyst student and administrator portals — plus the guarded gateway into `/ai` (see `services/ai/` and `routes/aiRoutes.js`; `POST /api/ai/coach/message` and `POST /api/ai/judge/score-submission`). This is the only backend the frontend talks to, and the only thing that talks to `/ai`.
 
+Part of Katalyst, built by Team 10 for Mastercard Code for Change 3.0 — see the
+[root README](../../README.md#team) for the full team and the repository link.
+
 ---
 
 ## 🏗️ Architecture

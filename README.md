@@ -1,11 +1,26 @@
 # Katalyst — Gamified Learning & Student Engagement
 
-Built for **Mastercard Code for Change**. Two portals (student and admin), a real product flow from
-activity creation through XP, backed end-to-end by a real Express + MongoDB backend and real Gemini
-LLM calls — auth, activities, enrollments, submissions, gamification, teams, notifications,
+Built for **Mastercard Code for Change 3.0**. Two portals (student and admin), a real product flow
+from activity creation through XP, backed end-to-end by a real Express + MongoDB backend and real
+Gemini LLM calls — auth, activities, enrollments, submissions, gamification, teams, notifications,
 feedback, complaints, certificates, collaborations, volunteer applications, and an AI Coach, AI
 Judge, AI Course Designer, and agentic AI Chatbot all call real endpoints, not mock data.
 **See [`FEATURES.md`](./FEATURES.md) for a complete, verified feature-by-feature audit.**
+
+Repository: https://github.com/ridash2005/Mastercard-Code-for-Change-Team-10
+
+## Team
+
+Team 10, Mastercard Code for Change 3.0:
+
+- Vaibhav Chavan
+- Gurpreet Singh Bhatia
+- Aditya Jadhav
+- Yash Kulkarni
+- Chinmayee Chaple
+- Ananya Munshi
+- Anshita Sarda
+- Rickarya Das
 
 ## Live deployment
 
