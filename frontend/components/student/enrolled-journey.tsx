@@ -31,13 +31,13 @@ function isDone(status: EnrollmentStatus) {
 
 function layout(count: number, variant: "desktop" | "mobile") {
   const padX = variant === "desktop" ? 108 : 148;
-  const padY = variant === "desktop" ? 156 : 72;
+  const padY = variant === "desktop" ? 180 : 72;
   // Each node's label is a fixed-width box; stretch the canvas so consecutive
   // nodes always have enough room between them for their labels not to overlap.
-  const minGap = variant === "desktop" ? 190 : 128;
+  const minGap = variant === "desktop" ? 220 : 150;
   const vb =
     variant === "desktop"
-      ? { w: Math.max(1100, padX * 2 + Math.max(0, count - 1) * minGap), h: 640 }
+      ? { w: Math.max(1100, padX * 2 + Math.max(0, count - 1) * minGap), h: 720 }
       : { w: 380, h: Math.max(920, count * minGap) };
   const pts = Array.from({ length: count }, (_, i) => {
     const t = count <= 1 ? 0 : i / (count - 1);
@@ -245,10 +245,10 @@ function JourneyCanvas({
             <div
               className={cn(
                 "absolute w-[8.5rem] sm:w-[9.5rem]",
-                pt.lane === "below" && (i % 2 === 0 ? "top-7" : "top-16") + " left-1/2 -translate-x-1/2",
-                pt.lane === "above" && (i % 2 === 0 ? "bottom-7" : "bottom-16") + " left-1/2 -translate-x-1/2",
-                pt.lane === "left" && "right-7 top-1/2 -translate-y-1/2",
-                pt.lane === "right" && "left-7 top-1/2 -translate-y-1/2",
+                pt.lane === "below" && (i % 2 === 0 ? "top-10" : "top-24") + " left-1/2 -translate-x-1/2",
+                pt.lane === "above" && (i % 2 === 0 ? "bottom-10" : "bottom-24") + " left-1/2 -translate-x-1/2",
+                pt.lane === "left" && "right-10 top-1/2 -translate-y-1/2",
+                pt.lane === "right" && "left-10 top-1/2 -translate-y-1/2",
               )}
               style={{ zIndex: i + 1 }}
             >
@@ -285,7 +285,7 @@ function JourneyCanvas({
           enrollment={selected.enrollment}
           transactions={store.xpTransactions.filter((t) => t.studentId === studentId && t.activityId === selected.activity.id)}
           submission={store.submissions.find((s) => s.activityId === selected.activity.id && s.studentId === studentId)}
-          certificateTitle={store.certificates.find((c) => c.studentId === studentId && c.activityId === selected.activity.id)?.title}
+          certificate={store.certificates.find((c) => c.studentId === studentId && c.activityId === selected.activity.id)}
         />
       ) : null}
     </div>

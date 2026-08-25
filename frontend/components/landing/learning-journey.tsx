@@ -18,15 +18,15 @@ const MOBILE_VB = { w: 360, h: 640 };
 function labelClass(anchor: JourneyMilestone["desktopAnchor"] | JourneyMilestone["mobileAnchor"]) {
   switch (anchor) {
     case "left":
-      return "right-full mr-3 top-1/2 -translate-y-1/2 text-right";
+      return "right-full mr-6 top-1/2 -translate-y-1/2 text-right";
     case "right":
-      return "left-full ml-3 top-1/2 -translate-y-1/2 text-left";
+      return "left-full ml-6 top-1/2 -translate-y-1/2 text-left";
     case "top":
-      return "bottom-full mb-2.5 left-1/2 -translate-x-1/2 text-center";
+      return "bottom-full mb-5 left-1/2 -translate-x-1/2 text-center";
     case "bottom":
-      return "top-full mt-2.5 left-1/2 -translate-x-1/2 text-center";
+      return "top-full mt-5 left-1/2 -translate-x-1/2 text-center";
     default:
-      return "left-full ml-3 top-1/2 -translate-y-1/2";
+      return "left-full ml-6 top-1/2 -translate-y-1/2";
   }
 }
 

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import type { Activity, ActivityType, Enrollment, EnrollmentStatus, Submission, XPTransaction } from "@/lib/types";
+import type { Activity, ActivityType, Certificate, Enrollment, EnrollmentStatus, Submission, XPTransaction } from "@/lib/types";
+import { api } from "@/lib/services/api";
 import { formatDate } from "@/lib/utils";
 const TYPE_LABEL: Record<ActivityType, string> = {
   course: "Course",
@@ -41,7 +42,7 @@ export function JourneyDetailDialog({
   enrollment,
   transactions,
   submission,
-  certificateTitle,
+  certificate,
 }: {
   open: boolean;
   onClose: () => void;
@@ -49,7 +50,7 @@ export function JourneyDetailDialog({
   enrollment: Enrollment;
   transactions: XPTransaction[];
   submission?: Submission;
-  certificateTitle?: string;
+  certificate?: Certificate;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const action = cta(activity, enrollment.status);
@@ -142,8 +143,17 @@ export function JourneyDetailDialog({
         <h4 className="mt-4 text-sm font-semibold text-plum">Rewards</h4>
         <p className="mt-1 text-sm text-muted">
           {earned ? `${earned} XP on record` : "No XP on record yet"}
-          {certificateTitle ? ` · Certificate: ${certificateTitle}` : ""}
+          {certificate ? ` · Certificate: ${certificate.title}` : ""}
         </p>
+        {certificate ? (
+          <a
+            href={api.certificates.downloadUrl(certificate.id)}
+            download
+            className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full border border-gold/60 bg-ivory px-3 py-1.5 text-xs font-semibold text-plum hover:bg-card"
+          >
+            Download certificate (PDF)
+          </a>
+        ) : null}
 
         <h4 className="mt-4 text-sm font-semibold text-plum">Next step</h4>
         <p className="mt-1 text-sm text-muted">{nextStep(activity, enrollment.status)}</p>

@@ -40,11 +40,15 @@ async function proxy(req: NextRequest, segments: string[]) {
     );
   }
 
-  const responseBody = await res.text();
-  return new NextResponse(responseBody, {
-    status: res.status,
-    headers: { "Content-Type": res.headers.get("Content-Type") ?? "application/json" }
-  });
+  const contentType = res.headers.get("Content-Type") ?? "application/json";
+  const isBinary = !contentType.includes("json") && !contentType.startsWith("text/");
+  const responseBody = isBinary ? await res.arrayBuffer() : await res.text();
+
+  const outHeaders: Record<string, string> = { "Content-Type": contentType };
+  const disposition = res.headers.get("Content-Disposition");
+  if (disposition) outHeaders["Content-Disposition"] = disposition;
+
+  return new NextResponse(responseBody, { status: res.status, headers: outHeaders });
 }
 
 type RouteContext = { params: Promise<{ path: string[] }> };

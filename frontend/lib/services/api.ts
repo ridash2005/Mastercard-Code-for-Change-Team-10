@@ -145,6 +145,8 @@ export const api = {
   certificates: {
     list: () => get<Certificate[]>("certificates"),
     get: (id: string) => get<Certificate>(`certificates/${id}`),
+    /** Same-origin URL for an `<a href download>` - the proxy attaches auth server-side. */
+    downloadUrl: (id: string) => `/api/backend/certificates/${id}/download`,
   },
   extracurricular: {
     list: () => get<ExtracurricularActivity[]>("extracurricular"),
