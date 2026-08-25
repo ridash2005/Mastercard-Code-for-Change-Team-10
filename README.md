@@ -37,6 +37,8 @@ real actions, not mock data.
 
 ---
 
+<a id="team"></a>
+
 ## 👥 Team
 
 **Team 10 · Mastercard Code for Change 3.0**
@@ -56,6 +58,8 @@ real actions, not mock data.
 | Anshita Sarda | Rickarya Das | |
 
 ---
+
+<a id="live-deployment"></a>
 
 ## 🚀 Live Deployment
 
@@ -82,6 +86,8 @@ Vercel" section for the Atlas-specific gotchas (SRV DNS, network access, `node_m
 the connection-race fix in `config/db.js`) if redeploying the backend.
 
 ---
+
+<a id="run-it-locally"></a>
 
 ## 🧑‍💻 Run It Locally
 
@@ -119,6 +125,8 @@ email), and root [`.env.example`](./.env.example) for the frontend's own (`BACKE
 
 ---
 
+<a id="monorepo-layout"></a>
+
 ## 🗂️ Monorepo Layout
 
 | Path | What's there |
@@ -135,6 +143,8 @@ the frontend build. `backend/api` has its own integration test script (`npm run 
 
 ---
 
+<a id="tech-stack"></a>
+
 ## 🛠️ Tech Stack
 
 **Frontend** — Next.js App Router, TypeScript, Tailwind CSS, shadcn-style UI, Lucide-ready layout,
@@ -147,6 +157,8 @@ React Hook Form + Zod, Zustand as a client cache over real backend data.
 **Other** — OCR.space for document scanning, Resend for transactional email, Vercel for hosting.
 
 ---
+
+<a id="engineering-notes"></a>
 
 ## 📝 Engineering Notes
 

@@ -21,6 +21,8 @@ Part of Katalyst, built by Team 10 for Mastercard Code for Change 3.0 — see th
 
 ---
 
+<a id="architecture"></a>
+
 ## 🏗️ Architecture
 
 Clean 4-tier layered architecture:
@@ -39,6 +41,8 @@ routes → controllers → services → models/database
 
 ---
 
+<a id="tech-stack"></a>
+
 ## 🛠️ Tech Stack
 
 | Technology | Purpose |
@@ -51,6 +55,8 @@ routes → controllers → services → models/database
 | **CORS & Morgan** | Cross-Origin Resource Sharing & Request Logging |
 
 ---
+
+<a id="environment-variables"></a>
 
 ## 📋 Environment Variables
 
@@ -92,6 +98,8 @@ See `.env.example` in this directory for the full annotated list, and root `.env
 
 ---
 
+<a id="quickstart--how-to-run"></a>
+
 ## 🚀 Quickstart & How to Run
 
 ### 1. Install Dependencies
@@ -123,6 +131,8 @@ npm run test:api
 
 ---
 
+<a id="authentication--roles"></a>
+
 ## 🔐 Authentication & Roles
 
 The platform enforces two roles:
@@ -139,6 +149,8 @@ The platform enforces two roles:
 | Arjun Desai | `arjun.admin@katalyst.edu` | `katalyst-demo-bridge-2026` | `admin` |
 
 ---
+
+<a id="api-endpoints-overview"></a>
 
 ## 📚 API Endpoints Overview
 
@@ -205,6 +217,8 @@ For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTI
 
 ---
 
+<a id="deploying-to-vercel"></a>
+
 ## ☁️ Deploying to Vercel
 
 This project already ships `vercel.json` and `scripts/vercel-build.js` (see that file's comments
@@ -247,6 +261,8 @@ If `/api/health` reports `"database":{"connected":false}` after a deploy, check
 the connection string form above.
 
 ---
+
+<a id="frontend-backend-integration"></a>
 
 ## 🔗 Frontend-Backend Integration
 
