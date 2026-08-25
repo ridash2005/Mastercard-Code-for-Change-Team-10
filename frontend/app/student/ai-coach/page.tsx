@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VoiceAssist } from "@/components/voice/voice-assist";
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function CoachPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const sid = store.sessionUserId ?? "";
   const user = store.users.find((u) => u.id === sid);
   const profile = store.studentProfiles.find((p) => p.userId === sid);
@@ -46,10 +48,8 @@ export default function CoachPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">AI Coach</h1>
-      <p className="mt-1 text-sm text-muted">
-        Personalised learning, scoring hints and nudges. The floating Chatbot answers catalogue questions instead.
-      </p>
+      <h1 className="font-serif text-3xl">{t.aiCoachHeading}</h1>
+      <p className="mt-1 text-sm text-muted">{t.aiCoachPageSubtitle}</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {coachPrompts.map((p) => (
           <button key={p} className="rounded-full border border-line bg-card px-3 py-1 text-xs text-plum" onClick={() => ask(p)}>
@@ -71,7 +71,7 @@ export default function CoachPage() {
         }}
       >
         <Input value={input} onChange={(e) => setInput(e.target.value)} />
-        <Button type="submit">Ask</Button>
+        <Button type="submit">{t.askButton}</Button>
       </form>
       <div className="mt-2">
         <VoiceAssist onTranscript={setInput} />

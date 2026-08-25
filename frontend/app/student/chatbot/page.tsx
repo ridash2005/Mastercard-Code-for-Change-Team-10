@@ -1,16 +1,14 @@
 "use client";
 
 import { ChatbotPanel } from "@/components/ai/chatbot";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ChatbotPage() {
+  const { t } = useI18n();
   return (
     <div>
-      <h1 className="font-serif text-3xl">AI Chatbot</h1>
-      <p className="mt-1 text-sm text-muted">
-        Ask a question, or ask it to act — enroll you, file feedback or a complaint, mark
-        notifications read, reschedule a session, or design a course from a topic. For
-        personalised performance advice, use AI Coach.
-      </p>
+      <h1 className="font-serif text-3xl">{t.chatbot}</h1>
+      <p className="mt-1 text-sm text-muted">{t.aiChatbotPageSubtitle}</p>
       <div className="mt-6 max-w-xl">
         <ChatbotPanel />
       </div>

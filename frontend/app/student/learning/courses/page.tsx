@@ -1,9 +1,9 @@
 "use client";
 
 import { LearningTypePage } from "@/components/student/learning-type-page";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function Page() {
-  return (
-    <LearningTypePage type="course" title="Online courses" blurb="Including certificate studios such as Payments and Trust." />
-  );
+  const { t } = useI18n();
+  return <LearningTypePage type="course" title={t.onlineCourses} blurb={t.courseTypeBlurb} />;
 }

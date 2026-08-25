@@ -1,7 +1,9 @@
 "use client";
 
 import { LearningTypePage } from "@/components/student/learning-type-page";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function Page() {
-  return <LearningTypePage type="milestone" title="Milestones" blurb="Gates such as Internship-Ready and Foundation Path." />;
+  const { t } = useI18n();
+  return <LearningTypePage type="milestone" title={t.milestones} blurb={t.milestonesTypeBlurb} />;
 }

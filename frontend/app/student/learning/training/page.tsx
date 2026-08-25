@@ -1,7 +1,9 @@
 "use client";
 
 import { LearningTypePage } from "@/components/student/learning-type-page";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function Page() {
-  return <LearningTypePage type="training" title="Training sessions" blurb="Live clinics. Reschedule from the Reschedule page." />;
+  const { t } = useI18n();
+  return <LearningTypePage type="training" title={t.trainingSessions} blurb={t.trainingTypeBlurb} />;
 }

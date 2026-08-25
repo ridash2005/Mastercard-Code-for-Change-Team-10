@@ -1,7 +1,9 @@
 "use client";
 
 import { LearningTypePage } from "@/components/student/learning-type-page";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function Page() {
-  return <LearningTypePage type="project" title="Projects" blurb="Team and studio projects, including Inclusion Wallet." />;
+  const { t } = useI18n();
+  return <LearningTypePage type="project" title={t.projects} blurb={t.projectsTypeBlurb} />;
 }

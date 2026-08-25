@@ -7,9 +7,11 @@ import { EmptyState } from "@/components/states";
 import { SearchBar } from "@/components/activities/filters";
 import { usePlatform } from "@/lib/data/platform-store";
 import type { ActivityType } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/provider";
 
 export function LearningTypePage({ type, title, blurb }: { type: ActivityType; title: string; blurb: string }) {
   const store = usePlatform();
+  const { t } = useI18n();
   const sid = store.sessionUserId ?? "";
   const [q, setQ] = useState("");
   const list = useMemo(() => {
@@ -24,7 +26,7 @@ export function LearningTypePage({ type, title, blurb }: { type: ActivityType; t
       </div>
       {list.length === 0 ? (
         <div className="mt-6">
-          <EmptyState title="Nothing matches." hint="Clear search or open Explore." />
+          <EmptyState title={t.nothingMatches} hint={t.clearSearchOrExplore} />
         </div>
       ) : (
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -40,7 +42,7 @@ export function LearningTypePage({ type, title, blurb }: { type: ActivityType; t
       )}
       <p className="mt-6 text-sm">
         <Link className="font-semibold text-barbie" href="/student/explore">
-          Browse all in Explore
+          {t.browseAllInExplore}
         </Link>
       </p>
     </div>
