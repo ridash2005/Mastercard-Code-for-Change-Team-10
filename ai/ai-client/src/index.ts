@@ -124,44 +124,86 @@ async function withTransientRetry<T>(fn: () => Promise<T>): Promise<T> {
   throw lastErr;
 }
 
+// A key that's hit its quota (daily cap or per-minute RPM) won't start
+// working again from backoff-retrying the same key - swap to the next
+// configured key instead. Distinct from isRetryableProviderError above:
+// that one decides whether a same-key backoff retry is worth trying at
+// all; this one decides whether persistent failure means "this key is
+// done for now, move on" rather than "give up entirely".
+function isQuotaExceededError(err: unknown): boolean {
+  const status = (err as { status?: number })?.status ?? (err as { statusCode?: number })?.statusCode;
+  if (status === 429) return true;
+  const message = err instanceof Error ? err.message : String(err);
+  return /\b429\b/.test(message) || /quota|RESOURCE_EXHAUSTED/i.test(message);
+}
+
+/** GEMINI_API_KEY may be a single key or a comma-separated list for fallback. */
+function parseApiKeysFromEnv(): string[] {
+  const raw = process.env.GEMINI_API_KEY;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+}
+
 /**
- * Google Gemini implementation. Requires GEMINI_API_KEY in the environment.
+ * Google Gemini implementation. Requires GEMINI_API_KEY in the environment
+ * (a single key, or a comma-separated list to fall back through when one
+ * hits its quota - see isQuotaExceededError/withKeyFallback).
  * Uses responseMimeType: "application/json" for generateJson (Gemini's JSON
  * mode) and native function-calling for chatWithTools.
  */
 export class GeminiClient implements LlmClient {
   private modelName: string;
-  private apiKey: string;
+  private apiKeys: string[];
+  // Sticky index so a client instance that successfully falls back to key
+  // N keeps using key N on later calls, instead of re-trying the
+  // already-known-exhausted key 0 first every time.
+  private currentKeyIndex = 0;
 
-  constructor(opts?: { apiKey?: string; model?: string }) {
-    const apiKey = opts?.apiKey ?? process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+  constructor(opts?: { apiKey?: string; apiKeys?: string[]; model?: string }) {
+    const apiKeys = opts?.apiKeys ?? (opts?.apiKey ? [opts.apiKey] : parseApiKeysFromEnv());
+    if (apiKeys.length === 0) {
       throw new Error(
         "GEMINI_API_KEY is not set. Add it to your .env (see §14 of the build spec) before making live calls."
       );
     }
-    this.apiKey = apiKey;
+    this.apiKeys = apiKeys;
     this.modelName = opts?.model ?? "gemini-3.6-flash";
   }
 
-  private async getModel() {
+  private async getGenAI(apiKey: string) {
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(this.apiKey);
-    return genAI;
+    return new GoogleGenerativeAI(apiKey);
+  }
+
+  /**
+   * Runs `fn` against each configured key in turn (starting from the last
+   * key known to work), backing off with withTransientRetry on each one
+   * individually. A key whose failure looks like quota exhaustion moves on
+   * to the next key rather than continuing to retry it; any other error
+   * (bad prompt, non-quota provider error) surfaces immediately instead of
+   * masking it by needlessly cycling through every key.
+   */
+  private async withKeyFallback<T>(fn: (apiKey: string) => Promise<T>): Promise<T> {
+    let lastErr: unknown;
+    for (let i = 0; i < this.apiKeys.length; i++) {
+      const keyIndex = (this.currentKeyIndex + i) % this.apiKeys.length;
+      try {
+        const result = await withTransientRetry(() => fn(this.apiKeys[keyIndex]));
+        this.currentKeyIndex = keyIndex;
+        return result;
+      } catch (err) {
+        lastErr = err;
+        if (!isQuotaExceededError(err) || i === this.apiKeys.length - 1) throw err;
+        // else: this key is quota-exhausted, fall through and try the next one
+      }
+    }
+    throw lastErr;
   }
 
   async generateJson<T>(opts: GenerateJsonOptions<T>): Promise<T> {
-    const genAI = await this.getModel();
-    const model = genAI.getGenerativeModel({
-      model: this.modelName,
-      systemInstruction: opts.systemPrompt,
-      generationConfig: {
-        temperature: opts.temperature ?? 0.2,
-        responseMimeType: "application/json",
-        ...(opts.responseSchema ? { responseSchema: opts.responseSchema as never } : {})
-      }
-    });
-
     let lastRaw = "";
     for (let attempt = 0; attempt < 2; attempt++) {
       const prompt =
@@ -169,8 +211,20 @@ export class GeminiClient implements LlmClient {
           ? opts.userPrompt
           : `${opts.userPrompt}\n\nYour previous response was not valid JSON matching the required schema. Return ONLY valid JSON, no prose, no markdown fences.`;
 
-      const result = await withTransientRetry(() => model.generateContent(prompt));
-      const raw = result.response.text();
+      const raw = await this.withKeyFallback(async (apiKey) => {
+        const genAI = await this.getGenAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: this.modelName,
+          systemInstruction: opts.systemPrompt,
+          generationConfig: {
+            temperature: opts.temperature ?? 0.2,
+            responseMimeType: "application/json",
+            ...(opts.responseSchema ? { responseSchema: opts.responseSchema as never } : {})
+          }
+        });
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      });
       lastRaw = raw;
 
       try {
@@ -186,24 +240,8 @@ export class GeminiClient implements LlmClient {
   }
 
   async chatWithTools(opts: ChatWithToolsOptions): Promise<ChatWithToolsResult> {
-    const genAI = await this.getModel();
     const systemMessages = opts.messages.filter((m) => m.role === "system").map((m) => m.content);
     const conversation = opts.messages.filter((m) => m.role !== "system");
-
-    const model = genAI.getGenerativeModel({
-      model: this.modelName,
-      systemInstruction: systemMessages.join("\n\n"),
-      tools: [
-        {
-          functionDeclarations: opts.tools.map((t) => ({
-            name: t.name,
-            description: t.description,
-            parameters: t.parameters as never
-          }))
-        }
-      ],
-      generationConfig: { temperature: opts.temperature ?? 0.4 }
-    });
 
     const history = conversation.slice(0, -1).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
@@ -211,9 +249,26 @@ export class GeminiClient implements LlmClient {
     }));
     const last = conversation[conversation.length - 1];
 
-    const chat = model.startChat({ history });
-    const result = await withTransientRetry(() => chat.sendMessage(last.content));
-    const response = result.response;
+    const response = await this.withKeyFallback(async (apiKey) => {
+      const genAI = await this.getGenAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: this.modelName,
+        systemInstruction: systemMessages.join("\n\n"),
+        tools: [
+          {
+            functionDeclarations: opts.tools.map((t) => ({
+              name: t.name,
+              description: t.description,
+              parameters: t.parameters as never
+            }))
+          }
+        ],
+        generationConfig: { temperature: opts.temperature ?? 0.4 }
+      });
+      const chat = model.startChat({ history });
+      const result = await chat.sendMessage(last.content);
+      return result.response;
+    });
 
     const calls = response.functionCalls() ?? [];
     return {
@@ -223,9 +278,9 @@ export class GeminiClient implements LlmClient {
   }
 }
 
-/** True when GEMINI_API_KEY is set — callers use this to pick live vs. fixture mode. */
+/** True when GEMINI_API_KEY (one key, or a comma-separated list) is set — callers use this to pick live vs. fixture mode. */
 export function hasGeminiKey(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY);
+  return parseApiKeysFromEnv().length > 0;
 }
 
 /**
