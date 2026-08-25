@@ -72,7 +72,7 @@ MONGO_URI=mongodb://127.0.0.1:27017/katalyst
 
 # Security & JWT
 JWT_SECRET=supersecretjwtkey_katalyst_2026_change_in_production
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=24h
 
 # Frontend Connection
 CLIENT_URL=http://localhost:3000

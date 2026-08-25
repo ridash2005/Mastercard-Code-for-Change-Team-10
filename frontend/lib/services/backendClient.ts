@@ -74,7 +74,7 @@ async function registerAndLogin(email: string, name: string, role: "student" | "
 // a multi-instance deployment would want Redis (per KATALYST_BACKEND_SPEC.md
 // §1's cache layer) instead.
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
-const TOKEN_TTL_MS = 6 * 24 * 60 * 60 * 1000; // under backend/api's 7d JWT_EXPIRES_IN
+const TOKEN_TTL_MS = 23 * 60 * 60 * 1000; // under backend/api's 24h JWT_EXPIRES_IN (absolute cap)
 
 /** Drops a cached token — call this when backend/api rejects it (401), e.g.
  * after a backend restart invalidates the user id a cached JWT points at. */
