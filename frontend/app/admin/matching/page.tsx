@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { complementaryPair, skillBuckets, suggestPairs } from "@/lib/admin/matching";
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
+import { formatT } from "@/lib/i18n/format";
 
 export default function MatchingPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const [selected, setSelected] = useState<string[]>([]);
   const [title, setTitle] = useState("Inclusion Wallet pairing");
   const suggestions = useMemo(() => suggestPairs(store.studentProfiles), [store.studentProfiles]);
@@ -23,20 +26,24 @@ export default function MatchingPage() {
     chosen.length === 2 && chosen[0] && chosen[1] ? complementaryPair(chosen[0], chosen[1]) : null;
   const rationale =
     pair && chosen[0] && chosen[1]
-      ? `${store.users.find((u) => u.id === chosen[0].userId)?.name} (${chosen[0].skills.join(", ")}) complements ${store.users.find((u) => u.id === chosen[1].userId)?.name} (${chosen[1].skills.join(", ")}) — ${pair.label}.`
+      ? formatT(t.complementsRationale, {
+          a: store.users.find((u) => u.id === chosen[0].userId)?.name ?? "",
+          askills: chosen[0].skills.join(", "),
+          b: store.users.find((u) => u.id === chosen[1].userId)?.name ?? "",
+          bskills: chosen[1].skills.join(", "),
+          label: pair.label,
+        })
       : chosen.length >= 2
-        ? "Selected students do not map to complementary skill buckets from the recorded skills."
-        : "Select two or more students.";
+        ? t.noComplementaryMapping
+        : t.selectTwoOrMore;
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Collaborator Matching</h1>
-      <p className="mt-1 text-sm text-muted">
-        Matches use recorded student skills only. Students see a generic request until they accept.
-      </p>
+      <h1 className="font-serif text-3xl">{t.collaboratorMatchingTitle}</h1>
+      <p className="mt-1 text-sm text-muted">{t.matchingSubtitle}</p>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <div>
-          <h2 className="font-serif text-xl">Available students</h2>
+          <h2 className="font-serif text-xl">{t.availableStudentsHeading}</h2>
           <ul className="mt-3 space-y-2">
             {store.studentProfiles.map((p) => {
               const u = store.users.find((x) => x.id === p.userId);
@@ -50,8 +57,8 @@ export default function MatchingPage() {
                     className={`w-full rounded-xl border px-4 py-3 text-left ${on ? "border-barbie bg-ivory" : "border-line bg-card"}`}
                   >
                     <p className="font-medium text-plum">{u?.name}</p>
-                    <p className="text-sm text-muted">Strengths: {p.skills.join(" · ") || "None recorded"}</p>
-                    <p className="text-xs text-purple">{skillBuckets(p.skills).join(" · ") || "No mapped bucket"}</p>
+                    <p className="text-sm text-muted">{t.strengthsLabel}: {p.skills.join(" · ") || t.noneRecorded}</p>
+                    <p className="text-xs text-purple">{skillBuckets(p.skills).join(" · ") || t.noMappedBucket}</p>
                   </button>
                 </li>
               );
@@ -59,11 +66,11 @@ export default function MatchingPage() {
           </ul>
         </div>
         <div className="k-card p-5">
-          <h2 className="font-serif text-xl">Create collaboration</h2>
-          {pair ? <p className="mt-2 text-sm font-medium text-blue">Suggested compatibility: {pair.label}</p> : null}
+          <h2 className="font-serif text-xl">{t.createCollaborationHeading}</h2>
+          {pair ? <p className="mt-2 text-sm font-medium text-blue">{t.suggestedCompatibilityLabel}: {pair.label}</p> : null}
           <p className="mt-2 text-sm text-muted">{rationale}</p>
           <div className="mt-3">
-            <Label>Project name</Label>
+            <Label>{t.projectNameLabel}</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <Button
@@ -75,9 +82,9 @@ export default function MatchingPage() {
               setSelected([]);
             }}
           >
-            Create collaboration
+            {t.createCollaborationHeading}
           </Button>
-          <h3 className="mt-6 text-sm font-semibold text-plum">Suggested pairs</h3>
+          <h3 className="mt-6 text-sm font-semibold text-plum">{t.suggestedPairsHeading}</h3>
           <ul className="mt-2 space-y-1 text-sm text-muted">
             {suggestions.map((s) => (
               <li key={`${s.a}-${s.b}`}>

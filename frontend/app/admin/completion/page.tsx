@@ -6,18 +6,19 @@ import { usePlatform } from "@/lib/data/platform-store";
 import { completionByType, completionForStudent, overdueForStudent, upcomingForStudent } from "@/lib/admin/insights";
 import { BarRows } from "@/components/admin/charts";
 import { Dialog } from "@/components/ui/dialog";
-
-const TYPE_LABEL = {
-  course: "Courses",
-  training: "Training",
-  mentoring: "Mentoring",
-  project: "Projects",
-  assignment: "Assignments",
-  milestone: "Milestones",
-} as const;
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function CompletionPage() {
   const store = usePlatform();
+  const { t } = useI18n();
+  const TYPE_LABEL = {
+    course: t.courses,
+    training: t.trainingSessions,
+    mentoring: t.mentoring,
+    project: t.projects,
+    assignment: t.assignments,
+    milestone: t.milestones,
+  } as const;
   const [openId, setOpenId] = useState<string | null>(null);
   const rows = useMemo(
     () =>
@@ -33,7 +34,7 @@ export default function CompletionPage() {
     ? completionByType(store.enrollments, store.activities, selected.userId).map((row) => ({
         label: TYPE_LABEL[row.type],
         pct: row.pct,
-        hint: row.total ? `${row.completed}/${row.total}` : "No enrolments",
+        hint: row.total ? `${row.completed}/${row.total}` : t.noEnrolmentsLabel,
       }))
     : [];
   const overdue = selected ? overdueForStudent(store.enrollments, store.activities, selected.userId) : [];
@@ -41,15 +42,15 @@ export default function CompletionPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Activity Completion</h1>
-      <p className="mt-1 text-sm text-muted">Completion is completed or approved enrolments divided by that student’s enrolments.</p>
+      <h1 className="font-serif text-3xl">{t.activityCompletion}</h1>
+      <p className="mt-1 text-sm text-muted">{t.completionSubtitle}</p>
       <div className="mt-6 overflow-x-auto">
         <table className="w-full min-w-[20rem] text-left text-sm">
           <thead>
             <tr className="border-b border-line text-muted">
-              <th className="py-2 font-medium">Student</th>
-              <th className="py-2 font-medium">Completion</th>
-              <th className="py-2 font-medium">Done / total</th>
+              <th className="py-2 font-medium">{t.studentColumnLabel}</th>
+              <th className="py-2 font-medium">{t.completionLabel}</th>
+              <th className="py-2 font-medium">{t.doneTotalLabel}</th>
             </tr>
           </thead>
           <tbody>
@@ -69,18 +70,18 @@ export default function CompletionPage() {
           </tbody>
         </table>
       </div>
-      <Dialog open={Boolean(selected)} title={selected?.name ?? "Student"} onClose={() => setOpenId(null)}>
+      <Dialog open={Boolean(selected)} title={selected?.name ?? t.studentFallback} onClose={() => setOpenId(null)}>
         {selected ? (
           <div className="space-y-4 text-sm">
             <p>
-              Overall {selected.pct}% · {selected.completed} completed · {selected.inProgress} in progress · {selected.total} total
+              {t.overallLabel} {selected.pct}% · {selected.completed} {t.status_completed.toLowerCase()} · {selected.inProgress} {t.status_in_progress.toLowerCase()} · {selected.total} {t.totalWord}
             </p>
             <p>
-              Overdue {overdue.length} · upcoming {upcoming.length}
+              {t.overdueWord} {overdue.length} · {t.upcomingWord} {upcoming.length}
             </p>
             <BarRows rows={bars} />
             <Link href={`/admin/students/${selected.userId}`} className="inline-block font-medium text-barbie">
-              Open student profile
+              {t.openStudentProfileLink}
             </Link>
           </div>
         ) : null}
