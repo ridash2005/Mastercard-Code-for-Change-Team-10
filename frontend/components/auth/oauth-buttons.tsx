@@ -4,6 +4,8 @@
 // sign-in from sign-up, the first use of a provider IS the sign-up), so one
 // component covers both pages instead of duplicating the markup.
 
+import { useI18n } from "@/lib/i18n/provider";
+
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">
@@ -35,7 +37,8 @@ function GithubIcon() {
   );
 }
 
-export function OAuthButtons({ label = "or continue with email" }: { label?: string }) {
+export function OAuthButtons({ label }: { label?: string }) {
+  const { t } = useI18n();
   return (
     <div>
       <div className="space-y-2">
@@ -44,19 +47,19 @@ export function OAuthButtons({ label = "or continue with email" }: { label?: str
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-800 transition hover:bg-stone-50"
         >
           <GoogleIcon />
-          Continue with Google
+          {t.continueWithGoogle}
         </a>
         <a
           href="/api/auth/github"
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-stone-300 bg-stone-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800"
         >
           <GithubIcon />
-          Continue with GitHub
+          {t.continueWithGithub}
         </a>
       </div>
       <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide text-stone-400">
         <span className="h-px flex-1 bg-stone-200" />
-        {label}
+        {label ?? t.orContinueWithEmail}
         <span className="h-px flex-1 bg-stone-200" />
       </div>
     </div>

@@ -29,6 +29,7 @@ function OAuthCallbackInner() {
 
     const code = params.get("code");
     if (!code) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from an external source (the URL) on mount, not derivable as render-time state
       setError("Missing sign-in code. Please try signing in again.");
       return;
     }

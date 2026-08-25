@@ -13,10 +13,12 @@ import { levelFromXp } from "@/lib/utils";
 import { NotificationPanel } from "@/components/notifications/panel";
 import { Logo } from "@/components/logo";
 import { CHAT_OPEN_EVENT } from "@/components/ai/chatbot";
+import { useI18n } from "@/lib/i18n/provider";
 
 export function Topbar({ variant, onOpenMenu }: { variant: "student" | "admin"; onOpenMenu?: () => void }) {
   const store = usePlatform();
   const router = useRouter();
+  const { t } = useI18n();
   const user = store.users.find((u) => u.id === store.sessionUserId);
   const profile = store.studentProfiles.find((p) => p.userId === store.sessionUserId);
   const lvl = levelFromXp(profile?.xp ?? 0);
@@ -27,11 +29,11 @@ export function Topbar({ variant, onOpenMenu }: { variant: "student" | "admin"; 
           <Logo invert />
         </div>
         {variant === "student" && onOpenMenu ? (
-          <button type="button" className="md:hidden" onClick={onOpenMenu} aria-label="Open menu">
+          <button type="button" className="md:hidden" onClick={onOpenMenu} aria-label={t.openMenu}>
             <Menu className="h-5 w-5" />
           </button>
         ) : variant === "admin" && onOpenMenu ? (
-          <button type="button" className="md:hidden" onClick={onOpenMenu} aria-label="Open menu">
+          <button type="button" className="md:hidden" onClick={onOpenMenu} aria-label={t.openMenu}>
             <Menu className="h-5 w-5" />
           </button>
         ) : null}
@@ -50,7 +52,7 @@ export function Topbar({ variant, onOpenMenu }: { variant: "student" | "admin"; 
         <LanguageSelector />
         <NotificationPanel audience={variant} userId={store.sessionUserId} />
         <Link href={variant === "student" ? "/student/profile" : "/admin/settings"} className="px-3 py-1.5 text-sm">
-          Account
+          {t.account}
         </Link>
         <Button
           variant="ghost"
@@ -61,7 +63,7 @@ export function Topbar({ variant, onOpenMenu }: { variant: "student" | "admin"; 
             });
           }}
         >
-          Sign out
+          {t.signOut}
         </Button>
       </div>
     </header>
@@ -70,6 +72,7 @@ export function Topbar({ variant, onOpenMenu }: { variant: "student" | "admin"; 
 
 function AiSearchField() {
   const [q, setQ] = useState("");
+  const { t } = useI18n();
   return (
     <form
       className="hidden min-w-[12rem] max-w-sm flex-1 items-center gap-1 lg:flex"
@@ -79,13 +82,13 @@ function AiSearchField() {
       }}
     >
       <label className="sr-only" htmlFor="ai-search">
-        Search with AI
+        {t.searchWithAi}
       </label>
       <input
         id="ai-search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search with AI..."
+        placeholder={t.searchWithAi}
         className="h-9 min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-3 text-sm text-white placeholder:text-white/70"
       />
       <VoiceMicButton

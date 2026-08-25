@@ -4,17 +4,19 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { PublicShell } from "@/components/layout/public-shell";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Select } from "@/components/ui/input";
+import { FileInput, Input, Label, Select } from "@/components/ui/input";
 import { ProgressBar } from "@/components/ui/progress";
 import { extractFromDocument } from "@/lib/ocr/service";
 import { usePlatform } from "@/lib/data/platform-store";
 import { ErrorState, LoadingState, SuccessState } from "@/components/states";
 import { InterestPicker } from "@/components/onboarding/interest-picker";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { useI18n } from "@/lib/i18n/provider";
 import Link from "next/link";
 import type { Role } from "@/lib/types";
 
 export default function RegisterPage() {
+  const { t } = useI18n();
   const setSession = usePlatform((s) => s.setSession);
   const sessionUserId = usePlatform((s) => s.sessionUserId);
   const studentProfiles = usePlatform((s) => s.studentProfiles);
@@ -120,28 +122,25 @@ export default function RegisterPage() {
           />
         ) : (
           <>
-            <h1 className="font-serif text-3xl">Register</h1>
-            <p className="mt-2 text-sm text-stone-600">
-              Role first, then optional OCR on an ID or offer letter. Review extracted fields before you continue. Your
-              password is hashed by backend/api and never stored in the browser.
-            </p>
+            <h1 className="font-serif text-3xl">{t.registerTitle}</h1>
+            <p className="mt-2 text-sm text-stone-600">{t.registerSubtitle}</p>
             <div className="mt-6">
-              <OAuthButtons label="or sign up with email" />
+              <OAuthButtons label={t.orSignUpWithEmail} />
             </div>
             <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-5">
               <div>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">{t.roleLabel}</Label>
                 <Select id="role" value={role} onChange={(e) => setRole(e.target.value as Role)}>
-                  <option value="student">Student</option>
-                  <option value="admin">Admin / management</option>
+                  <option value="student">{t.roleStudent}</option>
+                  <option value="admin">{t.roleAdmin}</option>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="doc">Document (OCR — auto-fills the fields below)</Label>
-                <Input
+                <FileInput
                   id="doc"
-                  type="file"
                   accept="image/*,.pdf"
+                  buttonLabel="Choose document"
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
@@ -158,24 +157,24 @@ export default function RegisterPage() {
                 {ocr === "processing" ? <div className="mt-2"><LoadingState title="Reading document…" /></div> : null}
                 {ocr === "ready" ? <p className="mt-2 text-xs text-stone-500">Extracted. Edit anything that looks wrong.</p> : null}
               </div>
-              <Field label="Full name" value={name} onChange={setName} />
-              <Field label="Email" value={email} onChange={setEmail} type="email" />
-              <Field label="College" value={college} onChange={setCollege} />
-              <Field label="Programme" value={programme} onChange={setProgramme} />
-              <Field label="Password" value={password} onChange={setPassword} type="password" />
+              <Field label={t.fullNameLabel} value={name} onChange={setName} />
+              <Field label={t.emailLabel} value={email} onChange={setEmail} type="email" />
+              <Field label={t.collegeLabel} value={college} onChange={setCollege} />
+              <Field label={t.programmeLabel} value={programme} onChange={setProgramme} />
+              <Field label={t.passwordLabel} value={password} onChange={setPassword} type="password" />
               <p className="text-xs text-stone-500">At least 6 characters.</p>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} />
                 I have verified the details above
               </label>
               <Button disabled={!verified || busy || password.length < 6} onClick={() => void createAccount()}>
-                {busy ? "Creating account…" : "Create account"}
+                {busy ? t.creatingAccount : t.createAccountButton}
               </Button>
               {error ? <ErrorState title={error} /> : null}
               {ok ? <SuccessState title="Welcome to Katalyst." /> : null}
             </div>
             <p className="mt-6 text-sm">
-              Already have an account? <Link className="underline" href="/login">Sign in</Link>
+              {t.alreadyHaveAccountQuestion} <Link className="underline" href="/login">{t.signIn2}</Link>
             </p>
           </>
         )}

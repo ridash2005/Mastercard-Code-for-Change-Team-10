@@ -43,12 +43,12 @@ import type { en } from "@/lib/i18n/dictionaries";
 import { StreakCalendar } from "@/components/layout/streak-calendar";
 import { usePlatform } from "@/lib/data/platform-store";
 
-type StudentNavKey = keyof typeof en;
+type NavKey = keyof typeof en;
 
-export const studentGroups: { id: string; heading: string; items: { href: string; key?: StudentNavKey; label?: string; icon: LucideIcon }[] }[] = [
+export const studentGroups: { id: string; headingKey: NavKey; items: { href: string; key: NavKey; icon: LucideIcon }[] }[] = [
   {
     id: "main",
-    heading: "MAIN",
+    headingKey: "navMain",
     items: [
       { href: "/student", key: "dashboard", icon: LayoutDashboard },
       { href: "/student/learning", key: "myLearning", icon: BookOpen },
@@ -57,7 +57,7 @@ export const studentGroups: { id: string; heading: string; items: { href: string
   },
   {
     id: "progress",
-    heading: "PROGRESS",
+    headingKey: "navProgress",
     items: [
       { href: "/student/achievements", key: "achievements", icon: Award },
       { href: "/student/missions", key: "missions", icon: Flag },
@@ -66,17 +66,17 @@ export const studentGroups: { id: string; heading: string; items: { href: string
   },
   {
     id: "community",
-    heading: "COMMUNITY",
+    headingKey: "navCommunity",
     items: [
       { href: "/student/teams", key: "teams", icon: Users },
       { href: "/student/ai-coach", key: "aiCoach", icon: Bot },
       { href: "/student/chatbot", key: "chatbot", icon: MessageCircle },
-      { href: "/student/playground", label: "Playground", icon: Code2 },
+      { href: "/student/playground", key: "playground", icon: Code2 },
     ],
   },
   {
     id: "activity",
-    heading: "ACTIVITY",
+    headingKey: "navActivity",
     items: [
       { href: "/student/notifications", key: "notifications", icon: Bell },
       { href: "/student/extracurricular", key: "extracurricular", icon: CalendarHeart },
@@ -85,7 +85,7 @@ export const studentGroups: { id: string; heading: string; items: { href: string
   },
   {
     id: "account",
-    heading: "ACCOUNT",
+    headingKey: "navAccount",
     items: [
       { href: "/student/profile", key: "profile", icon: User },
       { href: "/student/settings", key: "settings", icon: Settings },
@@ -93,7 +93,7 @@ export const studentGroups: { id: string; heading: string; items: { href: string
   },
   {
     id: "support",
-    heading: "SUPPORT",
+    headingKey: "navSupport",
     items: [
       { href: "/student/feedback", key: "feedback", icon: MessageSquare },
       { href: "/student/complaints", key: "complaints", icon: AlertTriangle },
@@ -103,71 +103,71 @@ export const studentGroups: { id: string; heading: string; items: { href: string
   },
 ];
 
-const adminGroups: { id: string; heading: string; items: { href: string; label: string; icon: LucideIcon }[] }[] = [
+const adminGroups: { id: string; headingKey: NavKey; items: { href: string; key: NavKey; icon: LucideIcon }[] }[] = [
   {
     id: "main",
-    heading: "MAIN",
+    headingKey: "navMain",
     items: [
-      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/admin/activities", label: "Activities", icon: BookOpen },
-      { href: "/admin/activities/create", label: "Create activity", icon: Sparkles },
-      { href: "/admin/courses", label: "Courses", icon: BookOpen },
+      { href: "/admin", key: "dashboard", icon: LayoutDashboard },
+      { href: "/admin/activities", key: "activities", icon: BookOpen },
+      { href: "/admin/activities/create", key: "createActivity", icon: Sparkles },
+      { href: "/admin/courses", key: "courses", icon: BookOpen },
     ],
   },
   {
     id: "programme",
-    heading: "PROGRAMME",
+    headingKey: "navProgramme",
     items: [
-      { href: "/admin/training", label: "Training", icon: Flag },
-      { href: "/admin/mentoring", label: "Mentoring", icon: Users },
-      { href: "/admin/projects", label: "Projects", icon: Compass },
-      { href: "/admin/assignments", label: "Assignments", icon: Award },
-      { href: "/admin/milestones", label: "Milestones", icon: Trophy },
+      { href: "/admin/training", key: "training", icon: Flag },
+      { href: "/admin/mentoring", key: "mentoring", icon: Users },
+      { href: "/admin/projects", key: "projects", icon: Compass },
+      { href: "/admin/assignments", key: "assignments", icon: Award },
+      { href: "/admin/milestones", key: "milestones", icon: Trophy },
     ],
   },
   {
     id: "students",
-    heading: "STUDENTS",
+    headingKey: "navStudents",
     items: [
-      { href: "/admin/students", label: "Students", icon: User },
-      { href: "/admin/teams", label: "Teams", icon: Users },
-      { href: "/admin/leaderboards", label: "Leaderboards", icon: Trophy },
-      { href: "/admin/matching", label: "Compatibility / Collaborators", icon: Handshake },
-      { href: "/admin/attention", label: "Students Requiring Attention", icon: UserRoundSearch },
+      { href: "/admin/students", key: "studentsNav", icon: User },
+      { href: "/admin/teams", key: "teams", icon: Users },
+      { href: "/admin/leaderboards", key: "leaderboardsNav", icon: Trophy },
+      { href: "/admin/matching", key: "compatibility", icon: Handshake },
+      { href: "/admin/attention", key: "attentionStudents", icon: UserRoundSearch },
     ],
   },
   {
     id: "insights",
-    heading: "INSIGHTS",
+    headingKey: "navInsights",
     items: [
-      { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-      { href: "/admin/reports", label: "Reports", icon: FileText },
-      { href: "/admin/completion", label: "Activity Completion", icon: ClipboardCheck },
-      { href: "/admin/reviews", label: "Student Reviews", icon: MessageSquare },
-      { href: "/admin/mentors", label: "Mentor Reviews", icon: Star },
+      { href: "/admin/analytics", key: "analytics", icon: BarChart3 },
+      { href: "/admin/reports", key: "reports", icon: FileText },
+      { href: "/admin/completion", key: "activityCompletion", icon: ClipboardCheck },
+      { href: "/admin/reviews", key: "studentReviews", icon: MessageSquare },
+      { href: "/admin/mentors", key: "mentorReviews", icon: Star },
     ],
   },
   {
     id: "community",
-    heading: "COMMUNITY",
+    headingKey: "navCommunity",
     items: [
-      { href: "/admin/volunteers", label: "Volunteers", icon: HeartHandshake },
-      { href: "/admin/volunteer-applications", label: "Volunteer Applications", icon: ClipboardCheck },
+      { href: "/admin/volunteers", key: "volunteers", icon: HeartHandshake },
+      { href: "/admin/volunteer-applications", key: "volunteerApplications", icon: ClipboardCheck },
     ],
   },
   {
     id: "activity",
-    heading: "ACTIVITY",
+    headingKey: "navActivity",
     items: [
-      { href: "/admin/submissions", label: "Submissions", icon: MessageSquare },
-      { href: "/admin/notifications", label: "Notifications", icon: Bell },
-      { href: "/admin/escalations", label: "Escalations", icon: AlertTriangle },
+      { href: "/admin/submissions", key: "submissions", icon: MessageSquare },
+      { href: "/admin/notifications", key: "notifications", icon: Bell },
+      { href: "/admin/escalations", key: "escalations", icon: AlertTriangle },
     ],
   },
   {
     id: "account",
-    heading: "ACCOUNT",
-    items: [{ href: "/admin/settings", label: "Settings", icon: Settings }],
+    headingKey: "navAccount",
+    items: [{ href: "/admin/settings", key: "settings", icon: Settings }],
   },
 ];
 
@@ -204,7 +204,7 @@ function StudentNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
                 onClick={() => setOpen((prev) => ({ ...prev, [group.id]: !prev[group.id] }))}
                 className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-left"
               >
-                <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-purple">{group.heading}</span>
+                <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-purple">{t[group.headingKey]}</span>
                 <ChevronDown className={cn("h-4 w-4 text-purple transition-transform", expanded ? "rotate-0" : "-rotate-90")} aria-hidden />
               </button>
             )}
@@ -215,7 +215,7 @@ function StudentNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
                     <SideLink
                       key={item.href}
                       href={item.href}
-                      label={item.label ?? t[item.key!]}
+                      label={t[item.key]}
                       icon={item.icon}
                       active={isRouteActive(pathname, item.href)}
                       collapsed={collapsed}
@@ -234,6 +234,7 @@ function StudentNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
 
 function AdminNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const activeGroup = groupForPath(pathname, "admin");
   const [open, setOpen] = useState<Record<string, boolean>>({ main: true });
 
@@ -250,7 +251,7 @@ function AdminNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: 
                 onClick={() => setOpen((prev) => ({ ...prev, [group.id]: !prev[group.id] }))}
                 className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-left"
               >
-                <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-purple">{group.heading}</span>
+                <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-purple">{t[group.headingKey]}</span>
                 <ChevronDown className={cn("h-4 w-4 text-purple transition-transform", expanded ? "rotate-0" : "-rotate-90")} aria-hidden />
               </button>
             )}
@@ -261,7 +262,7 @@ function AdminNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: 
                     <SideLink
                       key={item.href}
                       href={item.href}
-                      label={item.label}
+                      label={t[item.key]}
                       icon={item.icon}
                       active={isRouteActive(pathname, item.href)}
                       collapsed={collapsed}
@@ -288,6 +289,8 @@ export function Sidebar({
   onToggleCollapsed?: () => void;
 }) {
   const profile = usePlatform((s) => s.studentProfiles.find((p) => p.userId === s.sessionUserId));
+  const { t } = useI18n();
+  const portalLabel = variant === "student" ? t.studentPortal : t.adminPortal;
 
   return (
     <aside
@@ -302,7 +305,7 @@ export function Sidebar({
           {collapsed ? <span className="block text-center font-serif text-xl font-semibold text-plum">K</span> : <Logo />}
         </Link>
         {collapsed ? null : (
-          <p className="mt-1.5 text-[13px] font-semibold uppercase tracking-[0.14em] text-purple">{variant} portal</p>
+          <p className="mt-1.5 text-[13px] font-semibold uppercase tracking-[0.14em] text-purple">{portalLabel}</p>
         )}
         {onToggleCollapsed ? (
           <button
@@ -310,10 +313,10 @@ export function Sidebar({
             onClick={onToggleCollapsed}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-2 py-1.5 text-sm text-purple hover:bg-ivory"
             aria-pressed={collapsed}
-            aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+            aria-label={collapsed ? t.expandNav : t.collapseNav}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-            {collapsed ? null : <span>Collapse</span>}
+            {collapsed ? null : <span>{t.collapseNav}</span>}
           </button>
         ) : null}
       </div>
@@ -337,15 +340,16 @@ export function Sidebar({
 
 export function StudentMobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const profile = usePlatform((s) => s.studentProfiles.find((p) => p.userId === s.sessionUserId));
+  const { t } = useI18n();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40 md:hidden">
-      <button type="button" className="absolute inset-0 bg-navy/40" aria-label="Close menu" onClick={onClose} />
-      <div className="relative flex h-full w-[min(19rem,90vw)] flex-col overflow-hidden bg-card shadow-xl" role="dialog" aria-modal="true" aria-label="Student navigation">
+      <button type="button" className="absolute inset-0 bg-navy/40" aria-label={t.closeMenu} onClick={onClose} />
+      <div className="relative flex h-full w-[min(19rem,90vw)] flex-col overflow-hidden bg-card shadow-xl" role="dialog" aria-modal="true" aria-label={t.studentPortal}>
         <div className="shrink-0 px-4 py-5">
           <Logo />
           <button type="button" onClick={onClose} className="mt-3 text-sm font-medium text-barbie">
-            Close
+            {t.closeMenu}
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
@@ -360,15 +364,16 @@ export function StudentMobileDrawer({ open, onClose }: { open: boolean; onClose:
 }
 
 export function AdminMobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useI18n();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40 md:hidden">
-      <button type="button" className="absolute inset-0 bg-navy/40" aria-label="Close menu" onClick={onClose} />
-      <div className="relative flex h-full w-[min(19rem,90vw)] flex-col overflow-y-auto bg-card shadow-xl" role="dialog" aria-modal="true" aria-label="Admin navigation">
+      <button type="button" className="absolute inset-0 bg-navy/40" aria-label={t.closeMenu} onClick={onClose} />
+      <div className="relative flex h-full w-[min(19rem,90vw)] flex-col overflow-y-auto bg-card shadow-xl" role="dialog" aria-modal="true" aria-label={t.adminPortal}>
         <div className="px-4 py-5">
           <Logo />
           <button type="button" onClick={onClose} className="mt-3 text-sm font-medium text-barbie">
-            Close
+            {t.closeMenu}
           </button>
         </div>
         <AdminNav collapsed={false} onNavigate={onClose} />

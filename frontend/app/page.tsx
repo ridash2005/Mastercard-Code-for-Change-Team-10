@@ -14,10 +14,7 @@ export default function LandingPage() {
         <div>
           <Logo />
           <h1 className="mt-6 font-serif text-4xl leading-tight md:text-5xl">{t.tagline}</h1>
-          <p className="mt-4 max-w-md text-muted">
-            Katalyst turns programme work — courses, training, mentoring, projects — into a path you can
-            actually finish. XP, missions and a coach that knows your deadlines. Not a toy.
-          </p>
+          <p className="mt-4 max-w-md text-muted">{t.heroDescription}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/register" className="rounded-md bg-forest px-4 py-2 text-sm text-white">
               {t.getStarted}
@@ -32,9 +29,9 @@ export default function LandingPage() {
       <section className="border-y border-line bg-card py-14">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-3">
           {[
-            ["Training & courses", "Live clinics and certificate studios with due dates that mean something."],
-            ["Projects & mentoring", "Team wallets, SQL cases, and 1:1 career stories — not generic badges."],
-            ["XP you can explain", "Approved work awards XP. Leaderboards follow the ledger, not vibes."],
+            [t.feature1Title, t.feature1Desc],
+            [t.feature2Title, t.feature2Desc],
+            [t.feature3Title, t.feature3Desc],
           ].map(([h, p]) => (
             <div key={h}>
               <h2 className="font-serif text-2xl">{h}</h2>
@@ -44,11 +41,13 @@ export default function LandingPage() {
         </div>
       </section>
       <section className="mx-auto max-w-6xl px-4 py-14">
-        <h2 className="font-serif text-3xl">How it works</h2>
+        <h2 className="font-serif text-3xl">{t.howItWorksHeading}</h2>
         <ol className="mt-6 grid gap-4 md:grid-cols-4">
-          {["Create your profile", "Choose interests", "Complete activities", "Earn XP on the path"].map((s, i) => (
+          {[t.step1, t.step2, t.step3, t.step4].map((s, i) => (
             <li key={s} className="rounded-xl border border-line bg-card p-4">
-              <p className="text-xs text-muted">Step {i + 1}</p>
+              <p className="text-xs text-muted">
+                {t.stepLabel} {i + 1}
+              </p>
               <p className="mt-2 font-medium">{s}</p>
             </li>
           ))}
@@ -56,9 +55,9 @@ export default function LandingPage() {
       </section>
       <section className="bg-plum py-12 text-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4">
-          <p className="font-serif text-3xl text-white">Start your journey</p>
+          <p className="font-serif text-3xl text-white">{t.startJourney}</p>
           <Link href="/register" className="rounded-full bg-barbie px-4 py-2 text-sm text-white">
-            Get started
+            {t.getStarted}
           </Link>
         </div>
       </section>

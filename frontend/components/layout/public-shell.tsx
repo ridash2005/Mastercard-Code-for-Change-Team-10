@@ -10,8 +10,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t } = useI18n();
   const links = [
-    { href: "/", label: "Home" },
-    { href: "/volunteer", label: "Volunteer" },
+    { href: "/", label: t.homeLink },
+    { href: "/volunteer", label: t.volunteerLink },
     { href: "/contact", label: t.contact },
     { href: "/feedback", label: t.feedback },
     { href: "/complaint", label: t.complaints },
@@ -43,9 +43,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       {children}
-      <footer className="border-t border-line px-4 py-8 text-center text-xs text-muted">
-        Katalyst is a programme engagement platform built for Mastercard Code for Change.
-      </footer>
+      <footer className="border-t border-line px-4 py-8 text-center text-xs text-muted">{t.footerText}</footer>
     </div>
   );
 }

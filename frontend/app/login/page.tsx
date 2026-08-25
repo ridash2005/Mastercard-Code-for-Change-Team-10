@@ -10,6 +10,7 @@ import { demoAccounts } from "@/lib/auth/session";
 import { usePlatform } from "@/lib/data/platform-store";
 import { ErrorState } from "@/components/states";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { useI18n } from "@/lib/i18n/provider";
 import Link from "next/link";
 
 // Matches backend/api/scripts/seed.js's default demo account password
@@ -29,6 +30,7 @@ async function postJson(path: string, body: unknown) {
 function LoginForm() {
   const store = usePlatform();
   const router = useRouter();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,7 @@ function LoginForm() {
   // flash on every load, not just when ?oauthError is actually present.
   useEffect(() => {
     const oauthError = new URLSearchParams(window.location.search).get("oauthError");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from an external source (the URL) on mount, not derivable as render-time state
     if (oauthError) setError(oauthError);
   }, []);
 
@@ -84,10 +87,8 @@ function LoginForm() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="font-serif text-3xl">Sign in</h1>
-      <p className="mt-2 text-sm text-stone-600">
-        Welcome back. Sign in with your account, or continue with Google or GitHub.
-      </p>
+      <h1 className="font-serif text-3xl">{t.signInButton}</h1>
+      <p className="mt-2 text-sm text-stone-600">{t.welcomeBack}</p>
 
       {error ? (
         <div className="mt-4">
@@ -96,7 +97,7 @@ function LoginForm() {
       ) : null}
 
       <div className="mt-6">
-        <OAuthButtons />
+        <OAuthButtons label={t.orContinueWithEmail} />
       </div>
 
       <form
@@ -107,7 +108,7 @@ function LoginForm() {
         }}
       >
         <div>
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t.emailLabel}</Label>
           <Input
             id="email"
             type="email"
@@ -120,9 +121,9 @@ function LoginForm() {
         </div>
         <div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t.passwordLabel}</Label>
             <Link href="/forgot-password" className="text-xs underline text-stone-500">
-              Forgot password?
+              {t.forgotPasswordLink}
             </Link>
           </div>
           <Input
@@ -136,12 +137,12 @@ function LoginForm() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={busy}>
-          {busy ? "Signing in…" : "Sign in"}
+          {busy ? t.signingIn : t.signInButton}
         </Button>
       </form>
 
       <p className="mt-6 text-sm">
-        New here? <Link className="underline" href="/register">Create an account</Link>
+        {t.newHereQuestion} <Link className="underline" href="/register">{t.createAccountLink}</Link>
       </p>
 
       <div className="mt-10 border-t border-stone-200 pt-4">
@@ -150,7 +151,7 @@ function LoginForm() {
           onClick={() => setShowDemo((v) => !v)}
           className="text-xs text-stone-400 underline"
         >
-          {showDemo ? "Hide demo accounts" : "Reviewing this project? Try a demo account"}
+          {showDemo ? t.hideDemoAccounts : t.tryDemoAccount}
         </button>
         {showDemo ? (
           <div className="mt-3 space-y-2 text-sm">
