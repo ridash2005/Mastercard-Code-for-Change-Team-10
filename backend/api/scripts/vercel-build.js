@@ -64,8 +64,26 @@ execFileSync('npx tsc -p tsconfig.json', {
 
 console.log(`[vercel-build] Vendoring ai-client into ${VENDOR_DIR}...`);
 fs.rmSync(VENDOR_DIR, { recursive: true, force: true });
-fs.mkdirSync(VENDOR_DIR, { recursive: true });
-fs.cpSync(path.join(AI_CLIENT_SRC, 'dist'), path.join(VENDOR_DIR, 'dist'), { recursive: true });
+fs.mkdirSync(path.join(VENDOR_DIR, 'dist'), { recursive: true });
+// Renamed off "index.js" deliberately - Vercel's zero-config Node.js
+// Functions detection scans this whole project (rootDirectory) for files
+// matching its entrypoint patterns (app/index/server.{js,...}), including
+// this vendored *dependency* file, and was silently treating it as a
+// second, unintended serverless function: transpiling it ESM -> CommonJS
+// (its own default for a package.json without "type": "module", which is
+// backend/api/package.json's setting, not this vendored package's) while
+// leaving vendor/ai-client/package.json's "type": "module" untouched. The
+// mismatch then breaks at runtime with "exports is not defined in ES
+// module scope" the moment aiClientBridge.js dynamically imports it -
+// aiClientBridge.js's own import() call never triggers this misdetection,
+// only Vercel's build-time directory scan does, so the rename is the fix.
+for (const entry of fs.readdirSync(path.join(AI_CLIENT_SRC, 'dist'))) {
+  const renamed = entry.replace(/^index\./, 'aiClient.');
+  fs.copyFileSync(
+    path.join(AI_CLIENT_SRC, 'dist', entry),
+    path.join(VENDOR_DIR, 'dist', renamed)
+  );
+}
 fs.copyFileSync(path.join(AI_CLIENT_SRC, 'package.json'), path.join(VENDOR_DIR, 'package.json'));
 
 console.log('[vercel-build] Done.');
