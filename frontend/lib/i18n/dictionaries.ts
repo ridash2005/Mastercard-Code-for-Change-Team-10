@@ -390,6 +390,17 @@ export const en = {
   flagInactive: "Inactive",
   flagHealthy: "Healthy",
   activityHistoryHeading: "Activity history",
+  allStatusesLabel: "All statuses",
+  noTeamLabel: "No team",
+  participationLabel: "Participation (enrolled students in filter)",
+  completionRateLabel: "Completion rate",
+  averageXpLabel: "Average XP",
+  courseCertificatesLabel: "Course certificates",
+  overdueActivitiesLabel: "Overdue activities",
+  lowScoresLabel: "Low scores",
+  lowParticipationLabel: "Low participation",
+  teamPerformanceLabel: "Team performance",
+  allSquadsLabel: "All squads",
 };
 
 export const hi: Record<keyof typeof en, string> = {
@@ -762,6 +773,17 @@ export const hi: Record<keyof typeof en, string> = {
   flagInactive: "निष्क्रिय",
   flagHealthy: "स्वस्थ",
   activityHistoryHeading: "गतिविधि इतिहास",
+  allStatusesLabel: "सभी स्थितियाँ",
+  noTeamLabel: "कोई टीम नहीं",
+  participationLabel: "भागीदारी (फ़िल्टर में नामांकित छात्र)",
+  completionRateLabel: "पूर्णता दर",
+  averageXpLabel: "औसत XP",
+  courseCertificatesLabel: "कोर्स प्रमाणपत्र",
+  overdueActivitiesLabel: "अतिदेय गतिविधियाँ",
+  lowScoresLabel: "कम स्कोर",
+  lowParticipationLabel: "कम भागीदारी",
+  teamPerformanceLabel: "टीम प्रदर्शन",
+  allSquadsLabel: "सभी स्क्वाड",
 };
 
 export const es: Record<keyof typeof en, string> = {
@@ -1135,6 +1157,17 @@ export const es: Record<keyof typeof en, string> = {
   flagInactive: "Inactivo",
   flagHealthy: "Saludable",
   activityHistoryHeading: "Historial de actividad",
+  allStatusesLabel: "Todos los estados",
+  noTeamLabel: "Sin equipo",
+  participationLabel: "Participación (estudiantes inscritos en el filtro)",
+  completionRateLabel: "Tasa de finalización",
+  averageXpLabel: "XP promedio",
+  courseCertificatesLabel: "Certificados de curso",
+  overdueActivitiesLabel: "Actividades vencidas",
+  lowScoresLabel: "Puntuaciones bajas",
+  lowParticipationLabel: "Baja participación",
+  teamPerformanceLabel: "Rendimiento del equipo",
+  allSquadsLabel: "Todos los equipos",
 };
 
 export const fr: Record<keyof typeof en, string> = {
@@ -1508,6 +1541,17 @@ export const fr: Record<keyof typeof en, string> = {
   flagInactive: "Inactif",
   flagHealthy: "Sain",
   activityHistoryHeading: "Historique des activités",
+  allStatusesLabel: "Tous les statuts",
+  noTeamLabel: "Aucune équipe",
+  participationLabel: "Participation (étudiants inscrits dans le filtre)",
+  completionRateLabel: "Taux d'achèvement",
+  averageXpLabel: "XP moyen",
+  courseCertificatesLabel: "Certificats de cours",
+  overdueActivitiesLabel: "Activités en retard",
+  lowScoresLabel: "Scores faibles",
+  lowParticipationLabel: "Faible participation",
+  teamPerformanceLabel: "Performance de l'équipe",
+  allSquadsLabel: "Toutes les équipes",
 };
 
 export const de: Record<keyof typeof en, string> = {
@@ -1881,6 +1925,17 @@ export const de: Record<keyof typeof en, string> = {
   flagInactive: "Inaktiv",
   flagHealthy: "Gesund",
   activityHistoryHeading: "Aktivitätsverlauf",
+  allStatusesLabel: "Alle Status",
+  noTeamLabel: "Kein Team",
+  participationLabel: "Teilnahme (angemeldete Studierende im Filter)",
+  completionRateLabel: "Abschlussquote",
+  averageXpLabel: "Durchschnittliche XP",
+  courseCertificatesLabel: "Kurszertifikate",
+  overdueActivitiesLabel: "Überfällige Aktivitäten",
+  lowScoresLabel: "Niedrige Punktzahlen",
+  lowParticipationLabel: "Geringe Teilnahme",
+  teamPerformanceLabel: "Teamleistung",
+  allSquadsLabel: "Alle Teams",
 };
 
 export const pt: Record<keyof typeof en, string> = {
@@ -2254,6 +2309,17 @@ export const pt: Record<keyof typeof en, string> = {
   flagInactive: "Inativo",
   flagHealthy: "Saudável",
   activityHistoryHeading: "Histórico de atividades",
+  allStatusesLabel: "Todos os status",
+  noTeamLabel: "Sem equipe",
+  participationLabel: "Participação (estudantes inscritos no filtro)",
+  completionRateLabel: "Taxa de conclusão",
+  averageXpLabel: "XP médio",
+  courseCertificatesLabel: "Certificados de curso",
+  overdueActivitiesLabel: "Atividades atrasadas",
+  lowScoresLabel: "Pontuações baixas",
+  lowParticipationLabel: "Baixa participação",
+  teamPerformanceLabel: "Desempenho da equipe",
+  allSquadsLabel: "Todas as equipes",
 };
 
 export const zh: Record<keyof typeof en, string> = {
@@ -2626,6 +2692,17 @@ export const zh: Record<keyof typeof en, string> = {
   flagInactive: "不活跃",
   flagHealthy: "状态良好",
   activityHistoryHeading: "活动历史",
+  allStatusesLabel: "所有状态",
+  noTeamLabel: "无团队",
+  participationLabel: "参与度（筛选条件内已报名学生）",
+  completionRateLabel: "完成率",
+  averageXpLabel: "平均 XP",
+  courseCertificatesLabel: "课程证书",
+  overdueActivitiesLabel: "逾期活动",
+  lowScoresLabel: "低分",
+  lowParticipationLabel: "参与度低",
+  teamPerformanceLabel: "团队表现",
+  allSquadsLabel: "所有小队",
 };
 
 export const ja: Record<keyof typeof en, string> = {
@@ -2998,6 +3075,17 @@ export const ja: Record<keyof typeof en, string> = {
   flagInactive: "非アクティブ",
   flagHealthy: "健全",
   activityHistoryHeading: "アクティビティ履歴",
+  allStatusesLabel: "すべてのステータス",
+  noTeamLabel: "チームなし",
+  participationLabel: "参加状況（フィルター内の登録学生）",
+  completionRateLabel: "完了率",
+  averageXpLabel: "平均XP",
+  courseCertificatesLabel: "コース証明書",
+  overdueActivitiesLabel: "期限超過のアクティビティ",
+  lowScoresLabel: "低いスコア",
+  lowParticipationLabel: "参加率が低い",
+  teamPerformanceLabel: "チームパフォーマンス",
+  allSquadsLabel: "すべてのスクアッド",
 };
 
 export const ar: Record<keyof typeof en, string> = {
@@ -3371,6 +3459,17 @@ export const ar: Record<keyof typeof en, string> = {
   flagInactive: "غير نشط",
   flagHealthy: "سليم",
   activityHistoryHeading: "سجل النشاط",
+  allStatusesLabel: "جميع الحالات",
+  noTeamLabel: "بلا فريق",
+  participationLabel: "المشاركة (الطلاب المسجلون في الفلتر)",
+  completionRateLabel: "معدل الإتمام",
+  averageXpLabel: "متوسط نقاط الخبرة",
+  courseCertificatesLabel: "شهادات الدورة",
+  overdueActivitiesLabel: "الأنشطة المتأخرة",
+  lowScoresLabel: "درجات منخفضة",
+  lowParticipationLabel: "مشاركة منخفضة",
+  teamPerformanceLabel: "أداء الفريق",
+  allSquadsLabel: "جميع الفرق",
 };
 
 export const bn: Record<keyof typeof en, string> = {
@@ -3743,6 +3842,17 @@ export const bn: Record<keyof typeof en, string> = {
   flagInactive: "নিষ্ক্রিয়",
   flagHealthy: "সুস্থ",
   activityHistoryHeading: "কার্যক্রম ইতিহাস",
+  allStatusesLabel: "সব স্ট্যাটাস",
+  noTeamLabel: "কোনো টিম নেই",
+  participationLabel: "অংশগ্রহণ (ফিল্টারে নথিভুক্ত শিক্ষার্থী)",
+  completionRateLabel: "সম্পন্নতার হার",
+  averageXpLabel: "গড় XP",
+  courseCertificatesLabel: "কোর্স সার্টিফিকেট",
+  overdueActivitiesLabel: "বিলম্বিত কার্যক্রম",
+  lowScoresLabel: "কম স্কোর",
+  lowParticipationLabel: "কম অংশগ্রহণ",
+  teamPerformanceLabel: "টিম পারফরম্যান্স",
+  allSquadsLabel: "সব স্কোয়াড",
 };
 
 export type Locale = "en" | "hi" | "es" | "fr" | "de" | "pt" | "zh" | "ja" | "ar" | "bn";

@@ -5,9 +5,11 @@ import { SubmissionCard } from "@/components/cards";
 import { SearchBar } from "@/components/activities/filters";
 import { Select } from "@/components/ui/input";
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function SubmissionsPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const list = useMemo(() => {
@@ -22,17 +24,17 @@ export default function SubmissionsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Submissions</h1>
+      <h1 className="font-serif text-3xl">{t.submissions}</h1>
       <div className="mt-4 flex flex-wrap gap-3">
         <div className="w-full max-w-sm">
           <SearchBar value={q} onChange={setQ} />
         </div>
         <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="all">All statuses</option>
-          <option value="submitted">Submitted</option>
-          <option value="under_review">Under review</option>
-          <option value="approved">Approved</option>
-          <option value="needs_resubmission">Needs resubmission</option>
+          <option value="all">{t.allStatusesLabel}</option>
+          <option value="submitted">{t.status_submitted}</option>
+          <option value="under_review">{t.status_under_review}</option>
+          <option value="approved">{t.status_approved}</option>
+          <option value="needs_resubmission">{t.status_needs_resubmission}</option>
         </Select>
       </div>
       <div className="mt-6 space-y-3">
