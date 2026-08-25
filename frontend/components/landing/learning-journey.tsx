@@ -125,9 +125,10 @@ function JourneyCanvas({
             </button>
             <p
               className={cn(
-                "pointer-events-none absolute w-[7.25rem] text-[12px] font-semibold leading-snug text-plum sm:w-36 sm:text-[13px]",
+                "pointer-events-none absolute z-[1] w-[6.5rem] rounded-md bg-[#fffcf7]/95 px-1.5 py-1 text-[11px] font-semibold leading-snug text-plum shadow-[0_2px_8px_-4px_rgba(26,22,48,0.35)] sm:w-32 sm:text-[12px]",
                 labelClass(anchor),
               )}
+              style={{ zIndex: i + 1 }}
             >
               {m.name}
               {i === 0 ? (
@@ -160,10 +161,10 @@ export function LearningJourney() {
       <p className="mt-2 text-sm text-muted">
         Next: <span className="font-semibold text-barbie">{current.name}</span>
       </p>
-      <div className="mt-2 hidden md:block">
+      <div className="mt-2 hidden lg:block">
         <JourneyCanvas variant="desktop" currentIndex={currentIndex} onSelect={setCurrentIndex} />
       </div>
-      <div className="mt-2 md:hidden">
+      <div className="mt-2 lg:hidden">
         <JourneyCanvas variant="mobile" currentIndex={currentIndex} onSelect={setCurrentIndex} />
       </div>
       <Button variant="outline" className="mt-3" onClick={() => setCurrentIndex((i) => (i + 1) % JOURNEY_MILESTONES.length)}>

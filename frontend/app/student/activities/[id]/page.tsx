@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Textarea } from "@/components/ui/input";
+import { FileInput, Input, Label, Textarea } from "@/components/ui/input";
 import { StatusBadge, SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
 import { formatDate } from "@/lib/utils";
@@ -74,7 +74,7 @@ export default function ActivityDetailPage() {
             </div>
             <div>
               <Label>File (name only in this demo)</Label>
-              <Input type="file" onChange={(e) => setFileName(e.target.files?.[0]?.name)} />
+              <FileInput onChange={(e) => setFileName(e.target.files?.[0]?.name)} />
             </div>
             <div>
               <Label>Notes for reviewer</Label>

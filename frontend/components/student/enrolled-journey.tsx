@@ -30,9 +30,15 @@ function isDone(status: EnrollmentStatus) {
 }
 
 function layout(count: number, variant: "desktop" | "mobile") {
-  const vb = variant === "desktop" ? { w: 1100, h: 640 } : { w: 380, h: Math.max(920, count * 128) };
   const padX = variant === "desktop" ? 108 : 148;
   const padY = variant === "desktop" ? 156 : 72;
+  // Each node's label is a fixed-width box; stretch the canvas so consecutive
+  // nodes always have enough room between them for their labels not to overlap.
+  const minGap = variant === "desktop" ? 190 : 128;
+  const vb =
+    variant === "desktop"
+      ? { w: Math.max(1100, padX * 2 + Math.max(0, count - 1) * minGap), h: 640 }
+      : { w: 380, h: Math.max(920, count * minGap) };
   const pts = Array.from({ length: count }, (_, i) => {
     const t = count <= 1 ? 0 : i / (count - 1);
     const wave = Math.sin(t * Math.PI * 2);
@@ -148,10 +154,10 @@ export function EnrolledLearningJourney({
           <span className="rounded-full border border-line bg-card px-2.5 py-1 text-blue">{completion}% complete</span>
         </div>
       </div>
-      <div className="playground-scene mt-4 hidden md:block">
+      <div className="playground-scene mt-4 hidden lg:block">
         <JourneyCanvas variant="desktop" items={items} focusIndex={focusIndex} studentId={studentId} />
       </div>
-      <div className="playground-scene mt-4 md:hidden">
+      <div className="playground-scene mt-4 lg:hidden">
         <JourneyCanvas variant="mobile" items={items} focusIndex={focusIndex} studentId={studentId} />
       </div>
     </section>
@@ -238,12 +244,13 @@ function JourneyCanvas({
             </button>
             <div
               className={cn(
-                "absolute z-[1] w-[9.75rem] sm:w-[10.5rem]",
-                pt.lane === "below" && "top-7 left-1/2 -translate-x-1/2",
-                pt.lane === "above" && "bottom-7 left-1/2 -translate-x-1/2",
+                "absolute w-[8.5rem] sm:w-[9.5rem]",
+                pt.lane === "below" && (i % 2 === 0 ? "top-7" : "top-16") + " left-1/2 -translate-x-1/2",
+                pt.lane === "above" && (i % 2 === 0 ? "bottom-7" : "bottom-16") + " left-1/2 -translate-x-1/2",
                 pt.lane === "left" && "right-7 top-1/2 -translate-y-1/2",
                 pt.lane === "right" && "left-7 top-1/2 -translate-y-1/2",
               )}
+              style={{ zIndex: i + 1 }}
             >
               <button
                 type="button"

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PublicShell } from "@/components/layout/public-shell";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Select, Textarea } from "@/components/ui/input";
+import { FileInput, Input, Label, Select, Textarea } from "@/components/ui/input";
 import { StatusBadge, SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
 import type { ComplaintPriority } from "@/lib/types";
@@ -59,7 +59,7 @@ export default function ComplaintPublicPage() {
           </div>
           <div>
             <Label>Attachment</Label>
-            <Input name="file" type="file" />
+            <FileInput name="file" />
           </div>
           <Button type="submit">File complaint</Button>
           {ok ? <SuccessState title="Complaint filed with status Submitted." /> : null}
