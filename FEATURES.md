@@ -1,12 +1,14 @@
-# Katalyst — Feature Audit
+# 📊 Katalyst — Feature Audit
+
+> ⬅️ Part of [Katalyst](./README.md) — Team 10, Mastercard Code for Change 3.0
 
 A complete, path-by-path list of every feature in the product, what backs it, and its real/mock
 status. Every row marked **Real** has been verified end-to-end over actual HTTP against a running
 `backend/api` + MongoDB (and, for AI rows, a live Gemini call) — not just code-reviewed. See
 "How this was verified" at the bottom for the exact method.
 
-Legend: 🟢 Real (backend/api + MongoDB, or a live LLM call) · 🟡 Real data, minor gap noted · ⚪ Not
-backed by anything yet (explicitly out of scope, listed for completeness)
+**Legend:** 🟢 Real (backend/api + MongoDB, or a live LLM call) · 🟡 Real data, minor gap noted ·
+⚪ Not backed by anything yet (explicitly out of scope, listed for completeness)
 
 ## Account lifecycle
 

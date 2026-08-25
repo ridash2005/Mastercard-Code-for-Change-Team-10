@@ -1,4 +1,6 @@
-# Katalyst — Frontend Spec (Student + Admin Portals)
+# 🖥️ Katalyst — Frontend Spec (Student + Admin Portals)
+
+> ⬅️ Part of [Katalyst](./README.md) — Team 10, Mastercard Code for Change 3.0
 
 > Consolidates the frontend-relevant parts of `Katalyst_Build_Spec_for_Claude_Code.md`,
 > `KATALYST_BACKEND_MVP_HANDOFF.md`, and the visual/UX design brief (`Katalyst_Claude_Prompt.md`)

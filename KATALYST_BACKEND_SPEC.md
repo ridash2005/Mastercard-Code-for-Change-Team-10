@@ -1,4 +1,6 @@
-# Katalyst — Backend Spec (MVP, MongoDB)
+# 🗄️ Katalyst — Backend Spec (MVP, MongoDB)
+
+> ⬅️ Part of [Katalyst](./README.md) — Team 10, Mastercard Code for Change 3.0
 
 > Consolidates `Katalyst_Build_Spec_for_Claude_Code.md` (production architecture, §1–§13),
 > `KATALYST_BACKEND_MVP_HANDOFF.md` (hackathon-MVP delta: two-portal RBAC, personalisation,

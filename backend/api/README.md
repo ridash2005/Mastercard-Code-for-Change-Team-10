@@ -1,9 +1,23 @@
-# Katalyst Standalone Backend (`backend/api`)
+# ⚙️ Katalyst Standalone Backend (`backend/api`)
+
+<p>
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-runtime-339933?style=flat-square&logo=node.js&logoColor=white">
+  <img alt="Express" src="https://img.shields.io/badge/Express-4.21-000000?style=flat-square&logo=express&logoColor=white">
+  <img alt="MongoDB" src="https://img.shields.io/badge/Mongoose-8.10-47A248?style=flat-square&logo=mongodb&logoColor=white">
+  <img alt="JWT" src="https://img.shields.io/badge/Auth-JWT-black?style=flat-square&logo=jsonwebtokens&logoColor=white">
+  <img alt="Deployed on Vercel" src="https://img.shields.io/badge/Deployed_on-Vercel-000000?style=flat-square&logo=vercel&logoColor=white">
+</p>
 
 A robust, production-grade Express.js & MongoDB backend for the Katalyst student and administrator portals — plus the guarded gateway into `/ai` (see `services/ai/` and `routes/aiRoutes.js`; `POST /api/ai/coach/message` and `POST /api/ai/judge/score-submission`). This is the only backend the frontend talks to, and the only thing that talks to `/ai`.
 
 Part of Katalyst, built by Team 10 for Mastercard Code for Change 3.0 — see the
 [root README](../../README.md#team) for the full team and the repository link.
+
+**Live:** https://katalyst-backend-api.vercel.app/api/health
+
+### Contents
+
+[Architecture](#architecture) · [Tech Stack](#tech-stack) · [Environment Variables](#environment-variables) · [Quickstart](#quickstart--how-to-run) · [Auth & Roles](#authentication--roles) · [API Endpoints](#api-endpoints-overview) · [Deploying to Vercel](#deploying-to-vercel) · [Frontend Integration](#frontend-backend-integration)
 
 ---
 
@@ -194,7 +208,9 @@ For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTI
 ## ☁️ Deploying to Vercel
 
 This project already ships `vercel.json` and `scripts/vercel-build.js` (see that file's comments
-for why the AI client gets vendored into `vendor/ai-client` rather than imported cross-directory).
+for why the AI client gets vendored into `node_modules/@katalyst/ai-client-vendor` — under
+`node_modules` specifically, not some arbitrary folder, so Vercel's Functions builder leaves the
+compiled ESM output alone instead of mis-transpiling it — rather than imported cross-directory).
 Currently deployed at https://katalyst-backend-api.vercel.app as the `ridash/katalyst-backend-api`
 Vercel project. To redeploy:
 

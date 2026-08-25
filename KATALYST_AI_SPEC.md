@@ -1,4 +1,6 @@
-# Katalyst — AI Integration Spec (AI Judge, AI Coach, RAG, Peer Matching)
+# 🤖 Katalyst — AI Integration Spec (AI Judge, AI Coach, RAG, Peer Matching)
+
+> ⬅️ Part of [Katalyst](./README.md) — Team 10, Mastercard Code for Change 3.0
 
 > Consolidates the AI-relevant sections of `Katalyst_Build_Spec_for_Claude_Code.md` (§4, §5, §11,
 > §12, §14, §15), the personalisation additions from `KATALYST_BACKEND_MVP_HANDOFF.md` (§18), and
