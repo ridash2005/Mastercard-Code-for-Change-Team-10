@@ -6,9 +6,11 @@ import { Select } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { usePlatform } from "@/lib/data/platform-store";
 import { formatDate } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ReviewsPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("all");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -23,14 +25,14 @@ export default function ReviewsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Student Reviews</h1>
-      <p className="mt-1 text-sm text-muted">Reviews are student feedback records already stored on the platform.</p>
+      <h1 className="font-serif text-3xl">{t.studentReviews}</h1>
+      <p className="mt-1 text-sm text-muted">{t.studentReviewsSubtitle}</p>
       <div className="mt-4 flex flex-wrap gap-3">
         <div className="w-full max-w-sm">
           <SearchBar value={q} onChange={setQ} />
         </div>
         <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="all">All categories</option>
+          <option value="all">{t.allCategoriesLabel}</option>
           {categories.map((c) => (
             <option key={c}>{c}</option>
           ))}
@@ -50,16 +52,16 @@ export default function ReviewsPage() {
           </li>
         ))}
       </ul>
-      <Dialog open={Boolean(selected)} title="Review" onClose={() => setOpenId(null)}>
+      <Dialog open={Boolean(selected)} title={t.reviewDialogTitle} onClose={() => setOpenId(null)}>
         {selected ? (
           <div className="space-y-2 text-sm">
             <p>{store.users.find((u) => u.id === selected.userId)?.name}</p>
             <p className="text-muted">
               {selected.category} · {selected.rating}/5 · {formatDate(selected.createdAt)}
             </p>
-            {selected.activityId ? <p>Activity: {store.activities.find((a) => a.id === selected.activityId)?.title}</p> : null}
+            {selected.activityId ? <p>{t.activityColonLabel}: {store.activities.find((a) => a.id === selected.activityId)?.title}</p> : null}
             <p>{selected.message}</p>
-            <p className="text-muted">Status: submitted</p>
+            <p className="text-muted">{t.statusColonLabel}: {t.status_submitted}</p>
           </div>
         ) : null}
       </Dialog>

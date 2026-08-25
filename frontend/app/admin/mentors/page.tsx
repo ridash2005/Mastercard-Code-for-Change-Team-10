@@ -4,9 +4,12 @@ import { useMemo, useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { usePlatform } from "@/lib/data/platform-store";
 import { isDone } from "@/lib/admin/insights";
+import { useI18n } from "@/lib/i18n/provider";
+import { formatT } from "@/lib/i18n/format";
 
 export default function MentorsPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const mentoring = store.activities.filter((a) => a.type === "mentoring");
   const mentors = useMemo(() => {
     const ids = [...new Set(mentoring.map((a) => a.createdBy))];
@@ -38,26 +41,24 @@ export default function MentorsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Mentor performance</h1>
-      <p className="mt-1 text-sm text-muted">
-        Mentors are staff who created mentoring activities. Ratings appear only when students submit Mentoring feedback. No scores are invented.
-      </p>
+      <h1 className="font-serif text-3xl">{t.mentorPerformanceTitle}</h1>
+      <p className="mt-1 text-sm text-muted">{t.mentorPerformanceSubtitle}</p>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {mentors.map((m) => (
           <button key={m.id} type="button" className="k-card p-5 text-left" onClick={() => setOpenId(m.id)}>
             <p className="font-serif text-xl text-plum">{m.name}</p>
-            <p className="mt-1 text-sm text-gold">{m.avg != null ? `${"★".repeat(Math.round(m.avg))} ${m.avg.toFixed(1)}` : "No ratings yet"}</p>
+            <p className="mt-1 text-sm text-gold">{m.avg != null ? `${"★".repeat(Math.round(m.avg))} ${m.avg.toFixed(1)}` : t.noRatingsYet}</p>
             <p className="mt-2 text-sm text-muted">
-              {m.reviews.length} reviews · {m.students} students enrolled · {m.completed}/{m.sessions} sessions completed
+              {formatT(t.reviewsSessionsSummary, { reviews: m.reviews.length, students: m.students, completed: m.completed, sessions: m.sessions })}
             </p>
           </button>
         ))}
       </div>
-      <Dialog open={Boolean(selected)} title={selected?.name ?? "Mentor"} onClose={() => setOpenId(null)}>
+      <Dialog open={Boolean(selected)} title={selected?.name ?? t.mentorFallback} onClose={() => setOpenId(null)}>
         {selected ? (
           <div className="space-y-3 text-sm">
             <p>
-              Average rating: {selected.avg != null ? selected.avg.toFixed(1) : "n/a"} · {selected.reviews.length} reviews
+              {t.averageRatingLabel}: {selected.avg != null ? selected.avg.toFixed(1) : t.notApplicable} · {selected.reviews.length} {t.reviewsLabel}
             </p>
             <ul className="space-y-1">
               {selected.dist.map((count, i) => (
@@ -71,7 +72,7 @@ export default function MentorsPage() {
               ))}
             </ul>
             <p className="text-muted">
-              Recurring themes are not generated. {selected.reviews.length ? "Open Student Reviews to read the submitted comments." : "There is no Mentoring feedback to summarise."}
+              {t.recurringThemesNote} {selected.reviews.length ? t.openReviewsHint : t.noMentoringFeedbackHint}
             </p>
           </div>
         ) : null}
