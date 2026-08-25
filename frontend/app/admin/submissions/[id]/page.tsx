@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { StatusBadge, SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
+import { formatT } from "@/lib/i18n/format";
 
 export default function SubmissionReviewPage() {
   const { id } = useParams<{ id: string }>();
   const store = usePlatform();
+  const { t } = useI18n();
   const sub = store.submissions.find((s) => s.id === id);
   const hasAiResult = Boolean(sub?.aiSuggestion);
 
@@ -46,7 +49,7 @@ export default function SubmissionReviewPage() {
     setFeedback(ai.suggestedFeedback ?? "");
   }
 
-  if (!sub || !activity) return <p>Not found.</p>;
+  if (!sub || !activity) return <p>{t.notFoundLabel}</p>;
 
   function act(action: "approve" | "reject" | "resubmit") {
     if (!sub) return;
@@ -69,42 +72,42 @@ export default function SubmissionReviewPage() {
           {student?.name} · {student?.programme} · {profile?.xp} XP
         </p>
         <article className="rounded-xl border bg-white p-4 text-sm">
-          <h2 className="font-medium">Latest attempt</h2>
+          <h2 className="font-medium">{t.latestAttemptHeading}</h2>
           <p className="mt-2">{latest?.text}</p>
-          {latest?.link ? <p className="mt-2">Link: {latest.link}</p> : null}
-          {latest?.fileName ? <p>File: {latest.fileName}</p> : null}
-          {latest?.notes ? <p className="text-stone-600">Notes: {latest.notes}</p> : null}
+          {latest?.link ? <p className="mt-2">{t.linkLabel}: {latest.link}</p> : null}
+          {latest?.fileName ? <p>{t.fileWordLabel}: {latest.fileName}</p> : null}
+          {latest?.notes ? <p className="text-stone-600">{t.notesForReviewerLabel}: {latest.notes}</p> : null}
         </article>
         <div className="space-y-3 rounded-xl border bg-white p-4">
           <div>
-            <Label>Score</Label>
+            <Label>{t.scoreLabel}</Label>
             <Input type="number" min={0} max={100} value={score} onChange={(e) => setScore(Number(e.target.value))} />
           </div>
           <div>
-            <Label>Feedback</Label>
+            <Label>{t.feedback}</Label>
             <Textarea rows={4} value={feedback} onChange={(e) => setFeedback(e.target.value)} />
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => act("approve")}>Approve & award XP</Button>
+            <Button onClick={() => act("approve")}>{t.approveAwardXpButton}</Button>
             <Button variant="outline" onClick={() => act("resubmit")}>
-              Request resubmission
+              {t.requestResubmissionButton}
             </Button>
             <Button variant="danger" onClick={() => act("reject")}>
-              Reject
+              {t.rejectButton}
             </Button>
           </div>
-          {ok ? <SuccessState title={`Recorded as ${ok}. Student XP and notifications update in this demo.`} /> : null}
+          {ok ? <SuccessState title={formatT(t.recordedAsNotice, { action: ok })} /> : null}
         </div>
       </div>
       <aside className="rounded-xl border bg-white p-4 text-sm">
-        <h2 className="font-serif text-xl">AI Judge suggestion</h2>
+        <h2 className="font-serif text-xl">{t.aiJudgeSuggestionHeading}</h2>
         {!ai ? (
-          <p className="mt-2 text-stone-600">Scoring this submission — check back in a moment.</p>
+          <p className="mt-2 text-stone-600">{t.aiScoringInProgress}</p>
         ) : ai.error ? (
-          <p className="mt-2 text-stone-600">AI Judge couldn&apos;t score this one ({ai.error}). Review manually.</p>
+          <p className="mt-2 text-stone-600">{formatT(t.aiCouldNotScore, { error: ai.error })}</p>
         ) : (
           <>
-            <p className="mt-2 font-medium">Rubric</p>
+            <p className="mt-2 font-medium">{t.rubricLabel}</p>
             <ul className="space-y-2">
               {ai.criteriaLevels?.map((c) => (
                 <li key={c.criterionKey} className="border-t pt-2">
@@ -117,10 +120,10 @@ export default function SubmissionReviewPage() {
               ))}
             </ul>
             <p className="mt-3">
-              Suggested score {ai.suggestedScore} · confidence {Math.round((ai.confidence ?? 0) * 100)}%
+              {formatT(t.suggestedScoreConfidence, { score: ai.suggestedScore ?? 0, confidence: Math.round((ai.confidence ?? 0) * 100) })}
             </p>
             {ai.flags && ai.flags.length && !ai.flags.includes("none") ? (
-              <p className="mt-1 text-amber-700">Flags: {ai.flags.join(", ")}</p>
+              <p className="mt-1 text-amber-700">{t.flagsColonLabel}: {ai.flags.join(", ")}</p>
             ) : null}
             <p className="mt-1 text-stone-600">{ai.suggestedFeedback}</p>
             <Button
@@ -131,7 +134,7 @@ export default function SubmissionReviewPage() {
                 if (ai.suggestedFeedback) setFeedback(ai.suggestedFeedback);
               }}
             >
-              Use suggestion
+              {t.useSuggestionButton}
             </Button>
           </>
         )}

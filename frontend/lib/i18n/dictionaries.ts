@@ -457,6 +457,17 @@ export const en = {
   complementsRationale: "{a} ({askills}) complements {b} ({bskills}) — {label}.",
   noComplementaryMapping: "Selected students do not map to complementary skill buckets from the recorded skills.",
   selectTwoOrMore: "Select two or more students.",
+  latestAttemptHeading: "Latest attempt",
+  approveAwardXpButton: "Approve & award XP",
+  requestResubmissionButton: "Request resubmission",
+  recordedAsNotice: "Recorded as {action}. Student XP and notifications update in this demo.",
+  aiJudgeSuggestionHeading: "AI Judge suggestion",
+  aiScoringInProgress: "Scoring this submission — check back in a moment.",
+  aiCouldNotScore: "AI Judge couldn't score this one ({error}). Review manually.",
+  rubricLabel: "Rubric",
+  suggestedScoreConfidence: "Suggested score {score} · confidence {confidence}%",
+  flagsColonLabel: "Flags",
+  useSuggestionButton: "Use suggestion",
 };
 
 export const hi: Record<keyof typeof en, string> = {
@@ -896,6 +907,17 @@ export const hi: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) {b} ({bskills}) को पूरक करता है — {label}।",
   noComplementaryMapping: "चयनित छात्र दर्ज किए गए कौशल से पूरक कौशल श्रेणियों में मैप नहीं होते।",
   selectTwoOrMore: "दो या अधिक छात्र चुनें।",
+  latestAttemptHeading: "नवीनतम प्रयास",
+  approveAwardXpButton: "स्वीकृत करें और XP दें",
+  requestResubmissionButton: "पुनः सबमिशन का अनुरोध करें",
+  recordedAsNotice: "{action} के रूप में दर्ज किया गया। इस डेमो में छात्र XP और सूचनाएँ अपडेट होती हैं।",
+  aiJudgeSuggestionHeading: "एआई जज सुझाव",
+  aiScoringInProgress: "इस सबमिशन को स्कोर किया जा रहा है — कुछ समय बाद देखें।",
+  aiCouldNotScore: "एआई जज इसे स्कोर नहीं कर सका ({error})। मैन्युअल रूप से समीक्षा करें।",
+  rubricLabel: "रूब्रिक",
+  suggestedScoreConfidence: "सुझाया गया स्कोर {score} · विश्वास {confidence}%",
+  flagsColonLabel: "फ़्लैग",
+  useSuggestionButton: "सुझाव का उपयोग करें",
 };
 
 export const es: Record<keyof typeof en, string> = {
@@ -1336,6 +1358,17 @@ export const es: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) complementa a {b} ({bskills}) — {label}.",
   noComplementaryMapping: "Los estudiantes seleccionados no coinciden con categorías de habilidades complementarias a partir de las habilidades registradas.",
   selectTwoOrMore: "Selecciona dos o más estudiantes.",
+  latestAttemptHeading: "Último intento",
+  approveAwardXpButton: "Aprobar y otorgar XP",
+  requestResubmissionButton: "Solicitar reenvío",
+  recordedAsNotice: "Registrado como {action}. El XP del estudiante y las notificaciones se actualizan en esta demo.",
+  aiJudgeSuggestionHeading: "Sugerencia del Juez IA",
+  aiScoringInProgress: "Calificando este envío: vuelve a comprobarlo en un momento.",
+  aiCouldNotScore: "El Juez IA no pudo calificar este envío ({error}). Revísalo manualmente.",
+  rubricLabel: "Rúbrica",
+  suggestedScoreConfidence: "Puntuación sugerida {score} · confianza {confidence}%",
+  flagsColonLabel: "Marcadores",
+  useSuggestionButton: "Usar sugerencia",
 };
 
 export const fr: Record<keyof typeof en, string> = {
@@ -1776,6 +1809,17 @@ export const fr: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) complète {b} ({bskills}) — {label}.",
   noComplementaryMapping: "Les étudiants sélectionnés ne correspondent pas à des catégories de compétences complémentaires à partir des compétences enregistrées.",
   selectTwoOrMore: "Sélectionnez deux étudiants ou plus.",
+  latestAttemptHeading: "Dernière tentative",
+  approveAwardXpButton: "Approuver et attribuer XP",
+  requestResubmissionButton: "Demander une nouvelle soumission",
+  recordedAsNotice: "Enregistré comme {action}. L'XP de l'étudiant et les notifications sont mis à jour dans cette démo.",
+  aiJudgeSuggestionHeading: "Suggestion du Juge IA",
+  aiScoringInProgress: "Notation de cette soumission en cours — revenez dans un instant.",
+  aiCouldNotScore: "Le Juge IA n'a pas pu noter celui-ci ({error}). Révisez manuellement.",
+  rubricLabel: "Grille d'évaluation",
+  suggestedScoreConfidence: "Score suggéré {score} · confiance {confidence}%",
+  flagsColonLabel: "Indicateurs",
+  useSuggestionButton: "Utiliser la suggestion",
 };
 
 export const de: Record<keyof typeof en, string> = {
@@ -2216,6 +2260,17 @@ export const de: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) ergänzt {b} ({bskills}) — {label}.",
   noComplementaryMapping: "Die ausgewählten Studierenden lassen sich anhand der erfassten Fähigkeiten keinen sich ergänzenden Kategorien zuordnen.",
   selectTwoOrMore: "Wähle zwei oder mehr Studierende aus.",
+  latestAttemptHeading: "Letzter Versuch",
+  approveAwardXpButton: "Genehmigen & XP vergeben",
+  requestResubmissionButton: "Erneute Einreichung anfordern",
+  recordedAsNotice: "Als {action} erfasst. Studierenden-XP und Benachrichtigungen werden in dieser Demo aktualisiert.",
+  aiJudgeSuggestionHeading: "KI-Richter-Vorschlag",
+  aiScoringInProgress: "Diese Einreichung wird bewertet — schau in Kürze noch einmal nach.",
+  aiCouldNotScore: "Der KI-Richter konnte diese Einreichung nicht bewerten ({error}). Bitte manuell prüfen.",
+  rubricLabel: "Bewertungsraster",
+  suggestedScoreConfidence: "Vorgeschlagene Punktzahl {score} · Konfidenz {confidence}%",
+  flagsColonLabel: "Markierungen",
+  useSuggestionButton: "Vorschlag verwenden",
 };
 
 export const pt: Record<keyof typeof en, string> = {
@@ -2656,6 +2711,17 @@ export const pt: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) complementa {b} ({bskills}) — {label}.",
   noComplementaryMapping: "Os estudantes selecionados não correspondem a categorias de habilidades complementares com base nas habilidades registradas.",
   selectTwoOrMore: "Selecione dois ou mais estudantes.",
+  latestAttemptHeading: "Última tentativa",
+  approveAwardXpButton: "Aprovar e conceder XP",
+  requestResubmissionButton: "Solicitar reenvio",
+  recordedAsNotice: "Registrado como {action}. O XP do estudante e as notificações são atualizados nesta demo.",
+  aiJudgeSuggestionHeading: "Sugestão do Juiz de IA",
+  aiScoringInProgress: "Avaliando este envio — verifique novamente em breve.",
+  aiCouldNotScore: "O Juiz de IA não conseguiu avaliar este envio ({error}). Revise manualmente.",
+  rubricLabel: "Rubrica",
+  suggestedScoreConfidence: "Pontuação sugerida {score} · confiança {confidence}%",
+  flagsColonLabel: "Sinalizações",
+  useSuggestionButton: "Usar sugestão",
 };
 
 export const zh: Record<keyof typeof en, string> = {
@@ -3095,6 +3161,17 @@ export const zh: Record<keyof typeof en, string> = {
   complementsRationale: "{a}（{askills}）与{b}（{bskills}）互补 — {label}。",
   noComplementaryMapping: "根据已记录的技能，所选学生并不能匹配到互补的技能分类。",
   selectTwoOrMore: "请选择两名或更多学生。",
+  latestAttemptHeading: "最近一次尝试",
+  approveAwardXpButton: "批准并授予 XP",
+  requestResubmissionButton: "请求重新提交",
+  recordedAsNotice: "已记录为{action}。在此演示中，学生 XP 与通知会随之更新。",
+  aiJudgeSuggestionHeading: "AI 评审建议",
+  aiScoringInProgress: "正在为该提交内容评分——请稍后再查看。",
+  aiCouldNotScore: "AI 评审无法为此评分（{error}）。请手动审核。",
+  rubricLabel: "评分标准",
+  suggestedScoreConfidence: "建议分数 {score} · 置信度 {confidence}%",
+  flagsColonLabel: "标记",
+  useSuggestionButton: "使用建议",
 };
 
 export const ja: Record<keyof typeof en, string> = {
@@ -3534,6 +3611,17 @@ export const ja: Record<keyof typeof en, string> = {
   complementsRationale: "{a}（{askills}）は{b}（{bskills}）を補完します — {label}。",
   noComplementaryMapping: "選択された学生は、記録されたスキルから補完的なスキルカテゴリーに一致しません。",
   selectTwoOrMore: "2人以上の学生を選択してください。",
+  latestAttemptHeading: "最新の試み",
+  approveAwardXpButton: "承認してXPを付与",
+  requestResubmissionButton: "再提出を依頼",
+  recordedAsNotice: "{action}として記録されました。このデモでは学生のXPと通知が更新されます。",
+  aiJudgeSuggestionHeading: "AI判定の提案",
+  aiScoringInProgress: "この提出物を採点中です — しばらくしてから確認してください。",
+  aiCouldNotScore: "AI判定はこれを採点できませんでした（{error}）。手動で確認してください。",
+  rubricLabel: "評価基準",
+  suggestedScoreConfidence: "推奨スコア{score} · 信頼度{confidence}%",
+  flagsColonLabel: "フラグ",
+  useSuggestionButton: "提案を使用",
 };
 
 export const ar: Record<keyof typeof en, string> = {
@@ -3974,6 +4062,17 @@ export const ar: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) يكمل {b} ({bskills}) — {label}.",
   noComplementaryMapping: "لا يتطابق الطلاب المحددون مع فئات مهارات متكاملة من المهارات المسجلة.",
   selectTwoOrMore: "حدد طالبين أو أكثر.",
+  latestAttemptHeading: "آخر محاولة",
+  approveAwardXpButton: "موافقة ومنح نقاط الخبرة",
+  requestResubmissionButton: "طلب إعادة الإرسال",
+  recordedAsNotice: "تم التسجيل كـ {action}. يتم تحديث نقاط خبرة الطالب والإشعارات في هذا العرض التجريبي.",
+  aiJudgeSuggestionHeading: "اقتراح القاضي الذكي",
+  aiScoringInProgress: "جارٍ تقييم هذا العمل - تحقق مرة أخرى بعد قليل.",
+  aiCouldNotScore: "لم يتمكن القاضي الذكي من تقييم هذا العمل ({error}). راجع يدويًا.",
+  rubricLabel: "معيار التقييم",
+  suggestedScoreConfidence: "الدرجة المقترحة {score} · الثقة {confidence}%",
+  flagsColonLabel: "العلامات",
+  useSuggestionButton: "استخدام الاقتراح",
 };
 
 export const bn: Record<keyof typeof en, string> = {
@@ -4413,6 +4512,17 @@ export const bn: Record<keyof typeof en, string> = {
   complementsRationale: "{a} ({askills}) {b} ({bskills})-কে পরিপূরক করে — {label}।",
   noComplementaryMapping: "নির্বাচিত শিক্ষার্থীরা রেকর্ডকৃত দক্ষতা থেকে পরিপূরক দক্ষতা বিভাগে মেলে না।",
   selectTwoOrMore: "দুই বা তার বেশি শিক্ষার্থী নির্বাচন করো।",
+  latestAttemptHeading: "সর্বশেষ প্রচেষ্টা",
+  approveAwardXpButton: "অনুমোদন করো ও XP দাও",
+  requestResubmissionButton: "পুনরায় জমা দেওয়ার অনুরোধ করো",
+  recordedAsNotice: "{action} হিসেবে রেকর্ড করা হয়েছে। এই ডেমোতে শিক্ষার্থীর XP এবং বিজ্ঞপ্তি আপডেট হয়।",
+  aiJudgeSuggestionHeading: "এআই জাজ পরামর্শ",
+  aiScoringInProgress: "এই সাবমিশন স্কোর করা হচ্ছে — কিছুক্ষণ পরে দেখো।",
+  aiCouldNotScore: "এআই জাজ এটি স্কোর করতে পারেনি ({error})। ম্যানুয়ালি পর্যালোচনা করো।",
+  rubricLabel: "রুব্রিক",
+  suggestedScoreConfidence: "প্রস্তাবিত স্কোর {score} · আত্মবিশ্বাস {confidence}%",
+  flagsColonLabel: "ফ্ল্যাগ",
+  useSuggestionButton: "পরামর্শ ব্যবহার করো",
 };
 
 export type Locale = "en" | "hi" | "es" | "fr" | "de" | "pt" | "zh" | "ja" | "ar" | "bn";
