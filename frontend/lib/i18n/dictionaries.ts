@@ -364,6 +364,12 @@ export const en = {
   resetPasswordButton: "Reset password",
   passwordResetRedirectingNotice: "Password reset. Redirecting to sign in…",
   couldNotReachBackend: "Could not reach the backend. Is it running?",
+  countLabel: "Count",
+  adminLeaderboardNote: "Same XP ledger students see — programme view.",
+  createActivitySubtitle: "Validated with Zod. Published activities appear on student Explore immediately.",
+  adminNotificationsTitle: "Admin notifications",
+  analyticsSubtitle: "Engagement snapshot on top of the same filters as Reports.",
+  createButton: "Create",
 };
 
 export const hi: Record<keyof typeof en, string> = {
@@ -710,6 +716,12 @@ export const hi: Record<keyof typeof en, string> = {
   resetPasswordButton: "पासवर्ड रीसेट करें",
   passwordResetRedirectingNotice: "पासवर्ड रीसेट हो गया। साइन इन पर रीडायरेक्ट हो रहा है…",
   couldNotReachBackend: "बैकएंड तक नहीं पहुँच सका। क्या यह चल रहा है?",
+  countLabel: "संख्या",
+  adminLeaderboardNote: "वही XP लेजर जो छात्र देखते हैं — प्रोग्राम दृश्य।",
+  createActivitySubtitle: "Zod के साथ सत्यापित। प्रकाशित गतिविधियाँ तुरंत छात्र एक्सप्लोर पर दिखाई देती हैं।",
+  adminNotificationsTitle: "एडमिन सूचनाएँ",
+  analyticsSubtitle: "रिपोर्ट्स जैसे ही फ़िल्टर के साथ एंगेजमेंट स्नैपशॉट।",
+  createButton: "बनाएँ",
 };
 
 export const es: Record<keyof typeof en, string> = {
@@ -1057,6 +1069,12 @@ export const es: Record<keyof typeof en, string> = {
   resetPasswordButton: "Restablecer contraseña",
   passwordResetRedirectingNotice: "Contraseña restablecida. Redirigiendo para iniciar sesión…",
   couldNotReachBackend: "No se pudo conectar con el backend. ¿Está en ejecución?",
+  countLabel: "Cantidad",
+  adminLeaderboardNote: "El mismo registro de XP que ven los estudiantes: vista del programa.",
+  createActivitySubtitle: "Validado con Zod. Las actividades publicadas aparecen de inmediato en Explorar del estudiante.",
+  adminNotificationsTitle: "Notificaciones de administrador",
+  analyticsSubtitle: "Instantánea de participación con los mismos filtros que Informes.",
+  createButton: "Crear",
 };
 
 export const fr: Record<keyof typeof en, string> = {
@@ -1404,6 +1422,12 @@ export const fr: Record<keyof typeof en, string> = {
   resetPasswordButton: "Réinitialiser le mot de passe",
   passwordResetRedirectingNotice: "Mot de passe réinitialisé. Redirection vers la connexion…",
   couldNotReachBackend: "Impossible d'atteindre le backend. Est-il en cours d'exécution ?",
+  countLabel: "Nombre",
+  adminLeaderboardNote: "Le même registre XP que voient les étudiants — vue du programme.",
+  createActivitySubtitle: "Validé avec Zod. Les activités publiées apparaissent immédiatement dans l'Explorer des étudiants.",
+  adminNotificationsTitle: "Notifications d'administration",
+  analyticsSubtitle: "Aperçu de l'engagement avec les mêmes filtres que Rapports.",
+  createButton: "Créer",
 };
 
 export const de: Record<keyof typeof en, string> = {
@@ -1751,6 +1775,12 @@ export const de: Record<keyof typeof en, string> = {
   resetPasswordButton: "Passwort zurücksetzen",
   passwordResetRedirectingNotice: "Passwort zurückgesetzt. Weiterleitung zur Anmeldung…",
   couldNotReachBackend: "Backend nicht erreichbar. Läuft es?",
+  countLabel: "Anzahl",
+  adminLeaderboardNote: "Derselbe XP-Verlauf, den Studierende sehen — Programmansicht.",
+  createActivitySubtitle: "Mit Zod validiert. Veröffentlichte Aktivitäten erscheinen sofort im Entdecken-Bereich der Studierenden.",
+  adminNotificationsTitle: "Admin-Benachrichtigungen",
+  analyticsSubtitle: "Engagement-Übersicht mit denselben Filtern wie Berichte.",
+  createButton: "Erstellen",
 };
 
 export const pt: Record<keyof typeof en, string> = {
@@ -2098,6 +2128,12 @@ export const pt: Record<keyof typeof en, string> = {
   resetPasswordButton: "Redefinir senha",
   passwordResetRedirectingNotice: "Senha redefinida. Redirecionando para o login…",
   couldNotReachBackend: "Não foi possível acessar o backend. Ele está em execução?",
+  countLabel: "Quantidade",
+  adminLeaderboardNote: "O mesmo registro de XP que os estudantes veem — visão do programa.",
+  createActivitySubtitle: "Validado com Zod. Atividades publicadas aparecem imediatamente no Explorar do estudante.",
+  adminNotificationsTitle: "Notificações do administrador",
+  analyticsSubtitle: "Instantâneo de engajamento com os mesmos filtros de Relatórios.",
+  createButton: "Criar",
 };
 
 export const zh: Record<keyof typeof en, string> = {
@@ -2444,6 +2480,12 @@ export const zh: Record<keyof typeof en, string> = {
   resetPasswordButton: "重置密码",
   passwordResetRedirectingNotice: "密码已重置。正在跳转到登录页面…",
   couldNotReachBackend: "无法连接后端服务。它正在运行吗？",
+  countLabel: "数量",
+  adminLeaderboardNote: "与学生所见相同的 XP 记录——项目管理视图。",
+  createActivitySubtitle: "使用 Zod 校验。发布的活动会立即出现在学生的“探索”页面中。",
+  adminNotificationsTitle: "管理员通知",
+  analyticsSubtitle: "基于与“报告”相同筛选条件的互动快照。",
+  createButton: "新建",
 };
 
 export const ja: Record<keyof typeof en, string> = {
@@ -2790,6 +2832,12 @@ export const ja: Record<keyof typeof en, string> = {
   resetPasswordButton: "パスワードをリセット",
   passwordResetRedirectingNotice: "パスワードがリセットされました。サインインへリダイレクトしています…",
   couldNotReachBackend: "バックエンドに接続できませんでした。起動していますか？",
+  countLabel: "件数",
+  adminLeaderboardNote: "学生が見るのと同じXP履歴です — プログラムビュー。",
+  createActivitySubtitle: "Zodで検証されます。公開されたアクティビティは学生の「探す」に即時反映されます。",
+  adminNotificationsTitle: "管理者通知",
+  analyticsSubtitle: "レポートと同じフィルターに基づくエンゲージメントの概要。",
+  createButton: "作成",
 };
 
 export const ar: Record<keyof typeof en, string> = {
@@ -3137,6 +3185,12 @@ export const ar: Record<keyof typeof en, string> = {
   resetPasswordButton: "إعادة تعيين كلمة المرور",
   passwordResetRedirectingNotice: "تمت إعادة تعيين كلمة المرور. جارٍ التوجيه إلى تسجيل الدخول…",
   couldNotReachBackend: "تعذر الوصول إلى الخلفية. هل هي قيد التشغيل؟",
+  countLabel: "العدد",
+  adminLeaderboardNote: "سجل نقاط الخبرة نفسه الذي يراه الطلاب - عرض البرنامج.",
+  createActivitySubtitle: "تم التحقق باستخدام Zod. تظهر الأنشطة المنشورة فورًا في استكشاف الطالب.",
+  adminNotificationsTitle: "إشعارات المسؤول",
+  analyticsSubtitle: "لقطة تفاعل باستخدام نفس فلاتر التقارير.",
+  createButton: "إنشاء",
 };
 
 export const bn: Record<keyof typeof en, string> = {
@@ -3483,6 +3537,12 @@ export const bn: Record<keyof typeof en, string> = {
   resetPasswordButton: "পাসওয়ার্ড রিসেট করো",
   passwordResetRedirectingNotice: "পাসওয়ার্ড রিসেট হয়েছে। সাইন ইনে পুনঃনির্দেশিত হচ্ছে…",
   couldNotReachBackend: "ব্যাকএন্ডে পৌঁছানো যায়নি। এটি চলছে কি?",
+  countLabel: "সংখ্যা",
+  adminLeaderboardNote: "শিক্ষার্থীরা যে XP লেজার দেখে সেটাই — প্রোগ্রাম ভিউ।",
+  createActivitySubtitle: "Zod দিয়ে যাচাইকৃত। প্রকাশিত কার্যক্রম তাৎক্ষণিকভাবে শিক্ষার্থীর অন্বেষণে দেখা যায়।",
+  adminNotificationsTitle: "অ্যাডমিন বিজ্ঞপ্তি",
+  analyticsSubtitle: "রিপোর্টের মতো একই ফিল্টার দিয়ে এনগেজমেন্ট স্ন্যাপশট।",
+  createButton: "তৈরি করো",
 };
 
 export type Locale = "en" | "hi" | "es" | "fr" | "de" | "pt" | "zh" | "ja" | "ar" | "bn";

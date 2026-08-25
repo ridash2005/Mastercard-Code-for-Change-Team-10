@@ -5,17 +5,19 @@ import { ActivityCard } from "@/components/cards";
 import { SearchBar } from "@/components/activities/filters";
 import { usePlatform } from "@/lib/data/platform-store";
 import { useState } from "react";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function AdminActivities() {
   const activities = usePlatform((s) => s.activities);
+  const { t } = useI18n();
   const [q, setQ] = useState("");
   const list = activities.filter((a) => a.title.toLowerCase().includes(q.toLowerCase()));
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-serif text-3xl">Activities</h1>
+        <h1 className="font-serif text-3xl">{t.activities}</h1>
         <Link href="/admin/activities/create" className="rounded-md bg-forest px-3 py-2 text-sm text-white">
-          Create
+          {t.createButton}
         </Link>
       </div>
       <div className="mt-4 max-w-md">
