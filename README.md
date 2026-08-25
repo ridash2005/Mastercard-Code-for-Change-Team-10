@@ -45,6 +45,10 @@ real actions, not mock data.
   <img src="./img/Mastercard.jpg" alt="Team 10 at Mastercard Code for Change 3.0" width="700">
 </p>
 
+**🧑‍🏫 Mentor:** Vishal Gaikwad
+
+**Team Members:**
+
 | | | |
 |---|---|---|
 | Vaibhav Chavan | Gurpreet Singh Bhatia | Aditya Jadhav |
