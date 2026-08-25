@@ -4,10 +4,12 @@ const User = require('../models/User');
 const StudentProfile = require('../models/StudentProfile');
 const AdminProfile = require('../models/AdminProfile');
 const PasswordResetToken = require('../models/PasswordResetToken');
+const OAuthLoginCode = require('../models/OAuthLoginCode');
 const config = require('../config');
 const { sendPasswordResetEmail, isEmailConfigured } = require('./emailService');
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1h
+const OAUTH_LOGIN_CODE_TTL_MS = 2 * 60 * 1000; // 2m - just long enough for the browser redirect round trip
 
 const hashToken = (raw) => crypto.createHash('sha256').update(raw).digest('hex');
 
@@ -20,10 +22,23 @@ const generateToken = (id) => {
 const register = async (userData) => {
   const { name, email, password, role, college, programme, cohort, batchYear } = userData;
 
+  // No silent default password - a real sign-up form always collects one.
+  // (An OAuth sign-up goes through findOrCreateOAuthUser below instead,
+  // which never calls this function.)
+  if (!password || password.length < 6) {
+    const error = new Error('Password must be at least 6 characters');
+    error.statusCode = 400;
+    throw error;
+  }
+
   const normalizedEmail = email.toLowerCase().trim();
   const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
-    const error = new Error('A user with this email already exists');
+    const error = new Error(
+      existingUser.authProvider !== 'local' && !existingUser.passwordHash
+        ? `This email is already registered via ${existingUser.authProvider === 'google' ? 'Google' : 'GitHub'} sign-in. Use that instead, or reset your password to add one.`
+        : 'A user with this email already exists'
+    );
     error.statusCode = 400;
     throw error;
   }
@@ -39,7 +54,7 @@ const register = async (userData) => {
   const user = await User.create({
     name,
     email: normalizedEmail,
-    passwordHash: password || 'katalyst123',
+    passwordHash: password,
     role: userRole,
     college: college || (userRole === 'admin' ? 'Katalyst HQ' : ''),
     programme: programme || (userRole === 'admin' ? 'Programme Operations' : 'Katalyst Fellows 2026'),
@@ -87,20 +102,36 @@ const login = async (email, password) => {
   const normalizedEmail = email.toLowerCase().trim();
   const user = await User.findOne({ email: normalizedEmail });
 
-  if (!user) {
+  // Same generic message whether the email doesn't exist or the password
+  // is wrong - never reveal which one it was (that would let an attacker
+  // enumerate registered emails).
+  const invalidCredentials = () => {
     const error = new Error('Invalid email or password');
     error.statusCode = 401;
+    return error;
+  };
+
+  if (!user) {
+    throw invalidCredentials();
+  }
+
+  if (!user.passwordHash) {
+    // OAuth-only account (never set a password) - a *different*, specific
+    // message here is fine (not a credentials-enumeration leak): the user
+    // just proved they know a real registered email by typing it into this
+    // form, so telling them how they actually signed up is just good UX,
+    // matching how real sites handle this case.
+    const error = new Error(
+      `This account signs in with ${user.authProvider === 'google' ? 'Google' : 'GitHub'} - use that button instead of a password.`
+    );
+    error.statusCode = 400;
     throw error;
   }
 
-  // Check password (if provided)
-  if (password) {
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      const error = new Error('Invalid email or password');
-      error.statusCode = 401;
-      throw error;
-    }
+  // password is guaranteed present here - authController.login requires it.
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    throw invalidCredentials();
   }
 
   const token = generateToken(user._id);
@@ -239,12 +270,154 @@ const resetPassword = async (rawToken, newPassword) => {
   return { email: user.email };
 };
 
+/**
+ * Finds an existing account to sign into, or provisions a brand-new one -
+ * the "Sign in with Google/GitHub" backing for both login AND signup (OAuth
+ * doesn't distinguish the two the way a password form does; the first time
+ * someone uses it IS the signup). Called by controllers/oauthController.js
+ * after it's already exchanged the provider's code for a verified profile.
+ *
+ * Account linking: if a *local* account already exists with this email, the
+ * provider id gets attached to it instead of creating a duplicate account -
+ * same behavior real sites use, and safe here specifically because the
+ * email came back from Google/GitHub itself (they only report verified
+ * emails through the userinfo endpoints this app requests), not from
+ * user-supplied input.
+ */
+const findOrCreateOAuthUser = async ({ provider, providerId, email, name, avatarUrl }) => {
+  const providerField = provider === 'google' ? 'googleId' : 'githubId';
+
+  let user = await User.findOne({ [providerField]: providerId });
+
+  if (!user && email) {
+    const normalizedEmail = email.toLowerCase().trim();
+    user = await User.findOne({ email: normalizedEmail });
+    if (user && !user[providerField]) {
+      user[providerField] = providerId;
+      await user.save();
+    }
+  }
+
+  let profile;
+  let isNewUser = false;
+
+  if (!user) {
+    if (!email) {
+      const error = new Error(
+        `Your ${provider === 'google' ? 'Google' : 'GitHub'} account has no accessible email address to sign up with.`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    isNewUser = true;
+    const avatarInitials = (name || email)
+      .split(' ')
+      .map((p) => p[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+
+    user = await User.create({
+      name: name || email,
+      email: email.toLowerCase().trim(),
+      role: 'student', // OAuth self-signup always creates a student account - admin accounts are provisioned separately
+      college: '',
+      programme: 'Katalyst Fellows 2026',
+      avatar: avatarInitials,
+      onboardingCompleted: false,
+      authProvider: provider,
+      [providerField]: providerId
+    });
+
+    profile = await StudentProfile.create({
+      userId: user._id,
+      skills: [],
+      interests: [],
+      careerGoal: '',
+      xp: 0,
+      streak: 0,
+      teamId: null,
+      completedCourseIds: [],
+      inactive: false,
+      atRisk: false,
+      onboarded: false,
+      collegeName: '',
+      notificationPreferences: {
+        emailNotificationsEnabled: true,
+        courseRecommendationEmails: true,
+        meetingUpdateEmails: true
+      }
+    });
+  } else {
+    profile =
+      user.role === 'student'
+        ? await StudentProfile.findOne({ userId: user._id })
+        : await AdminProfile.findOne({ userId: user._id });
+  }
+
+  return { user, profile, isNewUser };
+};
+
+/**
+ * A short-lived, single-use code the OAuth callback redirects the browser
+ * to the frontend with (?code=...) instead of ever putting the real JWT in
+ * a URL. exchangeOAuthLoginCode below is the other half.
+ */
+const createOAuthLoginCode = async (userId) => {
+  const rawCode = crypto.randomBytes(32).toString('hex');
+  await OAuthLoginCode.create({
+    userId,
+    codeHash: hashToken(rawCode),
+    expiresAt: new Date(Date.now() + OAUTH_LOGIN_CODE_TTL_MS)
+  });
+  return rawCode;
+};
+
+const exchangeOAuthLoginCode = async (rawCode) => {
+  const record = await OAuthLoginCode.findOne({
+    codeHash: hashToken(rawCode),
+    used: false,
+    expiresAt: { $gt: new Date() }
+  });
+
+  if (!record) {
+    const error = new Error('This sign-in link is invalid or has expired. Please try again.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  record.used = true;
+  await record.save();
+
+  const user = await User.findById(record.userId);
+  if (!user) {
+    const error = new Error('This account no longer exists.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  let profile = null;
+  if (user.role === 'student') {
+    profile = await StudentProfile.findOne({ userId: user._id });
+  } else {
+    profile = await AdminProfile.findOne({ userId: user._id });
+  }
+
+  const token = generateToken(user._id);
+
+  return { user, profile, token };
+};
+
 module.exports = {
   generateToken,
   register,
   login,
   getMe,
   completeOnboarding,
+  findOrCreateOAuthUser,
+  createOAuthLoginCode,
+  exchangeOAuthLoginCode,
   forgotPassword,
   resetPassword
 };

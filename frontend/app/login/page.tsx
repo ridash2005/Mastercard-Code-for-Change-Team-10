@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { PublicShell } from "@/components/layout/public-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/input";
 import { demoAccounts } from "@/lib/auth/session";
 import { usePlatform } from "@/lib/data/platform-store";
 import { ErrorState } from "@/components/states";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import Link from "next/link";
 
 // Matches backend/api/scripts/seed.js's default demo account password
@@ -25,13 +26,15 @@ async function postJson(path: string, body: unknown) {
   return { res, body: await res.json().catch(() => ({})) };
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const store = usePlatform();
   const router = useRouter();
-  const [email, setEmail] = useState("ananya@katalyst.edu");
-  const [password, setPassword] = useState(DEMO_PASSWORD);
-  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(searchParams.get("oauthError"));
   const [busy, setBusy] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   async function signIn(signInEmail: string, signInPassword: string) {
     setBusy(true);
@@ -70,64 +73,109 @@ export default function LoginPage() {
   }
 
   return (
-    <PublicShell>
-      <div className="mx-auto max-w-md px-4 py-16">
-        <h1 className="font-serif text-3xl">Sign in</h1>
-        <p className="mt-2 text-sm text-stone-600">
-          Real authentication against backend/api (bcrypt-checked password, JWT session). Demo accounts below share
-          the password <code>{DEMO_PASSWORD}</code> and are auto-provisioned on first use if not already seeded.
-        </p>
-        <form
-          className="mt-6 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void signIn(email, password);
-          }}
-        >
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-xs underline text-stone-500">
-                Forgot password?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={busy}>
-            {busy ? "Signing in…" : "Continue"}
-          </Button>
-          {error ? <ErrorState title={error} hint="Try a demo account below." /> : null}
-        </form>
-        <div className="mt-8 space-y-2 text-sm">
-          {demoAccounts.map((a) => (
-            <button
-              key={a.email}
-              className="flex w-full items-center justify-between rounded-lg border border-stone-200 bg-white px-3 py-2 text-left"
-              onClick={() => void signIn(a.email, DEMO_PASSWORD)}
-              disabled={busy}
-            >
-              <span>
-                {a.name}
-                <span className="block text-xs text-stone-500">{a.email}</span>
-              </span>
-              <span className="text-xs uppercase">{a.role}</span>
-            </button>
-          ))}
+    <div className="mx-auto max-w-md px-4 py-16">
+      <h1 className="font-serif text-3xl">Sign in</h1>
+      <p className="mt-2 text-sm text-stone-600">
+        Welcome back. Sign in with your account, or continue with Google or GitHub.
+      </p>
+
+      {error ? (
+        <div className="mt-4">
+          <ErrorState title={error} />
         </div>
-        <p className="mt-6 text-sm">
-          New here? <Link className="underline" href="/register">Register with OCR assist</Link>
-        </p>
+      ) : null}
+
+      <div className="mt-6">
+        <OAuthButtons />
       </div>
+
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void signIn(email, password);
+        }}
+      >
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link href="/forgot-password" className="text-xs underline text-stone-500">
+              Forgot password?
+            </Link>
+          </div>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? "Signing in…" : "Sign in"}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-sm">
+        New here? <Link className="underline" href="/register">Create an account</Link>
+      </p>
+
+      <div className="mt-10 border-t border-stone-200 pt-4">
+        <button
+          type="button"
+          onClick={() => setShowDemo((v) => !v)}
+          className="text-xs text-stone-400 underline"
+        >
+          {showDemo ? "Hide demo accounts" : "Reviewing this project? Try a demo account"}
+        </button>
+        {showDemo ? (
+          <div className="mt-3 space-y-2 text-sm">
+            <p className="text-xs text-stone-500">
+              Demo accounts share the password <code>{DEMO_PASSWORD}</code> and are auto-provisioned on first use if
+              not already seeded.
+            </p>
+            {demoAccounts.map((a) => (
+              <button
+                key={a.email}
+                type="button"
+                className="flex w-full items-center justify-between rounded-lg border border-stone-200 bg-white px-3 py-2 text-left"
+                onClick={() => void signIn(a.email, DEMO_PASSWORD)}
+                disabled={busy}
+              >
+                <span>
+                  {a.name}
+                  <span className="block text-xs text-stone-500">{a.email}</span>
+                </span>
+                <span className="text-xs uppercase">{a.role}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <PublicShell>
+      <Suspense fallback={<div className="mx-auto max-w-md px-4 py-16" />}>
+        <LoginForm />
+      </Suspense>
     </PublicShell>
   );
 }

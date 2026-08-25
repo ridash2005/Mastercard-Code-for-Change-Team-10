@@ -22,7 +22,20 @@ const config = {
   // local dev, never for production).
   resendApiKey: process.env.RESEND_API_KEY || null,
   resendFromEmail: process.env.RESEND_FROM_EMAIL || 'Katalyst <onboarding@resend.dev>',
-  frontendUrl: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000'
+  frontendUrl: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000',
+
+  // This server's own publicly-reachable URL - needed to build the OAuth
+  // redirect_uri passed to Google/GitHub (must exactly match what's
+  // registered in each provider's app settings). Not the frontend URL.
+  backendPublicUrl: process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || 5000}`,
+
+  // "Sign in with Google/GitHub" (routes/authRoutes.js -> controllers/
+  // oauthController.js). Leave a pair unset to disable that provider's
+  // button-initiation route with a clean 503 instead of a broken redirect.
+  googleClientId: process.env.GOOGLE_CLIENT_ID || null,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || null,
+  githubClientId: process.env.GITHUB_CLIENT_ID || null,
+  githubClientSecret: process.env.GITHUB_CLIENT_SECRET || null
 };
 
 module.exports = config;

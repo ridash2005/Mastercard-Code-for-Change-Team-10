@@ -159,6 +159,29 @@ export async function loginRealUser(email: string, password: string): Promise<Au
   return { ok: false, status, message: body?.message ?? "Invalid email or password" };
 }
 
+/**
+ * Trades a one-time OAuth login code (from the Google/GitHub callback
+ * redirect, see app/auth/callback/page.tsx) for the real session JWT.
+ * Server-to-server only - the code itself is single-use and short-lived,
+ * but this still never runs in the browser (matches every other real-auth
+ * function in this file).
+ */
+export async function exchangeOAuthCode(code: string): Promise<AuthResult> {
+  const { status, body } = await backendFetch<{
+    success: boolean;
+    message?: string;
+    data?: { token: string; user: BackendUser };
+  }>("/auth/oauth/exchange", {
+    method: "POST",
+    body: JSON.stringify({ code })
+  });
+
+  if (status === 200 && body?.success && body.data) {
+    return { ok: true, token: body.data.token, user: body.data.user };
+  }
+  return { ok: false, status, message: body?.message ?? "Could not complete sign-in" };
+}
+
 /** Fetches the current user for a real backend/api JWT (from the session cookie). */
 export async function getMe(token: string): Promise<BackendUser | null> {
   const { status, body } = await backendFetch<{ success: boolean; data?: { user: BackendUser } }>("/auth/me", {

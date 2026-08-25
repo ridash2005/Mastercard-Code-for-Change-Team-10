@@ -10,6 +10,8 @@ import { extractFromDocument } from "@/lib/ocr/service";
 import { usePlatform } from "@/lib/data/platform-store";
 import { ErrorState, LoadingState, SuccessState } from "@/components/states";
 import { InterestPicker } from "@/components/onboarding/interest-picker";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import Link from "next/link";
 import type { Role } from "@/lib/types";
 
 export default function RegisterPage() {
@@ -123,7 +125,10 @@ export default function RegisterPage() {
               Role first, then optional OCR on an ID or offer letter. Review extracted fields before you continue. Your
               password is hashed by backend/api and never stored in the browser.
             </p>
-            <div className="mt-6 space-y-4 rounded-xl border border-stone-200 bg-white p-5">
+            <div className="mt-6">
+              <OAuthButtons label="or sign up with email" />
+            </div>
+            <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-5">
               <div>
                 <Label htmlFor="role">Role</Label>
                 <Select id="role" value={role} onChange={(e) => setRole(e.target.value as Role)}>
@@ -169,6 +174,9 @@ export default function RegisterPage() {
               {error ? <ErrorState title={error} /> : null}
               {ok ? <SuccessState title="Welcome to Katalyst." /> : null}
             </div>
+            <p className="mt-6 text-sm">
+              Already have an account? <Link className="underline" href="/login">Sign in</Link>
+            </p>
           </>
         )}
       </div>
