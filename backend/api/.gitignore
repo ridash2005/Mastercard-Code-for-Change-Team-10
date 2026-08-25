@@ -4,3 +4,4 @@
 # standalone (non-monorepo) Vercel deploys of this directory — see
 # services/ai/aiClientBridge.js. Build artifact, not source.
 vendor/
+.env*

@@ -9,8 +9,23 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
 
-// Database Connection
-connectDB();
+// Database Connection - kick off immediately at module load (cold start)
+// so a connection already in flight by the time the first request's
+// middleware below awaits it, but don't let an unhandled rejection here
+// crash the process; the middleware and requireDatabase/authMiddleware
+// checks handle a still-failed connection gracefully per-request.
+connectDB().catch(() => {});
+
+// Ensure every request actually waits for the connection attempt (success
+// or failure) to settle before hitting route handlers - a fire-and-forget
+// connectDB() alone races every request against a serverless cold start,
+// so readyState checks downstream (requireDatabase, authMiddleware) could
+// see "connecting" forever instead of the real outcome.
+app.use((req, res, next) => {
+  connectDB()
+    .catch(() => {})
+    .finally(next);
+});
 
 // Core Middleware
 app.use(

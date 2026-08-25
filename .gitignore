@@ -52,3 +52,6 @@ next-env.d.ts
 __pycache__/
 *.pyc
 *.egg-info/
+
+# Plaintext credential scratch file - never commit
+mongo_db_cred.txt
