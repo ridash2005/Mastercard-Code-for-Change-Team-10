@@ -7,15 +7,17 @@ import { FileInput, Input, Label, Select, Textarea } from "@/components/ui/input
 import { StatusBadge, SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
 import type { ComplaintPriority } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ComplaintPublicPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const [ok, setOk] = useState(false);
   return (
     <PublicShell>
       <div className="mx-auto max-w-lg px-4 py-12">
-        <h1 className="font-serif text-3xl">Complaint</h1>
-        <p className="mt-2 text-sm text-stone-600">Tracked tickets. Not for emergencies — use Emergency Help.</p>
+        <h1 className="font-serif text-3xl">{t.publicComplaintTitle}</h1>
+        <p className="mt-2 text-sm text-stone-600">{t.complaintTrackedTicketsNote}</p>
         <form
           className="mt-6 space-y-3"
           onSubmit={(e) => {
@@ -33,36 +35,36 @@ export default function ComplaintPublicPage() {
           }}
         >
           <div>
-            <Label>Category</Label>
+            <Label>{t.categoryLabel}</Label>
             <Select name="category">
-              <option>Session access</option>
-              <option>Grading</option>
-              <option>Conduct</option>
-              <option>Technical</option>
+              <option value="Session access">{t.complaintCategorySessionAccess}</option>
+              <option value="Grading">{t.complaintCategoryGrading}</option>
+              <option value="Conduct">{t.complaintCategoryConduct}</option>
+              <option value="Technical">{t.contactCategoryTechnical}</option>
             </Select>
           </div>
           <div>
-            <Label>Subject</Label>
+            <Label>{t.subjectLabel}</Label>
             <Input name="subject" required />
           </div>
           <div>
-            <Label>Description</Label>
+            <Label>{t.descriptionLabel}</Label>
             <Textarea name="description" required rows={4} />
           </div>
           <div>
-            <Label>Priority</Label>
+            <Label>{t.priorityLabel}</Label>
             <Select name="priority">
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value="low">{t.status_low}</option>
+              <option value="medium">{t.status_medium}</option>
+              <option value="high">{t.status_high}</option>
             </Select>
           </div>
           <div>
-            <Label>Attachment</Label>
+            <Label>{t.attachmentLabel}</Label>
             <FileInput name="file" />
           </div>
-          <Button type="submit">File complaint</Button>
-          {ok ? <SuccessState title="Complaint filed with status Submitted." /> : null}
+          <Button type="submit">{t.fileComplaintButton}</Button>
+          {ok ? <SuccessState title={t.complaintFiledNotice} /> : null}
         </form>
         <ul className="mt-8 space-y-2 text-sm">
           {store.complaints.map((c) => (

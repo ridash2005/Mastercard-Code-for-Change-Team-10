@@ -84,7 +84,7 @@ export default function RegisterPage() {
       setNewUserId(body.user.id);
       setStep("interests");
     } catch {
-      setError("Could not reach the backend. Is it running?");
+      setError(t.couldNotReachBackend);
     } finally {
       setBusy(false);
     }

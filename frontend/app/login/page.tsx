@@ -79,7 +79,7 @@ function LoginForm() {
       store.setSession(body.user);
       router.push(body.user.role === "admin" ? "/admin" : "/student");
     } catch {
-      setError("Could not reach the backend. Is it running?");
+      setError(t.couldNotReachBackend);
     } finally {
       setBusy(false);
     }

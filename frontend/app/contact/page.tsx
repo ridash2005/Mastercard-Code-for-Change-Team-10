@@ -6,21 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
-
-const faqs = [
-  { q: "How do I enrol?", a: "Open Explore, pick an activity, press Enrol. Mandatory items also appear on My Learning." },
-  { q: "Who awards XP?", a: "Faculty approval of a submission. Your XP ledger updates immediately once approved." },
-  { q: "Where is emergency help?", a: "Use Emergency Help — not the complaint form — for safety or wellbeing crises." },
-];
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ContactPage() {
   const add = usePlatform((s) => s.addContact);
+  const { t } = useI18n();
+  const faqs = [
+    { q: t.faq1Q, a: t.faq1A },
+    { q: t.faq2Q, a: t.faq2A },
+    { q: t.faq3Q, a: t.faq3A },
+  ];
   const [ok, setOk] = useState(false);
   return (
     <PublicShell>
       <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 md:grid-cols-2">
         <div>
-          <h1 className="font-serif text-3xl">Contact</h1>
+          <h1 className="font-serif text-3xl">{t.publicContactTitle}</h1>
           <form
             className="mt-6 space-y-3"
             onSubmit={(e) => {
@@ -31,32 +32,32 @@ export default function ContactPage() {
             }}
           >
             <div>
-              <Label>Name</Label>
+              <Label>{t.nameLabel}</Label>
               <Input name="name" required />
             </div>
             <div>
-              <Label>Email</Label>
+              <Label>{t.emailLabel}</Label>
               <Input name="email" type="email" required />
             </div>
             <div>
-              <Label>Category</Label>
+              <Label>{t.categoryLabel}</Label>
               <Select name="category">
-                <option>Programme access</option>
-                <option>Technical</option>
-                <option>Mentoring</option>
-                <option>Certificates</option>
+                <option value="Programme access">{t.contactCategoryProgrammeAccess}</option>
+                <option value="Technical">{t.contactCategoryTechnical}</option>
+                <option value="Mentoring">{t.mentoring}</option>
+                <option value="Certificates">{t.certificatesLabel}</option>
               </Select>
             </div>
             <div>
-              <Label>Message</Label>
+              <Label>{t.messageLabel}</Label>
               <Textarea name="message" required rows={4} />
             </div>
-            <Button type="submit">Send</Button>
-            {ok ? <SuccessState title="Message sent to programme staff." /> : null}
+            <Button type="submit">{t.send}</Button>
+            {ok ? <SuccessState title={t.messageSentToStaff} /> : null}
           </form>
         </div>
         <div>
-          <h2 className="font-serif text-2xl">FAQ</h2>
+          <h2 className="font-serif text-2xl">{t.faqHeading}</h2>
           <dl className="mt-4 space-y-4 text-sm">
             {faqs.map((f) => (
               <div key={f.q}>

@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SuccessState, ErrorState } from "@/components/states";
 import { api } from "@/lib/services/api";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function VolunteerPage() {
+  const { t } = useI18n();
   const [ok, setOk] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -15,11 +17,8 @@ export default function VolunteerPage() {
   return (
     <PublicShell>
       <div className="mx-auto max-w-xl px-4 py-12">
-        <h1 className="font-serif text-3xl">Volunteer with Katalyst</h1>
-        <p className="mt-2 text-sm text-stone-600">
-          Mentor a student, run a clinic, or support a programme event. Applications are reviewed by
-          programme staff.
-        </p>
+        <h1 className="font-serif text-3xl">{t.volunteerTitle}</h1>
+        <p className="mt-2 text-sm text-stone-600">{t.volunteerSubtitle}</p>
         <form
           className="mt-6 space-y-4"
           onSubmit={async (e) => {
@@ -43,41 +42,41 @@ export default function VolunteerPage() {
               });
               setOk(true);
             } catch (err) {
-              setError(err instanceof Error ? err.message : "Could not submit your application.");
+              setError(err instanceof Error ? err.message : t.couldNotSubmitApplication);
             } finally {
               setBusy(false);
             }
           }}
         >
           <div>
-            <Label>Name</Label>
+            <Label>{t.nameLabel}</Label>
             <Input name="name" required />
           </div>
           <div>
-            <Label>Email</Label>
+            <Label>{t.emailLabel}</Label>
             <Input name="email" type="email" required />
           </div>
           <div>
-            <Label>Interests (comma separated)</Label>
+            <Label>{t.interestsCommaSeparated}</Label>
             <Input name="interests" placeholder="Mentoring, Career Guidance" />
           </div>
           <div>
-            <Label>Skills (comma separated)</Label>
+            <Label>{t.skillsCommaSeparated}</Label>
             <Input name="skills" placeholder="React, SQL" />
           </div>
           <div>
-            <Label>College (optional)</Label>
+            <Label>{t.collegeOptional}</Label>
             <Input name="college" />
           </div>
           <div>
-            <Label>Anything else? (optional)</Label>
+            <Label>{t.anythingElseOptional}</Label>
             <Textarea name="message" rows={3} />
           </div>
           <Button type="submit" disabled={busy}>
-            {busy ? "Submitting…" : "Submit application"}
+            {busy ? t.submitting : t.submitApplication}
           </Button>
           {error ? <ErrorState title={error} /> : null}
-          {ok ? <SuccessState title="Application submitted — programme staff will review it." /> : null}
+          {ok ? <SuccessState title={t.applicationSubmittedNotice} /> : null}
         </form>
       </div>
     </PublicShell>
