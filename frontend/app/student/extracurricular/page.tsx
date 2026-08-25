@@ -1,12 +1,14 @@
 "use client";
 
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ExtraPage() {
   const items = usePlatform((s) => s.extracurricular);
+  const { t } = useI18n();
   return (
     <div>
-      <h1 className="font-serif text-3xl">Extracurricular development</h1>
+      <h1 className="font-serif text-3xl">{t.extracurricularTitle}</h1>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {items.map((x) => (
           <article key={x.id} className="k-card p-4">

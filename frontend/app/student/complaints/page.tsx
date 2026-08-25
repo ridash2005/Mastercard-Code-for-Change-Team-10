@@ -6,14 +6,16 @@ import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { StatusBadge, SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
 import type { ComplaintPriority } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function StudentComplaints() {
   const store = usePlatform();
+  const { t } = useI18n();
   const sid = store.sessionUserId ?? "";
   const [ok, setOk] = useState(false);
   return (
     <div>
-      <h1 className="font-serif text-3xl">Complaints</h1>
+      <h1 className="font-serif text-3xl">{t.complaints}</h1>
       <form
         className="mt-6 max-w-lg space-y-3"
         onSubmit={(e) => {
@@ -31,31 +33,31 @@ export default function StudentComplaints() {
         }}
       >
         <div>
-          <Label>Category</Label>
+          <Label>{t.categoryLabel}</Label>
           <Select name="category">
-            <option>Session access</option>
-            <option>Grading</option>
-            <option>Conduct</option>
+            <option value="Session access">{t.complaintCategorySessionAccess}</option>
+            <option value="Grading">{t.complaintCategoryGrading}</option>
+            <option value="Conduct">{t.complaintCategoryConduct}</option>
           </Select>
         </div>
         <div>
-          <Label>Subject</Label>
+          <Label>{t.subjectLabel}</Label>
           <Input name="subject" required />
         </div>
         <div>
-          <Label>Description</Label>
+          <Label>{t.descriptionLabel}</Label>
           <Textarea name="description" required />
         </div>
         <div>
-          <Label>Priority</Label>
+          <Label>{t.priorityLabel}</Label>
           <Select name="priority">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="low">{t.status_low}</option>
+            <option value="medium">{t.status_medium}</option>
+            <option value="high">{t.status_high}</option>
           </Select>
         </div>
-        <Button type="submit">Submit</Button>
-        {ok ? <SuccessState title="Filed as Submitted." /> : null}
+        <Button type="submit">{t.submit}</Button>
+        {ok ? <SuccessState title={t.filedAsSubmitted} /> : null}
       </form>
       <ul className="mt-8 space-y-2">
         {store.complaints

@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function StudentFeedback() {
   const store = usePlatform();
+  const { t } = useI18n();
   const [ok, setOk] = useState(false);
   return (
     <div className="max-w-lg">
-      <h1 className="font-serif text-3xl">Feedback</h1>
+      <h1 className="font-serif text-3xl">{t.feedback}</h1>
       <form
         className="mt-6 space-y-3"
         onSubmit={(e) => {
@@ -27,23 +29,23 @@ export default function StudentFeedback() {
         }}
       >
         <div>
-          <Label>Category</Label>
+          <Label>{t.categoryLabel}</Label>
           <Select name="category">
-            <option>Learning design</option>
-            <option>Platform</option>
-            <option>Mentoring</option>
+            <option value="Learning design">{t.feedbackCategoryLearningDesign}</option>
+            <option value="Platform">{t.feedbackCategoryPlatform}</option>
+            <option value="Mentoring">{t.mentoring}</option>
           </Select>
         </div>
         <div>
-          <Label>Rating 1–5</Label>
+          <Label>{t.ratingLabel}</Label>
           <Input name="rating" type="number" min={1} max={5} defaultValue={4} />
         </div>
         <div>
-          <Label>Message</Label>
+          <Label>{t.messageLabel}</Label>
           <Textarea name="message" required rows={4} />
         </div>
-        <Button type="submit">Send</Button>
-        {ok ? <SuccessState title="Feedback saved." /> : null}
+        <Button type="submit">{t.send}</Button>
+        {ok ? <SuccessState title={t.feedbackSaved} /> : null}
       </form>
     </div>
   );

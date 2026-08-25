@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Label, Select } from "@/components/ui/input";
 import { EmptyState, SuccessState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ReschedulePage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const meetings = store.meetings.filter((m) => m.reschedulable !== false);
   // No local "selected" state for the defaults - meetings/slots load
   // asynchronously (see hydrate()), so the selection is derived directly
@@ -25,9 +27,9 @@ export default function ReschedulePage() {
   if (!meetings.length) {
     return (
       <div className="max-w-lg">
-        <h1 className="font-serif text-3xl">Reschedule</h1>
+        <h1 className="font-serif text-3xl">{t.reschedule}</h1>
         <div className="mt-6">
-          <EmptyState title="No reschedulable sessions." hint="Sessions your mentor schedules will appear here." />
+          <EmptyState title={t.noReschedulableSessions} hint={t.reschedulableHint} />
         </div>
       </div>
     );
@@ -35,11 +37,11 @@ export default function ReschedulePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="font-serif text-3xl">Reschedule</h1>
-      <p className="mt-1 text-sm text-muted">Pick a scheduled session, then an open slot.</p>
+      <h1 className="font-serif text-3xl">{t.reschedule}</h1>
+      <p className="mt-1 text-sm text-muted">{t.rescheduleSubtitle}</p>
       <div className="mt-6 space-y-3">
         <div>
-          <Label>Session</Label>
+          <Label>{t.sessionLabel}</Label>
           <Select
             value={meetingId}
             onChange={(e) => {
@@ -56,7 +58,7 @@ export default function ReschedulePage() {
           </Select>
         </div>
         <div>
-          <Label>Available slot</Label>
+          <Label>{t.availableSlotLabel}</Label>
           <Select value={slot} onChange={(e) => setSlotOverride(e.target.value)}>
             {candidateSlots.map((s) => (
               <option key={s} value={s}>
@@ -74,9 +76,9 @@ export default function ReschedulePage() {
             setOk(true);
           }}
         >
-          {busy ? "Confirming…" : "Confirm change"}
+          {busy ? t.confirming : t.confirmChange}
         </Button>
-        {ok ? <SuccessState title="Slot updated. You and staff both received a notification." /> : null}
+        {ok ? <SuccessState title={t.slotUpdatedNotice} /> : null}
       </div>
     </div>
   );
