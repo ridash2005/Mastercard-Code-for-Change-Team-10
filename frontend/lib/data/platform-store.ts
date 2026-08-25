@@ -2,24 +2,30 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import * as seed from "@/lib/data/seed";
 import { api, ApiError, type TeamWithMembers } from "@/lib/services/api";
 import type {
+  Achievement,
   Activity,
   ActivityType,
+  AdminProfile,
   AppNotification,
+  Certificate,
   Complaint,
   Difficulty,
   Enrollment,
   EnrollmentStatus,
+  ExtracurricularActivity,
   FeedbackRecord,
   CollaborationInvite,
+  Mission,
+  StudentAchievement,
   VolunteerApplication,
   Participation,
   Requirement,
   StudentProfile,
   Submission,
   User,
+  XPTransaction,
 } from "@/lib/types";
 
 export type PlatformState = {
@@ -36,25 +42,25 @@ export type PlatformState = {
   clearSession: () => void;
   users: User[];
   studentProfiles: StudentProfile[];
-  adminProfiles: typeof seed.adminProfiles;
+  adminProfiles: AdminProfile[];
   activities: Activity[];
   enrollments: Enrollment[];
   submissions: Submission[];
-  achievements: typeof seed.achievements;
-  studentAchievements: typeof seed.studentAchievements;
-  missions: typeof seed.missions;
+  achievements: Achievement[];
+  studentAchievements: StudentAchievement[];
+  missions: Mission[];
   /** Real, role-agnostic rankings with names already joined server-side -
    * prefer this over deriving from studentProfiles/users, which (by
    * design - see backend/api's privacy-scoped routes) a student session
    * only has for themselves, not their peers. */
   leaderboard: { userId: string; name: string; xp: number; rank: number }[];
   teams: TeamWithMembers[];
-  xpTransactions: typeof seed.xpTransactions;
+  xpTransactions: XPTransaction[];
   notifications: AppNotification[];
   complaints: Complaint[];
   feedbackRecords: FeedbackRecord[];
-  certificates: typeof seed.certificates;
-  extracurricular: typeof seed.extracurricular;
+  certificates: Certificate[];
+  extracurricular: ExtracurricularActivity[];
   meetings: { id: string; title: string; scheduledAt: string; reschedulable?: boolean; candidateSlots?: string[]; [k: string]: unknown }[];
   collaborations: CollaborationInvite[];
   volunteerApplications: VolunteerApplication[];
@@ -104,21 +110,21 @@ const empty = {
   sessionUserId: null as string | null,
   users: [] as User[],
   studentProfiles: [] as StudentProfile[],
-  adminProfiles: [] as typeof seed.adminProfiles,
+  adminProfiles: [] as AdminProfile[],
   activities: [] as Activity[],
   enrollments: [] as Enrollment[],
   submissions: [] as Submission[],
-  achievements: [] as typeof seed.achievements,
-  studentAchievements: [] as typeof seed.studentAchievements,
-  missions: [] as typeof seed.missions,
+  achievements: [] as Achievement[],
+  studentAchievements: [] as StudentAchievement[],
+  missions: [] as Mission[],
   leaderboard: [] as PlatformState["leaderboard"],
   teams: [] as TeamWithMembers[],
-  xpTransactions: [] as typeof seed.xpTransactions,
+  xpTransactions: [] as XPTransaction[],
   notifications: [] as AppNotification[],
   complaints: [] as Complaint[],
   feedbackRecords: [] as FeedbackRecord[],
-  certificates: [] as typeof seed.certificates,
-  extracurricular: [] as typeof seed.extracurricular,
+  certificates: [] as Certificate[],
+  extracurricular: [] as ExtracurricularActivity[],
   meetings: [] as PlatformState["meetings"],
   collaborations: [] as CollaborationInvite[],
   volunteerApplications: [] as VolunteerApplication[],
@@ -219,14 +225,14 @@ export const usePlatform = create<PlatformState>()(
           if (complaints) patch.complaints = complaints;
           if (feedbackRecords) patch.feedbackRecords = feedbackRecords;
           if (meetings) patch.meetings = meetings;
-          if (missions) patch.missions = missions as typeof seed.missions;
+          if (missions) patch.missions = missions as Mission[];
           if (leaderboard) patch.leaderboard = leaderboard;
           if (collaborations) patch.collaborations = collaborations;
           if (volunteerApplications) patch.volunteerApplications = volunteerApplications;
-          if (xpTransactions) patch.xpTransactions = xpTransactions as typeof seed.xpTransactions;
+          if (xpTransactions) patch.xpTransactions = xpTransactions as XPTransaction[];
           if (gamAchievements) {
-            patch.achievements = achievements as typeof seed.achievements;
-            patch.studentAchievements = studentAchievements as typeof seed.studentAchievements;
+            patch.achievements = achievements as Achievement[];
+            patch.studentAchievements = studentAchievements as StudentAchievement[];
           }
           if (allUsers) patch.users = allUsers;
           if (ownProfile) {

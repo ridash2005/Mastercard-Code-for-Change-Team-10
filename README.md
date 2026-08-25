@@ -7,7 +7,26 @@ feedback, complaints, certificates, collaborations, volunteer applications, and 
 Judge, AI Course Designer, and agentic AI Chatbot all call real endpoints, not mock data.
 **See [`FEATURES.md`](./FEATURES.md) for a complete, verified feature-by-feature audit.**
 
-## Run it
+## Live deployment
+
+Both halves are deployed on Vercel and wired to a real MongoDB Atlas cluster:
+
+- Frontend: https://frontend-ridash.vercel.app
+- Backend API: https://katalyst-backend-api.vercel.app/api (`/health` for a status/DB-connectivity check)
+
+Demo accounts (password `katalyst-demo-bridge-2026`):
+
+- Student: `ananya@katalyst.edu`
+- Admin: `priya.admin@katalyst.edu`
+
+Both Vercel projects (`ridash/frontend`, `ridash/katalyst-backend-api`) are linked via `vercel link`
+and redeployed with `vercel deploy --prod` — the frontend must be deployed from the **repo root**
+(`vercel deploy --prod --cwd .`), since its Vercel project's Root Directory setting is `frontend`;
+running it from inside `frontend/` directly fails with a "Root Directory does not exist" error.
+See `backend/api/README.md`'s "Deploying to Vercel" section for the Atlas-specific gotchas
+(SRV DNS, network access, the connection-race fix in `config/db.js`) if redeploying the backend.
+
+## Run it locally
 
 This needs a database — there's no mock-only mode anymore (every authenticated request re-checks
 the caller against MongoDB, see `backend/api/middleware/authMiddleware.js`).
@@ -87,3 +106,8 @@ auth. `ai/`: Gemini via `@katalyst/ai-client`, Zod-validated schemas. OCR: OCR.s
 - The Chatbot can perform real actions (enroll, submit feedback/complaints, mark notifications
   read, reschedule, draft a course) in addition to answering questions — see
   `backend/api/services/ai/chatbotService.js` and `backend/api/services/chatbotActionService.js`.
+- `backend/api/config/db.js` caches the Mongo connection attempt as a promise that request
+  middleware in `server.js` awaits, rather than firing `connectDB()` at module load and never
+  waiting on it. On a serverless platform (Vercel) that fire-and-forget pattern lets a request's
+  `readyState` check race a connection that's still mid-flight, appearing permanently "connecting"
+  even after it has actually succeeded or failed — this bit us during the first deploy.

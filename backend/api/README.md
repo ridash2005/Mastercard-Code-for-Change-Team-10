@@ -188,12 +188,56 @@ For comprehensive Postman-ready payloads and curl commands, refer to [`API_TESTI
 
 ---
 
+## ☁️ Deploying to Vercel
+
+This project already ships `vercel.json` and `scripts/vercel-build.js` (see that file's comments
+for why the AI client gets vendored into `vendor/ai-client` rather than imported cross-directory).
+Currently deployed at https://katalyst-backend-api.vercel.app as the `ridash/katalyst-backend-api`
+Vercel project. To redeploy:
+
+```bash
+cd backend/api
+vercel link --yes            # first time only, links to the existing project
+vercel deploy --prod --yes
+```
+
+Env vars (`MONGO_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV`, `GEMINI_API_KEY`,
+`INTERNAL_AI_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CLIENT_URL`, `FRONTEND_URL`) are managed
+via `vercel env add <NAME> production` / `vercel env rm <NAME> production` — not committed anywhere.
+`CLIENT_URL`/`FRONTEND_URL` must match the deployed frontend's URL (CORS + password-reset links).
+
+Two gotchas discovered getting this running on Vercel, in case they recur:
+
+1. **`mongodb+srv://` doesn't resolve from Vercel's serverless functions.** SRV lookups need a raw
+   DNS query the runtime couldn't complete, and the connection hung indefinitely instead of failing
+   fast. Fix: use the plain `mongodb://` form with an explicit host list instead of `+srv`. Get the
+   three shard hostnames and `replicaSet` name via `nslookup -type=SRV
+   _mongodb._tcp.<cluster>.mongodb.net` and `nslookup -type=TXT <cluster>.mongodb.net`, then build:
+   ```
+   mongodb://<user>:<pass>@<shard0>:27017,<shard1>:27017,<shard2>:27017/<db>?ssl=true&replicaSet=<name>&authSource=admin&retryWrites=true&w=majority
+   ```
+   Local dev keeps using the normal `mongodb+srv://` form (`.env.example`) - only the Vercel-side
+   env var needs the expanded form.
+2. **Atlas Network Access must allow `0.0.0.0/0`** (Vercel's serverless IPs aren't static) under
+   Atlas → Security → Network Access, and the entry's status must show **Active**, not Pending,
+   before redeploying.
+
+If `/api/health` reports `"database":{"connected":false}` after a deploy, check
+`vercel logs <deployment-url>` for the actual Mongoose error (or `error.reason` detail logged by
+`config/db.js`) before assuming it's a code problem — it's almost always Atlas network access or
+the connection string form above.
+
+---
+
 ## 🔗 Frontend-Backend Integration
 
 The backend is fully compatible with the existing frontend data structures:
 
-1. **Base URL**: Point the frontend HTTP client to `http://localhost:5000/api`.
-2. **CORS**: Configured out of the box to accept requests from `http://localhost:3000` with credentials.
+1. **Base URL**: Point the frontend HTTP client to `http://localhost:5000/api` locally, or
+   `https://katalyst-backend-api.vercel.app/api` against the deployed backend (`BACKEND_API_URL` in
+   the frontend's env - see root `.env.example`).
+2. **CORS**: Configured via `CLIENT_URL` to accept requests from `http://localhost:3000` locally, or
+   the deployed frontend's origin in production, with credentials.
 3. **Authentication**: Transmit JWT in header:
    ```http
    Authorization: Bearer <token>
