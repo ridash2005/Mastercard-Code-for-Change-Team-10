@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { registerRealUser } from "@/lib/services/backendClient";
-import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from "@/lib/auth/cookies";
+import { setSessionCookies } from "@/lib/auth/cookies";
 
 export async function POST(req: NextRequest) {
   let payload: { name?: unknown; email?: unknown; password?: unknown; role?: unknown; college?: unknown; programme?: unknown };
@@ -43,8 +43,6 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ success: true, user: result.user });
-  res.cookies.set(AUTH_COOKIE_NAME, result.token, AUTH_COOKIE_OPTIONS);
-  res.cookies.set("katalyst-role", result.user.role, { path: "/", sameSite: "lax" });
-  res.cookies.set("katalyst-user", result.user.id, { path: "/", sameSite: "lax" });
+  setSessionCookies(res, result.token, result.user.role, result.user.id);
   return res;
 }

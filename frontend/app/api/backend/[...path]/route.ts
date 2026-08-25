@@ -12,7 +12,7 @@
 // list and response shapes.
 
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE_NAME } from "@/lib/auth/cookies";
+import { AUTH_COOKIE_NAME, clearSessionCookies, touchSessionCookies } from "@/lib/auth/cookies";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:5000/api";
 
@@ -48,7 +48,17 @@ async function proxy(req: NextRequest, segments: string[]) {
   const disposition = res.headers.get("Content-Disposition");
   if (disposition) outHeaders["Content-Disposition"] = disposition;
 
-  return new NextResponse(responseBody, { status: res.status, headers: outHeaders });
+  const out = new NextResponse(responseBody, { status: res.status, headers: outHeaders });
+
+  // Sliding session: every authenticated call that backend/api actually
+  // accepted counts as activity, so extend the idle window. A 401 means the
+  // token was rejected outright (invalid, or past the absolute
+  // JWT_EXPIRES_IN cap - see lib/auth/cookies.ts) - clear the stale cookies
+  // instead of sliding them, so the client sees a clean logged-out state.
+  if (res.status === 401) clearSessionCookies(out);
+  else touchSessionCookies(out, req);
+
+  return out;
 }
 
 type RouteContext = { params: Promise<{ path: string[] }> };

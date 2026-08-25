@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { ROLE_COOKIE_NAME } from "@/lib/auth/cookies";
 
 export function proxy(req: NextRequest) {
-  const role = req.cookies.get("katalyst-role")?.value;
+  const role = req.cookies.get(ROLE_COOKIE_NAME)?.value;
   const { pathname } = req.nextUrl;
   if (pathname.startsWith("/student") && role !== "student") {
     const url = req.nextUrl.clone();
