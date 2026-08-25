@@ -6,11 +6,13 @@ import { InterestPicker } from "@/components/onboarding/interest-picker";
 import { normalizeInterestIds } from "@/lib/data/interests";
 import { usePlatform } from "@/lib/data/platform-store";
 import { useState } from "react";
+import { useI18n } from "@/lib/i18n/provider";
 
 const DEFAULT_PREFS = { emailNotificationsEnabled: true, courseRecommendationEmails: true, meetingUpdateEmails: true };
 
 export default function SettingsPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const sid = store.sessionUserId ?? "";
   const profile = store.studentProfiles.find((p) => p.userId === sid);
   const [ok, setOk] = useState(false);
@@ -19,8 +21,8 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Settings</h1>
-      <p className="mt-1 text-sm text-muted">Language lives in the top bar. Auth is real (backend/api, JWT).</p>
+      <h1 className="font-serif text-3xl">{t.settings}</h1>
+      <p className="mt-1 text-sm text-muted">{t.settingsSubtitle}</p>
       <form
         className="mt-6 max-w-3xl space-y-6"
         onSubmit={(e) => {
@@ -32,21 +34,21 @@ export default function SettingsPage() {
         {profile ? (
           <fieldset>
             <legend id="settings-interests" className="font-serif text-xl text-plum">
-              Learning interests
+              {t.learningInterestsHeading}
             </legend>
-            <p className="mt-1 mb-3 text-sm text-muted">You can change these any time. They personalize recommendations later.</p>
+            <p className="mt-1 mb-3 text-sm text-muted">{t.interestsChangeHint}</p>
             <InterestPicker selected={interests} onChange={setInterests} labelledBy="settings-interests" />
           </fieldset>
         ) : null}
         <fieldset className="space-y-2">
-          <legend className="font-serif text-xl text-plum">Email notifications</legend>
+          <legend className="font-serif text-xl text-plum">{t.emailNotificationsHeading}</legend>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={prefs.emailNotificationsEnabled}
               onChange={(e) => setPrefs((p) => ({ ...p, emailNotificationsEnabled: e.target.checked }))}
             />
-            Email notifications enabled
+            {t.emailNotificationsEnabledLabel}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -54,7 +56,7 @@ export default function SettingsPage() {
               checked={prefs.courseRecommendationEmails}
               onChange={(e) => setPrefs((p) => ({ ...p, courseRecommendationEmails: e.target.checked }))}
             />
-            Course recommendation emails
+            {t.courseRecommendationEmailsLabel}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -62,11 +64,11 @@ export default function SettingsPage() {
               checked={prefs.meetingUpdateEmails}
               onChange={(e) => setPrefs((p) => ({ ...p, meetingUpdateEmails: e.target.checked }))}
             />
-            Meeting/session update emails
+            {t.meetingUpdateEmailsLabel}
           </label>
         </fieldset>
-        <Button type="submit">Save preferences</Button>
-        {ok ? <SuccessState title="Preferences saved to your profile." /> : null}
+        <Button type="submit">{t.savePreferences}</Button>
+        {ok ? <SuccessState title={t.preferencesSaved} /> : null}
       </form>
     </div>
   );

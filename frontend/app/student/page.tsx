@@ -9,6 +9,7 @@ import { usePlatform } from "@/lib/data/platform-store";
 import { coachReply } from "@/lib/ai/coach";
 import { levelFromXp } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/provider";
+import { formatT } from "@/lib/i18n/format";
 
 export default function StudentHome() {
   const store = usePlatform();
@@ -38,19 +39,20 @@ export default function StudentHome() {
     <div className="space-y-8">
       <div>
         <h1 className="font-serif text-3xl">
-          Hello, {user?.name?.split(" ")[0] ?? "fellow"}
+          {formatT(t.helloGreeting, { name: user?.name?.split(" ")[0] ?? t.fellowFallback })}
         </h1>
         <p className="mt-1 text-muted">
-          You are <span className="font-semibold text-blue">{completion}%</span> through enrolled work. Next: finish{" "}
-          <span className="font-semibold text-barbie">{deadlines[0]?.title ?? "an open activity"}</span> to stay on
-          the path.
+          {formatT(t.dashboardProgressMessage, {
+            pct: completion,
+            activity: deadlines[0]?.title ?? t.anOpenActivity,
+          })}
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <XPCard xp={profile?.xp ?? 0} level={lvl.level} toNext={lvl.xpToNext} progress={lvl.progress} />
         <StreakCard days={profile?.streak ?? 0} />
         <RankCard rank={rank} />
-        <CompletionCard value={completion} hint={`${completed} done · ${pending} open`} />
+        <CompletionCard value={completion} hint={formatT(t.doneOpenHint, { done: completed, open: pending })} />
       </div>
       <CollaborationRequests />
       <EnrolledLearningJourney
@@ -116,7 +118,7 @@ export default function StudentHome() {
             {team?.name} · rank {team?.rank} · {team?.projectTitle}
           </p>
           <Link href="/student/teams" className="text-sm font-semibold text-barbie">
-            Open teams
+            {t.openTeamsLink}
           </Link>
         </div>
       </div>
@@ -134,8 +136,8 @@ export default function StudentHome() {
         </ol>
       </section>
       <section className="k-card p-5">
-        <h2 className="font-serif text-2xl">AI Coach</h2>
-        <p className="mt-1 text-sm text-muted">Personalised — not the general chatbot.</p>
+        <h2 className="font-serif text-2xl">{t.aiCoachHeading}</h2>
+        <p className="mt-1 text-sm text-muted">{t.aiCoachPersonalizedHint}</p>
         <button
           className="mt-3 text-sm font-semibold text-barbie"
           onClick={async () => {
@@ -156,12 +158,12 @@ export default function StudentHome() {
             );
           }}
         >
-          Ask for this week’s move
+          {t.askWeeksMove}
         </button>
         {nudge ? <p className="mt-3 text-sm">{nudge}</p> : null}
         <p className="mt-3 text-sm">
           <Link className="font-semibold text-barbie" href="/student/ai-coach">
-            Open AI Coach
+            {t.openAiCoachLink}
           </Link>
         </p>
       </section>

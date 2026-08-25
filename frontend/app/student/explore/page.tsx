@@ -14,9 +14,11 @@ import {
 import { normalizeInterestIds } from "@/lib/data/interests";
 import { usePlatform } from "@/lib/data/platform-store";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function ExplorePage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const sid = store.sessionUserId ?? "";
   const profile = store.studentProfiles.find((p) => p.userId === sid);
   const interests = normalizeInterestIds(profile?.interests ?? []);
@@ -40,19 +42,28 @@ export default function ExplorePage() {
 
   const showRecommendedBand = hasInterests && recommended.length > 0 && chip === "all";
   const chips = EXPLORE_CHIPS.filter((c) => c.id !== "recommended" || hasInterests);
+  const chipLabels: Record<ExploreChip, string> = {
+    all: t.chipAll,
+    recommended: t.chipRecommended,
+    finance: t.chipFinance,
+    technology: t.chipTechnology,
+    business: t.chipBusiness,
+    design: t.chipDesign,
+    "ai-data": t.chipAiData,
+  };
   const gridItems =
     chip === "all" && showRecommendedBand ? catalogue.filter((a) => !recommendedIds.has(a.id)) : catalogue;
   const heading =
     chip === "recommended"
-      ? "Recommended for you"
+      ? t.recommended
       : chip === "all"
-        ? "All Courses"
-        : (chips.find((c) => c.id === chip)?.label ?? "Courses");
+        ? t.allCourses
+        : (chipLabels[chip] ?? t.coursesFallback);
 
   return (
     <div>
-      <h1 className="font-serif text-3xl text-plum">Explore Courses</h1>
-      <p className="mt-1 text-sm text-muted">Discover courses and learning opportunities that match your interests.</p>
+      <h1 className="font-serif text-3xl text-plum">{t.exploreTitle}</h1>
+      <p className="mt-1 text-sm text-muted">{t.exploreSubtitle}</p>
 
       <div className="relative mt-6">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple" aria-hidden />
@@ -60,8 +71,8 @@ export default function ExplorePage() {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search courses..."
-          aria-label="Search courses"
+          placeholder={t.searchCoursesPlaceholder}
+          aria-label={t.searchCoursesLabel}
           className="w-full rounded-full border border-line bg-card py-2.5 pl-10 pr-4 text-sm text-plum placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-barbie"
         />
       </div>
@@ -80,7 +91,7 @@ export default function ExplorePage() {
                 selected ? "bg-barbie text-white" : "border border-line bg-card text-plum hover:bg-ivory",
               )}
             >
-              {item.label}
+              {chipLabels[item.id]}
             </button>
           );
         })}
@@ -88,8 +99,8 @@ export default function ExplorePage() {
 
       {showRecommendedBand && chip === "all" ? (
         <section className="mt-8">
-          <h2 className="font-serif text-2xl text-plum">Recommended for you</h2>
-          <p className="mt-1 text-sm text-muted">Based on the interests you chose during onboarding.</p>
+          <h2 className="font-serif text-2xl text-plum">{t.recommended}</h2>
+          <p className="mt-1 text-sm text-muted">{t.basedOnInterests}</p>
           <div className="mt-4">
             <CourseGrid items={recommended} studentId={sid} recommendedIds={recommendedIds} />
           </div>
@@ -98,17 +109,17 @@ export default function ExplorePage() {
 
       {chip === "recommended" && gridItems.length === 0 ? (
         <div className="mt-8">
-          <EmptyState title="No recommended courses yet." hint="Try All, or update interests in your profile." />
+          <EmptyState title={t.noRecommendedCourses} hint={t.tryAllOrUpdateInterests} />
         </div>
       ) : chip !== "all" || gridItems.length > 0 || !showRecommendedBand ? (
         <section className="mt-8">
           <h2 className="font-serif text-2xl text-plum">{heading}</h2>
           {chip === "recommended" && hasInterests ? (
-            <p className="mt-1 text-sm text-muted">Based on the interests you chose during onboarding.</p>
+            <p className="mt-1 text-sm text-muted">{t.basedOnInterests}</p>
           ) : null}
           {gridItems.length === 0 ? (
             <div className="mt-4">
-              <EmptyState title="No courses match." hint="Try another search or category." />
+              <EmptyState title={t.noCoursesMatch} hint={t.tryAnotherSearch} />
             </div>
           ) : (
             <div className="mt-4">

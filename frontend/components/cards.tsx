@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CompletionRing, ProgressBar } from "@/components/ui/progress";
@@ -5,6 +7,8 @@ import { StatusBadge } from "@/components/states";
 import { formatDate } from "@/lib/utils";
 import type { Activity } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/provider";
+import { formatT } from "@/lib/i18n/format";
 
 export function DashboardCard({
   label,
@@ -39,9 +43,10 @@ export function DashboardCard({
 }
 
 export function XPCard({ xp, level, toNext, progress }: { xp: number; level: number; toNext: number; progress: number }) {
+  const { t } = useI18n();
   return (
     <DashboardCard
-      label="Experience"
+      label={t.experience}
       icon="⭐"
       iconClass="text-gold"
       value={
@@ -49,7 +54,7 @@ export function XPCard({ xp, level, toNext, progress }: { xp: number; level: num
           {xp.toLocaleString()} <span className="text-lg text-gold">XP</span>
         </>
       }
-      hint={`Level ${level} · ${toNext} XP to next`}
+      hint={formatT(t.levelToNext, { level, toNext })}
     >
       <ProgressBar value={progress} className="mt-4" />
     </DashboardCard>
@@ -57,17 +62,20 @@ export function XPCard({ xp, level, toNext, progress }: { xp: number; level: num
 }
 
 export function StreakCard({ days }: { days: number }) {
-  return <DashboardCard label="Streak" value={`${days} days`} hint="Keep it up!" icon="🔥" iconClass="text-coral" />;
+  const { t } = useI18n();
+  return <DashboardCard label={t.streak} value={formatT(t.daysUnit, { days })} hint={t.keepItUp} icon="🔥" iconClass="text-coral" />;
 }
 
 export function RankCard({ rank }: { rank: string | number }) {
-  return <DashboardCard label="Rank" value={`#${rank}`} hint="Global XP" icon="👑" iconClass="text-purple" />;
+  const { t } = useI18n();
+  return <DashboardCard label={t.rank} value={`#${rank}`} hint={t.globalXp} icon="👑" iconClass="text-purple" />;
 }
 
 export function CompletionCard({ value, hint }: { value: number; hint: string }) {
+  const { t } = useI18n();
   return (
     <DashboardCard
-      label="Completion"
+      label={t.completionLabel}
       value={`${value}%`}
       hint={hint}
       icon={<CompletionRing value={value} size={40} showLabel={false} />}
@@ -76,6 +84,7 @@ export function CompletionCard({ value, hint }: { value: number; hint: string })
 }
 
 export function AchievementCard({ title, description, unlocked }: { title: string; description: string; unlocked: boolean }) {
+  const { t } = useI18n();
   return (
     <div className="k-card p-5">
       <div className="flex items-start justify-between gap-3">
@@ -86,7 +95,7 @@ export function AchievementCard({ title, description, unlocked }: { title: strin
       </div>
       <p className="mt-1 text-sm text-muted">{description}</p>
       <p className={cn("mt-2 text-xs font-semibold uppercase tracking-wide", unlocked ? "text-gold" : "text-purple")}>
-        {unlocked ? "Unlocked" : "Locked"}
+        {unlocked ? t.unlockedLabel : t.lockedLabel}
       </p>
     </div>
   );
@@ -103,9 +112,10 @@ export function MissionCard({
   current: number;
   target: number;
 }) {
+  const { t } = useI18n();
   return (
     <div className="k-card p-5">
-      <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-purple">Mission</p>
+      <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-purple">{t.missionLabel}</p>
       <p className="mt-1 font-medium text-plum">{title}</p>
       <p className="mt-1 text-sm text-muted">{description}</p>
       <ProgressBar value={(current / target) * 100} className="mt-3" />
@@ -125,6 +135,7 @@ export function ActivityCard({
   href: string;
   status?: string;
 }) {
+  const { t } = useI18n();
   return (
     <Link href={href} className="k-card block p-5">
       <div className="flex items-start justify-between gap-3">
@@ -137,7 +148,7 @@ export function ActivityCard({
       <p className="mt-2 line-clamp-2 text-sm text-muted">{activity.description}</p>
       <p className="mt-3 text-sm text-muted">
         <span className="font-semibold text-gold">{activity.xpReward} XP</span>
-        {" · due "}
+        {` · ${t.dueLabel} `}
         {formatDate(activity.dueDate)} · {activity.difficulty}
       </p>
     </Link>

@@ -4,10 +4,13 @@ import { useState } from "react";
 import { EmptyState } from "@/components/states";
 import { usePlatform } from "@/lib/data/platform-store";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/provider";
 
 export default function LeaderboardPage() {
   const store = usePlatform();
+  const { t } = useI18n();
   const [tab, setTab] = useState<"global" | "team">("global");
+  const tabLabels = { global: t.globalTabLabel, team: t.teamTabLabel };
   // Global rows come pre-joined (name + xp + rank) from backend/api's
   // GET /api/gamification/leaderboard, which - unlike studentProfiles/users
   // - every role can see in full (it's the one place a student session gets
@@ -18,24 +21,24 @@ export default function LeaderboardPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">Leaderboard</h1>
+      <h1 className="font-serif text-3xl">{t.leaderboard}</h1>
       <div className="mt-4 flex flex-wrap gap-2">
         {(["global", "team"] as const).map((k) => (
           <button
             key={k}
             className={cn(
-              "rounded-full px-3.5 py-1.5 text-sm font-medium capitalize",
+              "rounded-full px-3.5 py-1.5 text-sm font-medium",
               tab === k ? "bg-barbie text-white" : "border border-line bg-card text-plum",
             )}
             onClick={() => setTab(k)}
           >
-            {k}
+            {tabLabels[k]}
           </button>
         ))}
       </div>
       {tab === "team" ? (
         teamRows.length === 0 ? (
-          <div className="mt-8"><EmptyState title="No teams yet." /></div>
+          <div className="mt-8"><EmptyState title={t.noTeamsYet} /></div>
         ) : (
           <ol className="k-card mt-4">
             {teamRows.map((t, i) => (
@@ -50,7 +53,7 @@ export default function LeaderboardPage() {
           </ol>
         )
       ) : rows.length === 0 ? (
-        <div className="mt-8"><EmptyState title="No ranked students yet." /></div>
+        <div className="mt-8"><EmptyState title={t.noRankedStudentsYet} /></div>
       ) : (
         <ol className="k-card mt-4">
           {rows.map((r) => (

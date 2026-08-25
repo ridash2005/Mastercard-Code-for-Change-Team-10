@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/provider";
 
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
@@ -9,9 +12,10 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   );
 }
 
-export function LoadingState({ title = "Loading…" }: { title?: string }) {
+export function LoadingState({ title }: { title?: string }) {
+  const { t } = useI18n();
   return (
-    <div className="k-card animate-pulse px-6 py-10 text-center text-sm text-muted">{title}</div>
+    <div className="k-card animate-pulse px-6 py-10 text-center text-sm text-muted">{title ?? t.loadingDefault}</div>
   );
 }
 
@@ -32,7 +36,31 @@ export function SuccessState({ title }: { title: string }) {
   );
 }
 
+const STATUS_KEYS = {
+  not_started: "status_not_started",
+  in_progress: "status_in_progress",
+  submitted: "status_submitted",
+  under_review: "status_under_review",
+  approved: "status_approved",
+  needs_resubmission: "status_needs_resubmission",
+  completed: "status_completed",
+  resolved: "status_resolved",
+  pending: "status_pending",
+  accepted: "status_accepted",
+  rejected: "status_rejected",
+  cancelled: "status_cancelled",
+  active: "status_active",
+  inactive: "status_inactive",
+  open: "status_open",
+  closed: "status_closed",
+  low: "status_low",
+  medium: "status_medium",
+  high: "status_high",
+  draft: "status_draft",
+} as const;
+
 export function StatusBadge({ status }: { status: string }) {
+  const { t } = useI18n();
   const map: Record<string, string> = {
     not_started: "text-purple",
     in_progress: "text-barbie",
@@ -46,7 +74,8 @@ export function StatusBadge({ status }: { status: string }) {
     medium: "text-purple",
     low: "text-muted",
   };
-  const label = status.replaceAll("_", " ");
+  const translationKey = STATUS_KEYS[status as keyof typeof STATUS_KEYS];
+  const label = translationKey ? t[translationKey] : status.replaceAll("_", " ");
   return (
     <span
       className={cn(
