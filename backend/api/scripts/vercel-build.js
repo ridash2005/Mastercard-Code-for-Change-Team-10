@@ -37,13 +37,18 @@ if (!fs.existsSync(AI_CLIENT_SRC)) {
 // though the ai/* workspace source is present in the checkout. Install
 // them explicitly before compiling rather than assuming the root install
 // already covered it.
-if (!fs.existsSync(path.join(AI_CLIENT_SRC, 'node_modules'))) {
+if (!fs.existsSync(path.join(AI_CLIENT_SRC, 'node_modules', '@types', 'node'))) {
   console.log('[vercel-build] Installing @katalyst/ai-client dependencies...');
   // package.json only lists its runtime deps (zod, @google/generative-ai) -
   // also grab @types/node so tsc can resolve the ambient Node globals
   // (process, setTimeout) this package's source uses; version matches the
-  // root workspace's devDependency.
-  execFileSync('npm install --no-save --no-package-lock @types/node@^22.9.0', {
+  // root workspace's devDependency. --no-workspaces forces a plain
+  // standalone install rooted at AI_CLIENT_SRC - without it, npm detects
+  // the monorepo's root package.json (it's a workspace member) and hoists
+  // everything up to the repo root's node_modules instead, which tsc's
+  // ancestor-directory @types lookup then somehow still doesn't resolve
+  // reliably on Vercel's build machine.
+  execFileSync('npm install --no-save --no-package-lock --no-workspaces @types/node@^22.9.0', {
     cwd: AI_CLIENT_SRC,
     stdio: 'inherit',
     shell: true
