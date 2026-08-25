@@ -81,7 +81,13 @@ function OAuthCallbackInner() {
 export default function OAuthCallbackPage() {
   return (
     <PublicShell>
-      <Suspense fallback={<div className="mx-auto max-w-md px-4 py-16" />}>
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-md px-4 py-16">
+            <LoadingState title="Finishing sign-in…" />
+          </div>
+        }
+      >
         <OAuthCallbackInner />
       </Suspense>
     </PublicShell>

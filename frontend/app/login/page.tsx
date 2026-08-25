@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { PublicShell } from "@/components/layout/public-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,12 +29,22 @@ async function postJson(path: string, body: unknown) {
 function LoginForm() {
   const store = usePlatform();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(searchParams.get("oauthError"));
+  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+
+  // Read straight from the URL instead of next/navigation's useSearchParams
+  // - that hook forces this whole tree behind a Suspense boundary, and this
+  // page is statically prerendered (no per-request server render to
+  // resolve it against), so the boundary's fallback is what actually ships
+  // in the static HTML until client JS hydrates - a real, visible blank
+  // flash on every load, not just when ?oauthError is actually present.
+  useEffect(() => {
+    const oauthError = new URLSearchParams(window.location.search).get("oauthError");
+    if (oauthError) setError(oauthError);
+  }, []);
 
   async function signIn(signInEmail: string, signInPassword: string) {
     setBusy(true);
@@ -173,9 +183,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <PublicShell>
-      <Suspense fallback={<div className="mx-auto max-w-md px-4 py-16" />}>
-        <LoginForm />
-      </Suspense>
+      <LoginForm />
     </PublicShell>
   );
 }
